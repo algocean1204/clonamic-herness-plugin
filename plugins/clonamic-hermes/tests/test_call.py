@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
 import json
 import os
 import subprocess
@@ -21,9 +22,7 @@ class CallTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.bin = Path(self.temp.name)
-        fake = self.bin / EXECUTABLE
-        fake.write_text(
-            "#!/usr/bin/env python3\n"
+        fake_source = (
             "import os, sys, time\n"
             "if os.environ.get('FAKE_MODE') == 'sleep':\n"
             "    open(os.environ['PID_FILE'], 'w').write(str(os.getpid()))\n"
@@ -40,10 +39,17 @@ class CallTests(unittest.TestCase):
             "print('token bare token with spaces')\n"
             "print('password: \"multi word password\"')\n"
             "print('sk-1234567890abcdef')\n"
-            "print('Authorization: Bearer bearer-secret', file=sys.stderr)\n",
-            encoding="utf-8",
+            "print('Authorization: Bearer bearer-secret', file=sys.stderr)\n"
         )
-        fake.chmod(0o755)
+        if os.name == "nt":
+            helper = self.bin / "fake_executor.py"
+            helper.write_text(fake_source, encoding="utf-8")
+            fake = self.bin / f"{EXECUTABLE}.cmd"
+            fake.write_text(f'@echo off\r\n"{sys.executable}" "%~dp0fake_executor.py" %*\r\n', encoding="utf-8")
+        else:
+            fake = self.bin / EXECUTABLE
+            fake.write_text(f"#!{sys.executable}\n{fake_source}", encoding="utf-8")
+            fake.chmod(0o755)
         self.env = os.environ.copy()
         self.env["PATH"] = f"{self.bin}{os.pathsep}{self.env.get('PATH', '')}"
 
@@ -142,8 +148,18 @@ class CallTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 124)
         self.assertTrue(result["timed_out"])
         pid = int(pid_file.read_text(encoding="utf-8"))
-        with self.assertRaises(ProcessLookupError):
-            os.kill(pid, 0)
+        if os.name == "nt":
+            listing = subprocess.run(
+                ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            rows = csv.reader(listing.stdout.splitlines())
+            self.assertFalse(any(len(row) > 1 and row[1].strip() == str(pid) for row in rows))
+        else:
+            with self.assertRaises(ProcessLookupError):
+                os.kill(pid, 0)
 
     def test_windows_termination_uses_taskkill_tree(self) -> None:
         spec = importlib.util.spec_from_file_location("clonamic_hermes_call", CALL)
