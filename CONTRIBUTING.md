@@ -47,6 +47,7 @@ cargo clippy --all-targets -- -D warnings
 cargo test --all-targets
 python3 scripts/validate-public.py
 python3 scripts/generate-adapters.py --check
+python3 -m unittest tests.test_plugin_config
 ```
 
 Child checks run from the child root. Most Python children use:
@@ -55,7 +56,7 @@ Child checks run from the child root. Most Python children use:
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 ```
 
-The PPT package keeps its engine tests under `skills/clonamic-ppt/tests/` and requires its declared Node dependency. Run the package's preserved test entry point after installing dependencies.
+The PPT package keeps its engine tests under `skills/clonamic-ppt/tests/` and requires its declared Node dependency. Run the package's preserved test entry point after installing dependencies. Reference and template tests must use original fixtures, exercise OOXML bounds and relationship confinement, compare SVG and PPTX content, and preserve editable output.
 
 ## Pull request checklist
 
@@ -66,6 +67,11 @@ The PPT package keeps its engine tests under `skills/clonamic-ppt/tests/` and re
 - Explicit state paths and rollback behavior are tested.
 - Simple and read-only routes remain free of root-guidance and team activation.
 - Team-mode tests prove worker/verifier separation, rejection evidence, bounded rework, and honest capability fallback.
+- Automation tests prove persisted claim authority, replay/scope rejection, zero conversational stops in scope, and platform-action waiting.
+- Session tests prove bounded external-prompt retention, internal non-overwrite, trusted source display, and symlink-safe atomic writes.
+- SQLite tests prove migration, FTS/fallback parity, bounded graph/search memory, provenance privacy, backup/restore, and zero shipped DB artifacts.
+- Plugin-config tests prove schema v1, complete shipped defaults, partial overlay order, immutable Core, fail-closed invalid input, installed/configured separation, platform support, and dependency readiness.
+- PPT tests prove bounded OOXML reads, internal relationship confinement, extraction-only semantic template contracts, editable output, SVG/PPTX parity, renderer timeouts, and honest unavailable visual status.
 - Generated adapters match canonical inputs.
 - Public docs distinguish repository checks, live host measurements, and fallbacks.
 - Changelog and compatibility notes describe user-visible changes without claiming unrun validation.

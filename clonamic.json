@@ -1,0 +1,15 @@
+{
+  "$schema": "./schemas/clonamic-config.schema.json",
+  "schema_version": 1,
+  "plugins": {
+    "clonamic-development": true,
+    "clonamic-korean": true,
+    "clonamic-ppt": true,
+    "clonamic-preprocessing": true,
+    "clonamic-memory": true,
+    "clonamic-grok": true,
+    "clonamic-gpt": true,
+    "clonamic-claude": true,
+    "clonamic-hermes": true
+  }
+}

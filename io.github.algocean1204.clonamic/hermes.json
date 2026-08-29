@@ -2,59 +2,69 @@
   "namespace": "io.github.algocean1204.clonamic",
   "platform": "hermes",
   "catalog": "../catalog/plugins.json",
+  "configuration": "../clonamic.json",
   "plugins": [
     {
       "manifest": "../plugin.json",
       "name": "clonamic-herness-plugin",
       "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
-      "version": "0.3.0"
+      "required": true,
+      "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-development/plugin.json",
       "name": "clonamic-development",
       "description": "Conservative modular design, patch discipline, and bounded native multi-agent review for software development.",
+      "required": false,
       "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-korean/plugin.json",
       "name": "clonamic-korean",
       "description": "Preservation-first clarity review and editing for Korean prose documents.",
+      "required": false,
       "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-ppt/plugin.json",
       "name": "clonamic-ppt",
       "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
+      "required": false,
       "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-preprocessing/plugin.json",
       "name": "clonamic-preprocessing",
       "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
+      "required": false,
       "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-memory/plugin.json",
       "name": "clonamic-memory",
       "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
+      "required": false,
       "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-grok/plugin.json",
       "name": "clonamic-grok",
       "description": "One bounded call through the installed Grok CLI.",
+      "required": false,
       "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-gpt/plugin.json",
       "name": "clonamic-gpt",
       "description": "One bounded call through the installed Codex CLI.",
+      "required": false,
       "version": "0.1.0"
     },
     {
       "manifest": "../plugins/clonamic-claude/plugin.json",
       "name": "clonamic-claude",
       "description": "One bounded call through the installed Claude CLI.",
+      "required": false,
       "version": "0.1.0"
     }
   ]

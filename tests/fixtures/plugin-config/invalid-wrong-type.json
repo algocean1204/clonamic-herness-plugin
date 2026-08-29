@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "plugins": {
+    "clonamic-development": "yes",
+    "clonamic-korean": true,
+    "clonamic-ppt": true,
+    "clonamic-preprocessing": true,
+    "clonamic-memory": true,
+    "clonamic-grok": true,
+    "clonamic-gpt": true,
+    "clonamic-claude": true,
+    "clonamic-hermes": true
+  }
+}

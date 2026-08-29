@@ -14,4 +14,4 @@
 
 Remove children independently, disable their adapter entries, and uninstall the core router last. The router block contains one reference to the canonical root guidance, not a policy copy. `clonamic uninstall-router` restores its recorded pre-image only when unrelated user edits can be preserved.
 
-Tagged release `v0.1.0` remains the pre-marketplace baseline, and `0.2.0` is the prior main-branch version and commit. Reverting a published migration uses a normal Git revert and push; no forced history rewrite is required.
+The historical `v0.1.0` tag remains immutable even though current package manifests also use version `0.1.0`. Reverting a published change uses a normal Git revert and push; no forced history or tag rewrite is required.

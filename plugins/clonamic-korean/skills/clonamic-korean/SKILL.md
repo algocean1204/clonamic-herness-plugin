@@ -1,20 +1,20 @@
 ---
 name: clonamic-korean
-description: Review or conservatively edit Korean prose documents for translationese, empty abstraction, rhythm, structure, register, and form while preserving meaning. Do not use for ordinary chat, work reports, code, spreadsheets, slides, or email.
+description: Review or minimally edit Korean prose documents for clarity while preserving meaning. Skip chat, work reports, code, sheets, slides, and email.
 ---
 
 # Korean Document Clarity
 
-Use this skill directly on a Korean prose document. It does not delegate work or choose an external runtime.
+Use directly on Korean prose; do not delegate or choose another runtime.
 
-Before reading a file whose surface is uncertain, run `python3 scripts/scope.py --kind <kind> <path>`. Stop when it returns `applicable=false`. For inline text, classify the surface first; only `document` is supported.
+For an uncertain file surface, run `python3 scripts/scope.py --kind <kind> <path>` and stop on `applicable=false`. Inline text must classify as `document`.
 
 ## Review or edit
 
 1. Read [references/preservation.md](references/preservation.md), then [references/korean-patterns.md](references/korean-patterns.md).
-2. Preserve the author's facts, numbers, dates, names, quotations, links, negation, modality, and register.
-3. For review, identify the smallest relevant rule and explain the concrete effect on the sentence.
-4. For editing, make the smallest change that removes the problem. Do not invent an actor, reason, example, metric, source, or personal experience.
-5. Return the requested review or revised prose directly. File application and user-facing workflow state remain with the host.
+2. Preserve facts, numbers, dates, names, quotations, links, negation, modality, and register.
+3. For review, name the narrow rule and its sentence-level effect.
+4. For editing, make the smallest correction; invent no actor, reason, example, metric, source, or experience.
+5. Return the review or revision. The host owns file application and workflow state.
 
-Do not edit code fences, commands, paths, formulas, table cells, or machine-generated lines embedded in a prose document. Do not handle approval, task completion, or work-report formatting.
+Do not edit embedded code, commands, paths, formulas, table cells, or generated lines. Do not handle approval, completion, or report formatting.

@@ -200,7 +200,7 @@ def main() -> int:
         "major": majors,
         "minor": sum(1 for i in issues if i["severity"] == "minor"),
         "issues": issues,
-        "pass": blockers == 0,
+        "pass": blockers == 0 and majors == 0,
     }
     if args.out:
         dump_json(Path(args.out), report)
@@ -208,7 +208,7 @@ def main() -> int:
     for i in issues:
         loc = i.get("slide_id") or ""
         print(f"  {i['severity']} {i['code']} {loc}: {i['message']}")
-    return 0 if blockers == 0 else 1
+    return 0 if blockers == 0 and majors == 0 else 1
 
 
 if __name__ == "__main__":

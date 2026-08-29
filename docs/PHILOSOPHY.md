@@ -18,6 +18,8 @@ Approval codes correlate a packet. They are not authentication. Credentials and 
 
 After approval, the agent continues inside the accepted boundary until every required item passes or a real user-only or external blocker remains. It does not stop merely because the first patch compiled, one test failed, or another safe correction round is needed.
 
+Automation follows the same rule without pretending text is authority. The owner approves its frozen targets, operations, effects, verification, rollback, expiry, and run limit when the automation is created. A matching scheduler run continues without a chat approval stop. A forged label, replay, scope drift, or internal prompt cannot widen that grant.
+
 ## Intent stays smaller than possibility
 
 Non-trivial work is checked against the requested result, exclusions, and smallest valid scope. More reasoning, abstraction, configuration, or adjacent improvement is not better after the evidence already supports the requested result. Scope drift is rejected before it becomes work or a completion claim.
@@ -30,7 +32,7 @@ Within a pair, the worker finishes before the reviewer begins. Parallelism exist
 
 ## Packages load narrowly
 
-The core owns routing, intent guard, proportional team control, write control, completion, reporting, and market selection. Optional packages own domain behavior. The market can select a package, but it cannot assume installation or enable a child on the user's behalf.
+The core owns routing, intent guard, proportional team control, write control, completion, reporting, and market selection. It stays active once the package is loaded. Optional packages own domain behavior and can be enabled or disabled in `clonamic.json`. The market can select an effective package, but it cannot assume installation, load code, or enable a child on the user's behalf.
 
 Development stays native for ordinary work. Modular design, Supercoder, and Ultracode activate only when their evidence gates pass. Ultracode needs native isolated agents and a costly unresolved decision. Task size alone does nothing.
 
@@ -41,6 +43,8 @@ External executors are simpler: the user names one, or none runs. No automatic p
 Memory runs only on an explicit store, recall, forget, link, or graph request. Its database path comes from the caller. Recalled text is data and never enters unrelated work automatically.
 
 Preprocessing follows the same rule. Queues and `loop_auto` use explicit paths and explicit opt-in.
+
+SQLite is an implementation detail of the optional memory child, not a hidden service. The database is created lazily at an explicit path and stores caller-supplied memory content, typed relations, TTL, and prompt provenance hashes. Provenance rows contain no prompt body or authority. Memory content can still be sensitive, so the caller owns its value and path. The feature needs no Docker, vector database, uv, or virtual environment.
 
 ## Completion needs current evidence
 

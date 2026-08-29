@@ -1,17 +1,18 @@
 ---
 name: clonamic-ppt
-description: Create or revise editable PPTX presentations with a structured brief, outline, slide specifications, deterministic rendering, and QA. Use for deck, slide, presentation, PowerPoint, or PPTX requests.
+description: Create or revise editable decks, slides, PowerPoint, or PPTX files through structured specifications, deterministic rendering, and QA.
 ---
 
 # Presentation Engine
 
-Work directly in this skill. Do not delegate or select an external runtime.
+Work directly; do not delegate or select another runtime.
 
-1. Read [references/specialist.md](references/specialist.md) and the purpose-specific guidance it names.
-2. Resolve the skill root as the directory containing this `SKILL.md`; all scripts and references are relative to it.
-3. Create `brief.json`, then `outline.json`, then `slide_specs.json` in the chosen output directory.
-4. Validate and render with the scripts in `scripts/`.
-5. Repair specification or content defects, rerun the engine, and return the final artifact paths with the QA findings.
+1. Read [references/specialist.md](references/specialist.md) and its purpose guidance.
+2. Resolve all scripts and references from this skill directory. When reference or template PPTX files are supplied, read [references/reference-contracts.md](references/reference-contracts.md) and extract their contracts before authoring.
+3. Create `brief.json`, then `outline.json`, then `slide_specs.json` in the chosen output directory. Apply the measured word ceiling by cutting or splitting content, never by shrinking type.
+4. Validate and render with the scripts in `scripts/`. Each validation-passing `run_engine.py` run creates bounded SVG previews for QA while keeping the PPTX editable; blocked input produces only `qa_report.json`.
+5. Repair defects, rerun, and return artifact paths with QA findings.
 
-Use only facts and numeric series supplied by the user. Do not hand-edit generated coordinates or presentation XML.
-Image inputs are unsupported. Do not pass ICNS, JXL, HEIF, HEIC, or any other image file to the renderer.
+Use only supplied facts and numbers. Do not hand-edit generated coordinates or XML. Images, including ICNS, JXL, HEIF, and HEIC, are unsupported.
+Template inspection is extraction-only. The renderer does not apply a template or claim to preserve its master; use the semantic contract as design input for a fresh editable deck.
+Use only the standard library for reference extraction. Do not create an environment, install a browser, or add a rendering dependency. On macOS, office rendering remains disabled unless the existing explicit opt-in is set.

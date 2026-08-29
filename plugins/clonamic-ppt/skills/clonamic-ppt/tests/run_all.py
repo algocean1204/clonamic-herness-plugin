@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -19,6 +20,7 @@ from engine_lib import BANNED_DESC_WORDS, description_has_banned_words  # noqa: 
 from validate import validate_brief, validate_outline, validate_specs  # noqa: E402
 from compose_ir import compose_deck  # noqa: E402
 from qa_static import qa_ir, qa_pptx  # noqa: E402
+import visual_qa  # noqa: E402
 import run_engine  # noqa: E402
 
 
@@ -63,6 +65,20 @@ def test_isolation() -> None:
     check("isolation.no_mcp", not (PLUGIN / "mcp.json").exists())
     # description of plugin.json should not use banned auto-trigger words either if possible
     # allow nothing from BANNED in skill description; plugin desc already clean
+
+
+def test_visual_renderer_safety() -> None:
+    with mock.patch.object(visual_qa.platform, "system", return_value="Darwin"):
+        with mock.patch.dict(visual_qa.os.environ, {}, clear=True):
+            check("visual.macos_auto_disabled", visual_qa._soffice() is None)
+        with mock.patch.dict(
+            visual_qa.os.environ, {"CLONAMIC_ALLOW_MACOS_SOFFICE": "1"}, clear=True
+        ):
+            with mock.patch.object(visual_qa.shutil, "which", return_value="/tmp/soffice"):
+                check("visual.macos_explicit_opt_in", visual_qa._soffice() == "/tmp/soffice")
+    source = (SCRIPTS / "visual_qa.py").read_text(encoding="utf-8")
+    check("visual.isolated_profile", "-env:UserInstallation=" in source)
+    check("visual.timeout", "timeout=30" in source)
 
 
 def test_local_node_dependencies() -> None:
@@ -423,6 +439,7 @@ def test_empty_args_spec_still_valid_shape() -> None:
 
 def main() -> int:
     test_isolation()
+    test_visual_renderer_safety()
     test_local_node_dependencies()
     test_post_motion_integrity_guard()
     test_golden()
@@ -431,6 +448,16 @@ def main() -> int:
     test_empty_args_spec_still_valid_shape()
     deeper = subprocess.run([sys.executable, str(ROOT / "tests/hard_deeper.py")], capture_output=True, text=True)
     check("deeper.suite", deeper.returncode == 0, (deeper.stdout or deeper.stderr)[-400:])
+    reference = subprocess.run(
+        [sys.executable, str(ROOT / "tests/test_reference_tools.py")],
+        capture_output=True,
+        text=True,
+    )
+    check(
+        "reference_contracts.suite",
+        reference.returncode == 0,
+        (reference.stdout + reference.stderr)[-800:],
+    )
     print(f"\n{len(failures)} failed" if failures else "\nALL PASSED")
     return 1 if failures else 0
 

@@ -59,15 +59,15 @@
       "slide_id": "s04",
       "sequence": 4,
       "role": "recommendation",
-      "takeaway": "오늘 필요한 결정은 범위 승인이다",
-      "title": "오늘 필요한 결정은 범위 승인이다",
+      "takeaway": "COO가 오늘 범위를 확정하면 다음 주 검증을 시작할 수 있다",
+      "title": "파일럿 범위를 오늘 승인해야 실행이 시작된다",
       "content_blocks": [
         {
           "type": "recommendation",
           "action": "파일럿 범위를 오늘 승인한다",
-          "owner": "COO",
-          "timing": "오늘",
-          "success_metric": "범위 합의서 서명"
+          "owner": "운영 총괄과 제품 책임자",
+          "timing": "오늘 의사결정 회의 종료 전",
+          "success_metric": "승인 범위와 검증 책임자가 합의서에 모두 서명한다"
         }
       ]
     }

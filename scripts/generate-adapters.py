@@ -13,6 +13,7 @@ CATALOG_PATH = ROOT / "catalog" / "plugins.json"
 PLUGIN_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
 NAMESPACE = "io.github.algocean1204.clonamic"
 PLATFORMS = ("codex", "claude", "grok", "hermes")
+CATALOG_PLATFORMS = {*PLATFORMS, "agent-plugins"}
 MANIFEST_FIELDS = {
     "$schema",
     "name",
@@ -112,6 +113,7 @@ def load_inventory():
     for entry in entries:
         if not isinstance(entry, dict) or set(entry) != {
             "manifest",
+            "required",
             "category",
             "platforms",
             "dependencies",
@@ -122,11 +124,13 @@ def load_inventory():
             raise CatalogError(f"duplicate or invalid manifest path: {relative!r}")
         if not isinstance(entry["category"], str) or not entry["category"]:
             raise CatalogError(f"invalid category for {relative}")
+        if not isinstance(entry["required"], bool):
+            raise CatalogError(f"invalid required flag for {relative}")
         platforms = entry["platforms"]
         if (
             not isinstance(platforms, list)
             or len(platforms) != len(set(platforms))
-            or not set(platforms).issubset(PLATFORMS)
+            or not set(platforms).issubset(CATALOG_PLATFORMS)
         ):
             raise CatalogError(f"invalid platforms for {relative}")
         dependencies = entry["dependencies"]
@@ -165,6 +169,9 @@ def load_inventory():
 
     for node in graph:
         visit(node)
+    required = [entry["manifest"] for entry, _ in rows if entry["required"]]
+    if required != ["plugin.json"]:
+        raise CatalogError("only the root plugin may be required")
     return rows
 
 
@@ -291,6 +298,7 @@ def descriptor(platform, rows):
         "namespace": NAMESPACE,
         "platform": platform,
         "catalog": "../catalog/plugins.json",
+        "configuration": "../clonamic.json",
         "plugins": [],
     }
     if marketplace is not None:
@@ -302,6 +310,7 @@ def descriptor(platform, rows):
             "manifest": f"../{entry['manifest']}",
             "name": manifest["name"],
             "description": manifest.get("description", ""),
+            "required": entry["required"],
         }
         if "version" in manifest:
             row["version"] = manifest["version"]

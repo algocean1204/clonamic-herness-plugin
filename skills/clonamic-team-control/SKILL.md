@@ -1,16 +1,14 @@
 ---
 name: clonamic-team-control
-description: Choose native direct work, a worker-reviewer pair, or a necessary second-tier lead with specialist workers. Use when non-trivial work may benefit from independent execution or verification; do not activate a team from size, repetition, or importance alone.
+description: Choose direct work, a worker-reviewer pair, or a specialist lead when value exceeds coordination cost.
 ---
 
 # Clonamic Team Control
 
-Read the canonical instructions at [../../clonamic-herness-plugin.md](../../clonamic-herness-plugin.md), then apply [references/team-contract.json](references/team-contract.json).
+Read [../../clonamic-herness-plugin.md](../../clonamic-herness-plugin.md) and apply [references/team-contract.json](references/team-contract.json). Select prospectively; size, repetition, importance, later defects, and missing evidence do not promote the mode.
 
-- Select the intended mode prospectively, before execution. Keep `native` unless expected team benefit exceeds coordination cost. Worker defects, missing evidence, and false completion are review outcomes, never reasons to promote the mode.
-- Use `paired` for one direct worker and one independent reviewer. The reviewer returns a verdict only after the worker result and fresh evidence arrive. Multiple isolated worker-reviewer pairs may run in parallel; each pair's verdict remains sequential. Colliding files stay sequential.
-- Use `lead_workers` only when the contract's specialist count and second-tier necessity gates both pass. The topology is main → lead → specialists. The lead assigns and reviews but never executes or integrates; one specialist owns integration. Serialize colliding writes and wait for every specialist result plus fresh evidence before the lead verdict.
-- Direct workers use one session and never delegate.
-- Do not auto-select external executors. If the intended team cannot be created because native subagents are unavailable, preserve the intended mode but set `actual_team: false` and perform a local sequential second pass without claiming independent review. Capability absence alone never changes a direct task.
+- `paired`: one direct worker, then an independent reviewer after result and fresh evidence. Isolated pairs may run in parallel; shared files stay sequential.
+- `lead_workers`: at least three specialists and a necessary coordination tier. Main → lead → specialists; the lead only assigns and reviews, one specialist integrates, colliding writes serialize, and all results precede review.
+- unavailable native subagents: preserve intended mode, set `actual_team: false`, run a local sequential second pass, and do not claim independent review.
 
-For each delivered result, apply [references/review-contract.json](references/review-contract.json). `ACCEPT` requires every result, fresh evidence, and preserved intent. Every `REJECT` field must be nonempty. Keep rework bounded to the rejected requirements, count only distinct strategy identities, and stop with a blocker after three materially different strategies are exhausted.
+Internal assignments require exact parent ID and session, then consume only the scope intersection. Apply [references/review-contract.json](references/review-contract.json): `ACCEPT` needs every result, fresh evidence, and preserved intent; otherwise return a complete rejection packet and bounded same-reviewer rework. Three distinct failed strategies produce a blocker.

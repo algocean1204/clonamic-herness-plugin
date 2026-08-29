@@ -2,62 +2,72 @@
   "plugins": [
     {
       "manifest": "plugin.json",
+      "required": true,
       "category": "core",
-      "platforms": ["codex", "claude", "grok", "hermes"],
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-development/plugin.json",
+      "required": false,
       "category": "development",
-      "platforms": ["codex", "claude", "grok", "hermes"],
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-korean/plugin.json",
+      "required": false,
       "category": "writing",
-      "platforms": ["codex", "claude", "grok", "hermes"],
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-ppt/plugin.json",
+      "required": false,
       "category": "presentation",
-      "platforms": ["codex", "claude", "grok", "hermes"],
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-preprocessing/plugin.json",
+      "required": false,
       "category": "workflow",
-      "platforms": ["codex", "claude", "grok", "hermes"],
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-memory/plugin.json",
+      "required": false,
       "category": "memory",
-      "platforms": ["codex", "claude", "grok", "hermes"],
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-grok/plugin.json",
+      "required": false,
       "category": "executor",
-      "platforms": ["codex", "claude", "hermes"],
+      "platforms": ["agent-plugins", "codex", "claude", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-gpt/plugin.json",
+      "required": false,
       "category": "executor",
-      "platforms": ["claude", "grok", "hermes"],
+      "platforms": ["agent-plugins", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-claude/plugin.json",
+      "required": false,
       "category": "executor",
-      "platforms": ["codex", "grok", "hermes"],
+      "platforms": ["agent-plugins", "codex", "grok", "hermes"],
       "dependencies": []
     },
     {
       "manifest": "plugins/clonamic-hermes/plugin.json",
+      "required": false,
       "category": "executor",
-      "platforms": ["codex", "claude", "grok"],
+      "platforms": ["agent-plugins", "codex", "claude", "grok"],
       "dependencies": []
     }
   ]

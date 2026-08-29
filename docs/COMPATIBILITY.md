@@ -26,11 +26,19 @@ The root package is the portable core. Nine child packages are independent roots
 
 Removing one child does not remove the core or another child. Missing children return unavailable; the core does not substitute a neighboring capability.
 
+`clonamic.json` is host-neutral routing input for an integration that calls the native resolver. The resolver accepts explicit shipped, user, and project paths plus an explicit installed-package set. A vendor-neutral or special-purpose client uses platform ID `agent-plugins`. Core remains effective and has no toggle. Optional `false` values prevent invocation only through that integration; optional `true` values do not install or load code. Stock hosts that ignore the resolver and hosts that need process-level unloading must use their own disable or uninstall operation.
+
 ## Structural core
 
 The `clonamic` binary supplies deterministic approval, completion, and router install/rollback operations. The installed router block references the canonical root guidance once and does not duplicate it. Skills can preserve the behavioral contract without the binary, but that is a model-side fallback. Documentation and reports must say so when structural enforcement matters.
 
 Team topology is selected prospectively; worker defects, missing evidence, and false completion do not create a team after execution. A pair always runs worker then reviewer, parallelism is only across isolated pairs, and same-file work is serialized. In `main → lead → specialists`, the lead neither executes nor integrates, one specialist owns integration, and no verdict precedes all results plus fresh evidence. Team control depends on native isolated-agent support: without it, `actual_team` is false and a disclosed local sequential second pass is not independent review.
+
+Prompt provenance and automation authority require a host adapter that can attest whether a prompt came from an interactive user, scheduler, or internal worker. Without attestation, authority is `none`; a textual automation label never upgrades it. In-scope claimed automation is noninteractive, while credentials and operating-system prompts remain platform actions.
+
+The optional memory child uses Python's standard `sqlite3` at a caller-supplied path. It creates and migrates state lazily and does not require a server, Docker, vector extension, uv, or a virtual environment. FTS5 is opportunistic; the scan fallback preserves results when FTS5 is unavailable.
+
+The PPT child produces structural and SVG QA artifacts after input validation passes; blocked input produces `qa_report.json` without render artifacts. Raster QA depends on an available office renderer and image tooling. Automatic LibreOffice use is disabled on macOS unless `CLONAMIC_ALLOW_MACOS_SOFFICE=1`; unavailable raster QA is reported as unavailable, not passed. Host-side PowerPoint fidelity still requires visual inspection in the target application.
 
 ## External executors
 

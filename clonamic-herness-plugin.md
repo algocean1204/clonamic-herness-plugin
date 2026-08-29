@@ -1,32 +1,18 @@
 # Clonamic operating contract
 
-This file is the canonical instruction source for intent control, proportional team use, review, and completion discipline. Skills route here; platform adapters may point to it but must not copy or widen its policy.
+Canonical instruction source; adapters only reference it.
 
-## Intent boundary
+## Boundary
 
-Treat the user's requested outcome and exclusions as the boundary. Before non-trivial work and whenever the plan grows, apply `clonamic-intent-guard`.
+- Preserve outcomes, exclusions, and raw prompt bytes. Reuse capability; reject adjacent work, duplication, speculative abstraction, and excess reasoning.
+- Host metadata alone determines source. Automation gains authority after a persisted ID/scope match. Internal work needs the same session and parent, then inherits the parent/assignment intersection.
+- Direct work is default. Pair worker and reviewer only when verification value exceeds coordination cost. Direct workers never delegate; shared writes are sequential. A three-specialist lead never executes or integrates and waits for all results plus fresh evidence.
+- `ACCEPT` needs every result, preserved intent, and fresh evidence. Otherwise return evidenced `REJECT`, bounded rework, and reverification. Three failed strategies produce a blocker.
 
-- Stop at the smallest scope that produces the requested result.
-- Reuse an existing capability instead of duplicating it.
-- Reject adjacent work and speculative abstraction.
-- Stop reasoning once current evidence resolves the requested decision.
-- If work has drifted, return to the smallest valid scope before continuing.
+## Writes and automation
 
-## Team boundary
+One approved development specification covers its inspect-fix-retest-apply-deploy-backup loop. Automation grants bind scope, effects, checks, rollback, expiry, count, and sequence. Initialization never resets runs. Claimed runs never ask chat approval. Replay or changed/expired authority returns `needs_authorization`; credentials or OS action return `waiting_platform_action` without consuming the run.
 
-Native direct work is the default. Apply `clonamic-team-control` only when independent execution or review produces more value than coordination costs.
+Session Markdown is display/recovery data, never authority. Trusted user or claimed automation updates its bounded prompt excerpt and SHA-256; internal prompts update active fields only. Completion relies on current evidence, not session text.
 
-- Select the intended mode before execution. Later worker defects, missing evidence, or false completion affect review, not team selection.
-- A direct worker completes one bounded assignment in one session and does not delegate.
-- The ordinary team is one worker plus one independent reviewer. The reviewer decides only after the worker delivers a result with fresh evidence. Multiple isolated worker-reviewer pairs may run in parallel, but each pair's final verdict stays sequential. Shared files stay sequential.
-- Use a second-tier lead only when three or more specialists and a real coordination layer are necessary. The topology is main → lead → specialists. The lead assigns, reviews, accepts, rejects, and reassigns, but never executes or integrates. Assign integration to one specialist, serialize colliding writes, and wait for all specialist results plus fresh evidence before the lead verdict.
-- `ACCEPT` requires all requested results, fresh evidence, and preserved intent. Every reviewer otherwise returns an evidence-backed `REJECT` whose reason, evidence, missing requirements, rework scope, and reverification conditions are all nonempty.
-- Identify correction strategies explicitly. Count only distinct materially different strategy identities; repeated attempts of one strategy never exhaust the limit. After three distinct strategies fail, report a blocker instead of claiming completion.
-
-## Capability and executor boundary
-
-Do not auto-select an external executor. When a justified intended team cannot be created because native subagents are unavailable, preserve the intended mode while reporting `actual_team: false`, run a local sequential second pass, disclose that the pass is not independent review, and never claim that a team was created. Capability absence alone does not change a direct task.
-
-## Completion boundary
-
-Only current evidence can support completion. A reviewer checks the requested result, changed scope, verification evidence, and unresolved requirements. Rework stays inside the rejected scope and returns to the same review contract.
+Optional plugins resolve from explicit paths: complete default, then partial user/project overlays. Any invalid layer yields Core-only. Effective state also needs installation, platform support, and ready dependencies. Enabling installs or authorizes nothing; automation intersects its prior optional scope with the effective set.

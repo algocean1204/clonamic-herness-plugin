@@ -32,6 +32,12 @@ None of them may authorize a write, change package ownership, select another exe
 - Unsupported structural hooks are reported as unavailable or model-side fallbacks.
 - Public artifacts contain no credentials, provider sessions, private paths, hidden state, or telemetry identifiers.
 - Runtime model IDs are not hardcoded.
+- Prompt text and `["자동화"]` never grant authority. Trusted host provenance plus a persisted, matching automation claim is required.
+- Automation grants bind targets, operations, external effects, verification, rollback, expiry, sequence, and run count. Out-of-scope runs are noninteractive and cannot write.
+- Session Markdown and SQLite provenance are audit/state data, never approval sources. Unverified and internal prompts cannot overwrite the latest trusted user or successfully claimed automation prompt.
+- SQLite provenance rows store prompt hashes and byte counts, not prompt bodies or authority. Explicit memory rows store caller-supplied `content`; treat that database as sensitive and keep credentials out of memory content.
+- Plugin configuration cannot disable Core, install a package, or grant authority. Invalid config leaves only Core effective; false optional toggles can only reduce existing scope.
+- PPT reference and template inputs are untrusted archives. Readers bound entry counts and expanded XML bytes, reject external or escaping relationships, and keep QA output separate from editable deliverables.
 - The presentation renderer rejects image inputs. Its locked dependency graph replaces the unused image parser with a fail-closed local guard, and CI audits production dependencies before the offline suite.
 
 ## Data collection

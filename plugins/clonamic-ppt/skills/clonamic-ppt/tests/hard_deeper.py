@@ -785,15 +785,15 @@ def test_render_adversarial() -> None:
             slide(
                 4,
                 role="recommendation",
-                takeaway="오늘 한도와 책임자를 적는다",
-                title="오늘 한도와 책임자를 적는다",
+                takeaway="운영 총괄이 오늘 한도를 확정하면 검증을 시작할 수 있다",
+                title="오늘 한도와 책임자를 확정해야 실행이 시작된다",
                 content_blocks=[
                     {
                         "type": "recommendation",
                         "action": "한도와 책임자를 오늘 적는다",
-                        "owner": "COO",
-                        "timing": "오늘",
-                        "success_metric": "회의록 기재",
+                        "owner": "운영 총괄과 제품 책임자",
+                        "timing": "오늘 의사결정 회의 종료 전",
+                        "success_metric": "승인 한도와 검증 책임자가 회의록에 모두 기록된다",
                     }
                 ],
             ),

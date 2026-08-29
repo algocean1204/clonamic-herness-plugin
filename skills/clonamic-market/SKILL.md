@@ -1,16 +1,15 @@
 ---
 name: clonamic-market
-description: Select the smallest matching optional Clonamic plugin from the repository catalog. Use when the user asks what Clonamic capability or plugin is available; do not use for installation or automatic activation.
+description: Match a requested capability to the smallest optional catalog plugin. Use for availability questions, not installation or activation.
 ---
 
 # Clonamic Market
 
-Read `../../catalog/plugins.json` relative to this skill root and match the request to the narrowest listed capability.
+Read `../../catalog/plugins.json`; use `clonamic resolve-plugins` with explicit config paths and host installation state, then select the narrowest effective capability.
 
-- Treat the catalog as inventory, not installation authority.
-- Prefer one plugin; add another only when the request has a distinct uncovered capability.
-- Respect declared dependencies and platform support.
-- Never infer that a child plugin is installed, enabled, or automatically bundled with this core plugin.
-- If the catalog is absent or has no match, state that result without inventing an entry or fallback.
+- Prefer one plugin; add another only for a distinct uncovered capability.
+- Report configured, installed, platform_supported, dependencies_ready, effective, reason, and manifest separately.
+- Never infer installation or authority. A disabled plugin is unavailable; enabling grants nothing.
+- If no catalog or match exists, state that without inventing a fallback.
 
-Return the matching plugin name, the capability that matched, and any declared dependency. Installation remains a separate user-authorized platform action.
+Return the plugin name, match, and resolver reason. Installation stays a platform action.

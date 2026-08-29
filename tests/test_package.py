@@ -38,6 +38,7 @@ EXPECTED_PACKAGES = {
     "clonamic-hermes",
 }
 PLATFORMS = {"codex", "claude", "grok", "hermes"}
+CATALOG_PLATFORMS = {*PLATFORMS, "agent-plugins"}
 MARKETPLACES = {
     "codex": ROOT / ".agents" / "plugins" / "marketplace.json",
     "claude": ROOT / ".claude-plugin" / "marketplace.json",
@@ -101,10 +102,11 @@ class PackageContractTest(unittest.TestCase):
         for entry, path, manifest in rows:
             with self.subTest(manifest=entry["manifest"]):
                 self.assertEqual(
-                    {"manifest", "category", "platforms", "dependencies"}, set(entry)
+                    {"manifest", "required", "category", "platforms", "dependencies"}, set(entry)
                 )
                 self.assertNotIn("name", entry)
                 self.assertNotIn("version", entry)
+                self.assertIsInstance(entry["required"], bool)
                 relative = PurePosixPath(entry["manifest"])
                 self.assertFalse(relative.is_absolute())
                 self.assertNotIn("..", relative.parts)
@@ -117,7 +119,7 @@ class PackageContractTest(unittest.TestCase):
                 self.assertIsInstance(entry["category"], str)
                 self.assertTrue(entry["category"])
                 self.assertEqual(len(entry["platforms"]), len(set(entry["platforms"])))
-                self.assertLessEqual(set(entry["platforms"]), PLATFORMS)
+                self.assertLessEqual(set(entry["platforms"]), CATALOG_PLATFORMS)
                 graph[entry["manifest"]] = entry["dependencies"]
         for dependencies in graph.values():
             self.assertLessEqual(set(dependencies), set(graph))

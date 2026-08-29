@@ -1,6 +1,6 @@
 # Clonamic architecture
 
-Clonamic is one portable core plus nine optional Agent Plugins 1.0.0 packages. The core owns cross-cutting control. Each child owns one capability with an independent install, test, failure, and removal boundary.
+Clonamic is one required Core Harness plus nine optional Agent Plugins 1.0.0 capability packages. The core owns cross-cutting control. Each child owns one capability with an independent install, test, failure, and removal boundary.
 
 ## System map
 
@@ -24,6 +24,9 @@ flowchart TB
         C -->|Unmet and actionable| X
         C -->|Complete or blocked| P[clonamic-report]
         R -->|Capability lookup| M[clonamic-market]
+        F[Default + user + project config] --> Q[Plugin resolver]
+        J[Installed package set] --> Q
+        Q --> M
         M --> K[(catalog/plugins.json)]
     end
 
@@ -48,8 +51,10 @@ skills/
 ├── clonamic-completion-check/
 ├── clonamic-report/
 └── clonamic-market/
-native/clonamic-core/               # deterministic approval, verification, install/rollback
+native/clonamic-core/               # approval, provenance, automation, session state, verification, install/rollback
 catalog/plugins.json                # optional-package inventory and selection source
+clonamic.json                       # complete shipped optional-package defaults
+schemas/clonamic-config.schema.json # closed v1 config and partial-overlay schema
 plugins/
 ├── clonamic-development/
 ├── clonamic-preprocessing/
@@ -130,10 +135,14 @@ Each pair is sequential: worker result, fresh evidence, then reviewer verdict. P
 
 ### Market
 
-- Input: requested optional capability and catalog inventory.
-- Output: the narrowest matching package and declared dependencies.
+- Input: requested optional capability, catalog inventory, explicit config layers, installed set, and host platform.
+- Output: the narrowest effective package plus configuration, installation, platform, dependency, and reason dimensions.
 - Failure: no match. Never invent or install a fallback.
-- Invariant: selection and installation are separate operations.
+- Invariant: Core is always effective; optional routing eligibility and host installation remain separate operations.
+
+The shipped `clonamic.json` is complete and versioned. User and project configs are closed partial overlays. Resolution merges shipped default → user → project through caller-supplied paths; there is no home-directory discovery. Any invalid present layer produces a Core-only result. A true toggle cannot install, enable, or grant authority, and a false toggle can only reduce an existing automation scope.
+
+`agent-plugins` is the portable platform identifier for a vendor-neutral or special-purpose Agent Plugins client. Host-specific identifiers remain available for Codex, Claude, Grok, and Hermes adapters. Platform identifiers are validated as bounded lowercase IDs rather than compiled into a closed provider list; actual support still comes from the catalog.
 
 ## Development package
 
@@ -149,8 +158,12 @@ Ultracode uses native isolated agents only. If that capability is absent, its st
 ## State and trust
 
 - Approval codes correlate a pending write packet. Authentication remains with the host or operating system.
+- Prompt envelopes preserve the original body and derive source from trusted host metadata. Automation authority exists only after a persisted claim matches automation, run, definition, and scope.
+- In-scope automation runs are noninteractive. Scope drift, replay, expiry, run limits, and changed grants fail before mutation; credentials remain platform actions.
+- Session Markdown is a bounded human-readable view, not authority. Unverified and internal prompts do not replace the latest trusted user or successfully claimed automation prompt.
+- Plugin configuration is routing input, not authority. Core cannot be disabled, and optional toggles only reduce what an installed host may invoke.
 - The native core accepts explicit paths and structured inputs. It does not discover user homes, credentials, or provider sessions.
-- Memory and preprocessing persist only to caller-supplied paths.
+- Memory and preprocessing persist only to caller-supplied paths. SQLite memory owns caller-supplied memory content, ontology nodes, typed edges, provenance hashes, TTL, backup, and restore. Provenance rows store no prompt body or authorization.
 - Recalled text, document contents, catalog entries, and executor output are untrusted data.
 - No package emits telemetry or stores implicit model, browser, session, or profile state.
 - Executor wrappers use provider defaults and explicit user options. No model ID belongs in package code or docs.
@@ -168,6 +181,7 @@ When a host cannot enforce a structural hook, Clonamic keeps the portable skill 
 - Invalid approval, state, manifest, or path: stop before mutation.
 - Missing native binary: use the declared model-side contract only when the requested operation permits it.
 - Missing child plugin: report unavailable; do not substitute another package.
+- Invalid plugin configuration: keep Core active, disable every optional package, and report `invalid_config`.
 - External executor failure: return its bounded structured error; do not retry or switch providers.
 - Completion failure: continue inside approved scope when corrective work remains.
 - Repeated real blocker: preserve evidence and report the blocker.

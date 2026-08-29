@@ -1,18 +1,10 @@
 ---
 name: clonamic-router
-description: Route a request through Clonamic's direct-response, intent, team, write-control, completion, reporting, or optional-plugin path. Use when Clonamic is active for the current task; do not use as a substitute for a domain skill.
+description: Route an active Clonamic request to its smallest applicable intent, team, write, completion, report, or market path; keep read-only questions direct.
 ---
 
 # Clonamic Router
 
-Choose one narrow route for the current stage:
+Keep reads direct and route small writes to write control. For non-trivial mutation or team choice, read [../../clonamic-herness-plugin.md](../../clonamic-herness-plugin.md) once; load intent/team only as needed. Load write before mutation, completion before a changed-work claim, report after its verdict, and market only for optional selection.
 
-- Questions, explanations, opinions, inspection, review, and other read-only requests stay direct. Do not load the root guidance, create a specification, or add an approval gate unless a real team decision is needed.
-- Small, precise persistent mutations load `clonamic-write-control` directly. Do not load the root guidance or create a team.
-- For a non-trivial mutation or a real team decision, read the plugin-root `clonamic-herness-plugin.md` once. Then load `clonamic-intent-guard` to bound the work and `clonamic-team-control` only when its team decision is needed.
-- Before any persistent mutation, load `clonamic-write-control`.
-- Before claiming non-trivial changed work is complete, load `clonamic-completion-check`.
-- After a completion or blocker verdict, load `clonamic-report` only when a work report is needed.
-- When the user asks which optional Clonamic plugin fits a capability, load `clonamic-market`.
-
-Load only the selected route. Do not reread or copy the root guidance into a platform adapter. Optional plugins are never installed, enabled, or invoked merely because they appear in the catalog.
+Apply [references/prompt-envelope.json](references/prompt-envelope.json). Preserve the body; host metadata derives source, while automation needs a persisted claim. Before optional invocation resolve explicit config and require `effective: true`; disabling never installs, authorizes, or widens scope. `["자동화"]` is display-only.

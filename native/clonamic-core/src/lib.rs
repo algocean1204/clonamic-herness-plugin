@@ -1,8 +1,12 @@
 mod atomic;
 
 pub mod approval;
+pub mod automation;
 pub mod completion;
 pub mod installation;
+pub mod plugin_config;
+pub mod provenance;
+pub mod session;
 
 use std::fmt::{Display, Formatter};
 

@@ -1,11 +1,11 @@
 ---
 name: clonamic-development-router
-description: Route software-development work between the native path, modular design, conservative patching, and bounded native multi-agent review. Use when a coding or architecture request needs a proportional development method; keep ordinary work native.
+description: Route coding or architecture work among native, modular-design, conservative-patch, and bounded native-review stages; keep ordinary work native.
 ---
 
 # Clonamic Development Router
 
-Choose the smallest development stage that materially reduces risk. The native path is the default.
+Choose the smallest stage that materially reduces risk; default to native.
 
 ## Route
 
@@ -20,16 +20,16 @@ DevelopmentRoute {
 }
 ```
 
-Apply stages in this order when more than one qualifies:
+When multiple stages qualify, order them:
 
-1. `modular-design` for a real architecture, new-system, or large-refactor decision.
-2. `supercoder` for an already approved non-trivial code write with stale or ambiguous patch risk.
-3. `ultracode` only when all four decision gates pass and the host exposes native isolated agents.
+1. `modular-design` for architecture, a new system, or a large refactor.
+2. `supercoder` for an approved non-trivial write with stale or ambiguous patch risk.
+3. `ultracode` only when all four gates pass and native isolated agents exist.
 
-Task size, file count, repetition, or an importance label never activates Ultracode by itself. When its four gates pass but native isolated agents are unavailable, set `ultracode: unavailable`; do not substitute another execution path or simulate consensus.
+Size, file count, repetition, or importance alone never activates Ultracode. If eligible but unavailable, set `ultracode: unavailable`; do not simulate consensus.
 
-Read [references/ownership-contract.json](references/ownership-contract.json) before handing work to a specialist. This plugin consumes `approved_scope` when a write is already authorized. It does not create authorization, decide completion, shape the user report, install components, or select external executors.
+Read [references/ownership-contract.json](references/ownership-contract.json) before specialist handoff. This plugin may consume `approved_scope`; it cannot create authorization, decide completion, format reports, install components, or select external executors.
 
 ## Failure
 
-Missing or contradictory routing evidence returns the native stage with the uncertainty recorded in `degraded`. Routing itself has no side effects.
+Missing or contradictory evidence returns native with the uncertainty in `degraded`. Routing is read-only.

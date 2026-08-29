@@ -2,7 +2,7 @@
 
 Clonamic benchmarks compare control overhead and outcome quality. They do not rank model intelligence.
 
-No public performance score is published yet.
+No public model-quality score is published yet. Measured validation runtime is reported separately in [Validation performance](PERFORMANCE.md).
 
 ## Profiles
 
@@ -28,6 +28,11 @@ Run every profile in a clean temporary repository and isolated host home:
 8. Generate a presentation from fixed local fixtures.
 9. Invoke one fake external CLI and verify timeout, cleanup, redaction, and recursion blocking.
 10. Uninstall the router and compare the restored bytes.
+11. Run a trusted automation inside its frozen grant without a chat approval stop.
+12. Reject a forged automation marker, replay, scope drift, and internal scope expansion.
+13. Migrate, search, traverse, back up, and restore an explicit SQLite memory fixture.
+14. Merge complete defaults with partial user and project toggles, reject an invalid layer to Core-only, and distinguish configured, installed, platform-supported, dependency-ready, and effective states.
+15. Process hostile reference/template archives, compare every SVG and editable PPTX slide, and report unavailable raster QA without a false pass.
 
 ## Measurements
 
@@ -57,5 +62,7 @@ A published result must include:
 - model selector and reasoning setting used by the host, without turning either into a package default;
 - operating system and date;
 - exact commands and raw machine-readable results.
+
+Long-form model evaluation uses independently authored prompts of at least 1,500 characters. Deterministic contract checks and black-box model outcomes are reported separately; no fixture ID, model name, expected route, or composite score is allowed to become production routing logic.
 
 Label repository-only checks separately from live host measurements. Do not infer live installation from a manifest check, and do not report Grok validation success without a recorded Grok run.
