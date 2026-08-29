@@ -1,6 +1,6 @@
 # Validation performance
 
-The authoritative serial baseline is 12.390 seconds. The latest integrated three-run median is 6.650 seconds with four Python-suite workers.
+The authoritative serial baseline is 12.390 seconds. The latest integrated three-run median is 6.670 seconds with four Python-suite workers.
 
 ## Measurement
 
@@ -9,9 +9,9 @@ The integrated measurements ran on macOS 26.5.1 arm64 with Python 3.9.6 and Carg
 | Measurement | Run 1 | Run 2 | Run 3 | Median |
 | --- | ---: | ---: | ---: | ---: |
 | Authoritative serial baseline | — | — | — | 12.390 s |
-| Integrated parallel validation | 6.650 s | 6.660 s | 6.600 s | 6.650 s |
+| Integrated parallel validation | 6.670 s | 6.780 s | 6.650 s | 6.670 s |
 
-The median decreased by 5.740 seconds, or 46.3%. A full one-worker run completed in 13.771 seconds and a four-worker comparison run completed in 5.966 seconds before the later config and PPT safety suites were added. The current integrated suite includes executable provenance, automation, session, team, intent, review, process-tree cleanup, context-budget, plugin configuration, expanded memory, and hostile OOXML checks.
+The median decreased by 5.720 seconds, or 46.2%. A full one-worker run completed in 13.771 seconds and a four-worker comparison run completed in 5.966 seconds before the later config and PPT safety suites were added. The current integrated suite includes executable provenance, automation, session, team, intent, review, process-tree cleanup, context-budget, plugin configuration, expanded memory, and hostile OOXML checks.
 
 ## Execution plan
 

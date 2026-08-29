@@ -64,13 +64,24 @@ class LongFormUxTest(unittest.TestCase):
             raise AssertionError(result.stdout + result.stderr)
 
     def run_cli(self, *args):
-        return subprocess.run(
-            [str(BINARY), *map(str, args)],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
+        with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as output:
+            with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as error:
+                result = subprocess.run(
+                    [str(BINARY), *map(str, args)],
+                    cwd=ROOT,
+                    text=True,
+                    stdout=output,
+                    stderr=error,
+                    check=False,
+                )
+                output.seek(0)
+                error.seek(0)
+                return subprocess.CompletedProcess(
+                    result.args,
+                    result.returncode,
+                    output.read(),
+                    error.read(),
+                )
 
     def seed_session(self, root, index, session_id):
         body = f"seed user prompt {index}"
