@@ -1,9 +1,11 @@
 use crate::{Error, Result};
-use std::fs::{self, File};
+use std::fs;
 use std::io::Write;
 use std::path::Path;
 use tempfile::{Builder, NamedTempFile};
 
+#[cfg(unix)]
+use std::fs::File;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
