@@ -636,7 +636,7 @@ def _copy_database(source: sqlite3.Connection, target: Path) -> None:
 
 
 def _fsync(path: Path) -> None:
-    descriptor = os.open(path, os.O_RDONLY)
+    descriptor = os.open(path, os.O_RDWR)
     try:
         os.fsync(descriptor)
     finally:
@@ -647,9 +647,15 @@ def _fsync_directory(path: Path) -> None:
     try:
         descriptor = os.open(path, os.O_RDONLY)
     except OSError:
+        if os.name == "posix":
+            raise
         return
     try:
-        os.fsync(descriptor)
+        try:
+            os.fsync(descriptor)
+        except OSError:
+            if os.name == "posix":
+                raise
     finally:
         os.close(descriptor)
 

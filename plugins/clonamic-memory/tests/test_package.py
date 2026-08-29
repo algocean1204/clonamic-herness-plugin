@@ -1,4 +1,5 @@
 import importlib.util
+import errno
 import io
 import json
 import os
@@ -7,8 +8,9 @@ import shutil
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import redirect_stdout
+from contextlib import closing, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -184,7 +186,7 @@ class MemoryPackageTest(unittest.TestCase):
     def test_legacy_schema_migrates_with_backup_and_user_version(self):
         database = self.database_path()
         database.parent.mkdir(parents=True)
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.executescript(
                 """
                 CREATE TABLE memories (
@@ -200,7 +202,7 @@ class MemoryPackageTest(unittest.TestCase):
                 """
             )
         self.record_source(database)
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             self.assertEqual(1, connection.execute("PRAGMA user_version").fetchone()[0])
             memory_columns = {row[1] for row in connection.execute("PRAGMA table_info(memories)")}
             edge_columns = {row[1] for row in connection.execute("PRAGMA table_info(edges)")}
@@ -208,14 +210,14 @@ class MemoryPackageTest(unittest.TestCase):
         self.assertTrue({"source_id", "expires_at"} <= edge_columns)
         backup = database.with_name(f"{database.name}.pre-v1.bak")
         self.assertTrue(backup.is_file())
-        with sqlite3.connect(backup) as connection:
+        with closing(sqlite3.connect(backup)) as connection:
             self.assertEqual(0, connection.execute("PRAGMA user_version").fetchone()[0])
             self.assertEqual("ok", connection.execute("PRAGMA quick_check").fetchone()[0])
 
     def test_legacy_migration_replaces_an_invalid_stale_backup(self):
         database = self.database_path()
         database.parent.mkdir(parents=True)
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.executescript(
                 """
                 CREATE TABLE memories (
@@ -232,14 +234,14 @@ class MemoryPackageTest(unittest.TestCase):
         backup = database.with_name(f"{database.name}.pre-v1.bak")
         backup.write_bytes(b"stale")
         self.record_source(database)
-        with sqlite3.connect(backup) as connection:
+        with closing(sqlite3.connect(backup)) as connection:
             self.assertEqual("ok", connection.execute("PRAGMA quick_check").fetchone()[0])
             self.assertEqual(0, connection.execute("PRAGMA user_version").fetchone()[0])
 
     def test_unknown_newer_schema_fails_closed(self):
         database = self.database_path()
         database.parent.mkdir(parents=True)
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.execute("PRAGMA user_version = 99")
         before = database.read_bytes()
         before_mode = database.stat().st_mode & 0o777
@@ -258,7 +260,7 @@ class MemoryPackageTest(unittest.TestCase):
         self.store(database, "b", "node b")
         edge = self.runtime.link(database, "a", "b", "supports", source_id="p1")
         self.assertEqual("p1", edge["source_id"])
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             columns = {row[1] for row in connection.execute("PRAGMA table_info(prompt_sources)")}
             row = connection.execute("SELECT * FROM prompt_sources WHERE id = 'p1'").fetchone()
         self.assertEqual(
@@ -277,7 +279,7 @@ class MemoryPackageTest(unittest.TestCase):
         queries = ("한글", "한글 + 검색", "C++ OR SQL", "operator")
         expected = [[row["id"] for row in self.runtime.recall(database, query)] for query in queries]
         self.assertIn("ko-glued", expected[0])
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.executescript(
                 """
                 DROP TRIGGER IF EXISTS memories_fts_insert;
@@ -296,7 +298,7 @@ class MemoryPackageTest(unittest.TestCase):
         self.store(database, "ascii", "strasse separated-token", ["address"])
         queries = ("ss", "strasse")
         expected = [[row["id"] for row in self.runtime.recall(database, query)] for query in queries]
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.executescript(
                 """
                 DROP TRIGGER IF EXISTS memories_fts_insert;
@@ -334,7 +336,7 @@ class MemoryPackageTest(unittest.TestCase):
         self.runtime.heapq.nsmallest = bounded_top_k
         try:
             expected = [row["id"] for row in self.runtime.recall(database, "strasse", limit=limit)]
-            with sqlite3.connect(database) as connection:
+            with closing(sqlite3.connect(database)) as connection:
                 connection.executescript(
                     """
                     DROP TRIGGER IF EXISTS memories_fts_insert;
@@ -455,6 +457,44 @@ class MemoryPackageTest(unittest.TestCase):
         self.assertTrue(any("PRAGMA BUSY_TIMEOUT = 5000" in statement for statement in normalized))
         self.assertTrue(any("BEGIN IMMEDIATE" in statement for statement in normalized))
 
+    def test_file_sync_uses_a_writable_descriptor_and_directory_sync_is_best_effort(self):
+        path = self.root / "sync.sqlite3"
+        with mock.patch.object(self.runtime.os, "open", return_value=73) as open_file:
+            with mock.patch.object(self.runtime.os, "fsync") as sync_file:
+                with mock.patch.object(self.runtime.os, "close") as close_file:
+                    self.runtime._fsync(path)
+        open_file.assert_called_once_with(path, os.O_RDWR)
+        sync_file.assert_called_once_with(73)
+        close_file.assert_called_once_with(73)
+
+        with mock.patch.object(self.runtime.os, "name", "nt"):
+            with mock.patch.object(self.runtime.os, "open", return_value=74):
+                with mock.patch.object(
+                    self.runtime.os,
+                    "fsync",
+                    side_effect=OSError(errno.EBADF, "unsupported"),
+                ):
+                    with mock.patch.object(self.runtime.os, "close") as close_directory:
+                        self.runtime._fsync_directory(path.parent)
+        close_directory.assert_called_once_with(74)
+
+        with mock.patch.object(self.runtime.os, "name", "posix"):
+            with mock.patch.object(self.runtime.os, "open", return_value=75):
+                with mock.patch.object(
+                    self.runtime.os, "fsync", side_effect=OSError(errno.EIO, "write failed")
+                ):
+                    with mock.patch.object(self.runtime.os, "close") as close_directory:
+                        with self.assertRaises(OSError):
+                            self.runtime._fsync_directory(path.parent)
+        close_directory.assert_called_once_with(75)
+
+        with mock.patch.object(self.runtime.os, "name", "posix"):
+            with mock.patch.object(
+                self.runtime.os, "open", side_effect=OSError(errno.EIO, "open failed")
+            ):
+                with self.assertRaises(OSError):
+                    self.runtime._fsync_directory(path.parent)
+
     def test_backup_restore_and_refusals_preserve_destination(self):
         database = self.database_path()
         backup = self.root / "backups" / "memory.sqlite3"
@@ -473,7 +513,7 @@ class MemoryPackageTest(unittest.TestCase):
         self.assertEqual(before, database.read_bytes())
 
         newer = self.root / "backups" / "newer.sqlite3"
-        with sqlite3.connect(newer) as connection:
+        with closing(sqlite3.connect(newer)) as connection:
             connection.execute("PRAGMA user_version = 99")
         with self.assertRaises(sqlite3.DatabaseError):
             self.runtime.restore(database, newer)
@@ -483,7 +523,8 @@ class MemoryPackageTest(unittest.TestCase):
         database = self.database_path()
         self.assertFalse(database.exists())
         self.record_source(database)
-        self.assertEqual(0o600, database.stat().st_mode & 0o777)
+        if os.name == "posix":
+            self.assertEqual(0o600, database.stat().st_mode & 0o777)
         alias = database.with_name("alias.sqlite3")
         alias.symlink_to(database)
         with self.assertRaises(OSError):

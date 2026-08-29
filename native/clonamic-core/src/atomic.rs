@@ -1,6 +1,6 @@
 use crate::{Error, Result};
 use sha2::{Digest, Sha256};
-use std::fs;
+use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -8,8 +8,6 @@ use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tempfile::{Builder, NamedTempFile};
 
-#[cfg(unix)]
-use std::fs::File;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
