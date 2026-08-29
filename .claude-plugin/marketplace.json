@@ -1,0 +1,17 @@
+{
+  "name": "clonamic",
+  "description": "Portable AI coding harness plugins from Clonamic",
+  "owner": {
+    "name": "Clonamic"
+  },
+  "plugins": [
+    {
+      "name": "clonamic-herness-plugin",
+      "description": "Approve writes once, verify completion, and keep agent output concise.",
+      "version": "0.1.0",
+      "source": "./plugins/clonamic-herness-plugin",
+      "category": "development",
+      "tags": ["harness", "approval", "verification", "agents"]
+    }
+  ]
+}

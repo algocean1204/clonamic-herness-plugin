@@ -1,0 +1,3 @@
+[workspace]
+members = ["plugins/clonamic-herness-plugin/native/clonamic-core"]
+resolver = "2"

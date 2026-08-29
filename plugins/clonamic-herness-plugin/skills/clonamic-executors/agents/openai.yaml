@@ -1,0 +1,6 @@
+interface:
+  display_name: "Clonamic Executors"
+  short_description: "Run one explicitly selected external AI executor"
+  default_prompt: "Use $clonamic-executors for this explicit executor command."
+policy:
+  allow_implicit_invocation: false

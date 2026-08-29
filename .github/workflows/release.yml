@@ -1,0 +1,43 @@
+name: Release binaries
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset: clonamic-linux-x86_64
+          - os: macos-latest
+            asset: clonamic-macos-aarch64
+          - os: windows-latest
+            asset: clonamic-windows-x86_64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install 1.85.1 --profile minimal
+      - run: cargo build --release --bin clonamic
+      - name: Stage Unix binary
+        if: runner.os != 'Windows'
+        run: cp target/release/clonamic "${{ matrix.asset }}"
+      - name: Stage Windows binary
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Copy-Item target/release/clonamic.exe "${{ matrix.asset }}"
+      - name: Checksum Unix binary
+        if: runner.os != 'Windows'
+        run: shasum -a 256 "${{ matrix.asset }}" > "${{ matrix.asset }}.sha256"
+      - name: Checksum Windows binary
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: '"$((Get-FileHash -Algorithm SHA256 "${{ matrix.asset }}").Hash.ToLower())  ${{ matrix.asset }}" | Out-File -Encoding ascii "${{ matrix.asset }}.sha256"'
+      - name: Upload release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "${{ matrix.asset }}" "${{ matrix.asset }}.sha256" --clobber
