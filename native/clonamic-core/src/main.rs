@@ -57,7 +57,10 @@ fn run(args: Vec<String>) -> Result<()> {
             let root = Path::new(plugin_root);
             let required = [
                 "plugin.json",
+                "clonamic-herness-plugin.md",
                 "skills/clonamic-router/SKILL.md",
+                "skills/clonamic-intent-guard/SKILL.md",
+                "skills/clonamic-team-control/SKILL.md",
                 "skills/clonamic-write-control/SKILL.md",
                 "skills/clonamic-completion-check/SKILL.md",
                 "skills/clonamic-report/SKILL.md",

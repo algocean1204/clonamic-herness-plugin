@@ -10,10 +10,17 @@ flowchart TB
 
     subgraph Core[Core package]
         R -->|Read-only| H[Native host path]
-        R -->|Persistent write| W[clonamic-write-control]
+        R -->|Small precise write| W[clonamic-write-control]
+        R -->|Non-trivial mutation or team decision| I[clonamic-intent-guard]
+        I --> T{clonamic-team-control}
+        T -->|Native| W
+        T -->|Team| W
         W --> A[Approved scope]
-        A --> X[Implementation loop]
-        X --> C[clonamic-completion-check]
+        A --> X[Worker execution]
+        X -->|Native mode| C
+        X -->|Team mode| V{Independent verifier}
+        V -->|REJECT and bounded rework| X
+        V -->|ACCEPT| C[clonamic-completion-check]
         C -->|Unmet and actionable| X
         C -->|Complete or blocked| P[clonamic-report]
         R -->|Capability lookup| M[clonamic-market]
@@ -32,8 +39,11 @@ The straight path is intentional: request, route, approved execution when needed
 
 ```text
 plugin.json                         # canonical core Agent Plugins 1.0.0 manifest
+clonamic-herness-plugin.md          # canonical non-trivial intent and team guidance
 skills/
 ├── clonamic-router/
+├── clonamic-intent-guard/
+├── clonamic-team-control/
 ├── clonamic-write-control/
 ├── clonamic-completion-check/
 ├── clonamic-report/
@@ -61,7 +71,7 @@ The generated adapter directories and marketplace files are build outputs. Canon
 
 | Package | Public responsibility | Activation | Explicit exclusions |
 |---|---|---|---|
-| Core | Route, gate writes, verify completion, format work reports, select optional packages | Core active for the current task | Domain execution, child installation |
+| Core | Route, bound intent, choose proportional team use, gate writes, verify completion, format work reports, select optional packages | Core active for the current task | Domain execution, child installation |
 | Development | Modular design, Supercoder patch discipline, native gated Ultracode review | Software work where a stage materially reduces risk | Authorization, final verdict, external executors |
 | Preprocessing | Normalize input, create caller-directed clarification packets, explicit queues | Fuzzy or multi-item input, or explicit queue use | Scope authority, final execution |
 | Korean | Korean prose-document clarity | Supported prose document | Chat, work reports, code, spreadsheets, slides, email |
@@ -87,6 +97,22 @@ The generated adapter directories and marketplace files are build outputs. Canon
 - Output: approved scope or a no-write result.
 - Failure: no mutation.
 - Invariant: one approved development specification covers the full named inspect/fix/retest/apply/deploy/backup loop.
+
+### Intent guard
+
+- Input: user request, exclusions, current plan, and proposed effects.
+- Output: pass or reject with the smallest valid scope and bounded rework.
+- Failure: stop the out-of-scope or unnecessary work before it becomes a completion claim.
+- Invariant: adjacent improvements, speculative abstractions, and reasoning beyond sufficient evidence are not part of the task.
+
+### Team control
+
+- Input: task coupling, independent work streams, risk, verification value, host capability, and coordination cost.
+- Output: native execution or the smallest useful worker-and-verifier team.
+- Failure: preserve the prospective selection but set `actual_team: false`, run only a disclosed local sequential second pass, and never call it independent review.
+- Invariant: topology is selected before execution. Worker defects, missing evidence, and false completion cause rejection; they never retroactively create a team.
+
+Each pair is sequential: worker result, fresh evidence, then reviewer verdict. Parallelism is allowed only across at least two isolated worker-reviewer pairs; shared-file work is serialized. A necessary second tier is `main → lead → specialists`. The lead assigns and reviews but neither executes nor integrates; one assigned specialist integrates. No verdict is valid until all specialist results and fresh evidence arrive. Workers remain single-session and do not delegate, and task size, repetition, or importance labels alone never activate a team.
 
 ### Completion check
 
@@ -131,9 +157,9 @@ Ultracode uses native isolated agents only. If that capability is absent, its st
 
 ## Adapter generation
 
-Agent Plugins 1.0.0 manifests and skills are canonical. Platform adapters translate discovery and registration only.
+Agent Plugins 1.0.0 manifests and skills are canonical. The standard discovers immediate skills under `skills/` and MCP configuration at root `mcp.json`; it does not portably discover the root guidance file, nested child package roots, marketplaces, or team/subagent behavior. Platform adapters translate discovery and registration only.
 
-Generated outputs may include Codex, Claude Code, Grok Build, and Hermes manifest or registration formats. Generation must be deterministic and checked for drift. An adapter may expose a supported hook; it may not duplicate policy, install children, select a model, read memory, or widen permissions.
+Generated outputs may include Codex, Claude Code, Grok Build, and Hermes manifest or registration formats. Generation must be deterministic and checked for drift. An adapter may expose a supported hook; it may not duplicate policy, install children, select a model, read memory, or widen permissions. The optional router installer writes one reference to `clonamic-herness-plugin.md`; it does not copy the file's policy into the host router.
 
 When a host cannot enforce a structural hook, Clonamic keeps the portable skill behavior and declares a model-side fallback. The documentation never labels that fallback as a measured hook.
 
@@ -145,6 +171,7 @@ When a host cannot enforce a structural hook, Clonamic keeps the portable skill 
 - External executor failure: return its bounded structured error; do not retry or switch providers.
 - Completion failure: continue inside approved scope when corrective work remains.
 - Repeated real blocker: preserve evidence and report the blocker.
+- Missing native team support: report `actual_team: false`; a local sequential second pass is not an independent review.
 - Install or router failure: leave the original file unchanged or restore the recorded pre-image.
 
 ## Migration and rollback
@@ -153,7 +180,7 @@ When a host cannot enforce a structural hook, Clonamic keeps the portable skill 
 2. Validate the core and each selected child as separate package roots.
 3. Generate adapters and test them in isolated host homes. Do not replace an active configuration during this step.
 4. Install the core alongside existing behavior. Install children only when the user selects them.
-5. Compare representative read, write, approved-loop, completion, and uninstall scenarios.
+5. Compare representative direct-read, small-write, intent rejection, native/team routing, reviewer rejection, approved-loop, completion, and uninstall scenarios.
 6. Remove superseded rules only after equivalent behavior is measured.
 
 Rollback removes selected children independently, disables the generated adapter, and runs `clonamic uninstall-router` when the router was installed. The installer restores its recorded pre-image only when safe; unrelated user edits remain untouched. Old packages and backups stay available until the full acceptance set passes.

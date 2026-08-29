@@ -23,6 +23,8 @@ None of them may authorize a write, change package ownership, select another exe
 ## Package rules
 
 - Persistent writes require the core write-control decision before mutation.
+- Non-trivial work must pass the intent guard; team assignment never widens the accepted scope or authority.
+- Team reviewers accept or reject evidence. Worker output and completion claims remain untrusted until independently checked.
 - Approved loops remain inside the accepted scope.
 - External executors are explicit, bounded, non-recursive, and never substituted.
 - Memory and preprocessing use caller-supplied paths. No implicit home or background process is created.
@@ -38,6 +40,6 @@ Clonamic has no telemetry. It does not collect usage, prompts, repository names,
 
 ## Installation and rollback
 
-Review source and release checksums before installation. Test generated adapters in an isolated host home. The router installer records enough information to restore its managed change and must not overwrite unrelated user edits during uninstall.
+Review source and release checksums before installation. Test generated adapters in an isolated host home. The router installer adds one reference to the canonical guidance, records enough information to restore its managed change, and must not overwrite unrelated user edits during uninstall.
 
 Path traversal, symlink escape, approval confusion, secret exposure, executor recursion, hidden state, generated-adapter drift, incomplete process cleanup, and unsafe rollback are security defects.

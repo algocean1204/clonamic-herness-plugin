@@ -1,7 +1,7 @@
 {
   "name": "clonamic-herness-plugin",
-  "version": "0.2.0",
-  "description": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
+  "version": "0.3.0",
+  "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
   "author": {
     "name": "Clonamic"
   },
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Clonamic Herness Plugin",
-    "shortDescription": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
-    "longDescription": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
+    "shortDescription": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
+    "longDescription": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
     "developerName": "Clonamic",
     "category": "Core",
     "capabilities": [

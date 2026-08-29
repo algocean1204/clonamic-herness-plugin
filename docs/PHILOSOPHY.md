@@ -18,9 +18,19 @@ Approval codes correlate a packet. They are not authentication. Credentials and 
 
 After approval, the agent continues inside the accepted boundary until every required item passes or a real user-only or external blocker remains. It does not stop merely because the first patch compiled, one test failed, or another safe correction round is needed.
 
+## Intent stays smaller than possibility
+
+Non-trivial work is checked against the requested result, exclusions, and smallest valid scope. More reasoning, abstraction, configuration, or adjacent improvement is not better after the evidence already supports the requested result. Scope drift is rejected before it becomes work or a completion claim.
+
+## Teams must earn their coordination cost
+
+Native execution is the default, and topology is chosen before work starts. A later worker defect, missing evidence, or false completion rejects the result; it does not turn a native run into a team after the fact. A rejection identifies the evidence, rework boundary, and recheck condition.
+
+Within a pair, the worker finishes before the reviewer begins. Parallelism exists only across isolated pairs, while same-file work is serialized. If a second tier is unavoidable, the topology is `main → lead → specialists`: the lead assigns and reviews without executing or integrating, one specialist owns integration, and the verdict waits for all results and fresh evidence. Without native subagents, `actual_team` is false; a disclosed local sequential second pass is useful fallback work, not independent review.
+
 ## Packages load narrowly
 
-The core owns routing, write control, completion, reporting, and market selection. Optional packages own domain behavior. The market can select a package, but it cannot assume installation or enable a child on the user's behalf.
+The core owns routing, intent guard, proportional team control, write control, completion, reporting, and market selection. Optional packages own domain behavior. The market can select a package, but it cannot assume installation or enable a child on the user's behalf.
 
 Development stays native for ordinary work. Modular design, Supercoder, and Ultracode activate only when their evidence gates pass. Ultracode needs native isolated agents and a costly unresolved decision. Task size alone does nothing.
 
@@ -46,4 +56,4 @@ The first line states the outcome and one useful number or cause. Failures and u
 
 ## The user's machine stays theirs
 
-Installation is additive and reversible. Clonamic does not collect telemetry, import credentials, copy provider sessions, choose model IDs, create hidden memory, or preserve private paths in public artifacts. Generated adapters translate host formats and carry no policy of their own.
+Installation is additive and reversible. Clonamic does not collect telemetry, import credentials, copy provider sessions, choose model IDs, create hidden memory, or preserve private paths in public artifacts. Generated adapters translate host formats and carry no policy of their own. The optional router installer adds one canonical-guidance reference and removes it reversibly.

@@ -10,13 +10,15 @@ Compatibility claims use three labels:
 
 | Surface | Canonical package | Repository-checked contract | Host-measured claim | Declared fallback |
 |---|---|---|---|---|
-| Agent Plugins 1.0.0 | Root `plugin.json`; each child `plugins/*/plugin.json` | Closed manifest and package-local contract | Depends on the client implementation | Load the matching skill directory directly when supported |
+| Agent Plugins 1.0.0 | Root `plugin.json`; immediate `skills/*/SKILL.md`; optional root `mcp.json`; each child `plugins/*/plugin.json` as a separate root | Closed manifest and package-local contract | Depends on the client implementation | Load the matching skill directory directly when supported |
 | Codex | Generated Codex marketplace and manifest outputs | Artifact shape and core contracts | No blanket live-install claim | Model-side skill contract when a structural hook is unavailable |
 | Claude Code | Generated Claude marketplace and plugin outputs | Artifact shape and core contracts | No blanket live-install claim | Skills remain usable without claiming hook enforcement |
 | Grok Build | Generated Grok marketplace and plugin outputs | Artifact shape only unless a release record says otherwise | No Grok validation success is claimed | Skills remain usable; missing commands or hooks are reported unavailable |
 | Hermes | Generated registration output | Registration and package contracts can be checked locally | No blanket live-install claim | Direct skill loading or explicit CLI use, without claiming hook enforcement |
 
 Generated files are compatibility outputs. Their presence does not prove that a host installed, enabled, or executed them.
+
+Agent Plugins 1.0.0 does not automatically load arbitrary root Markdown, recursively discover nested skills or plugin roots, define marketplaces, or define team/subagent execution. `clonamic-herness-plugin.md` is therefore reached through `clonamic-router` for non-trivial mutation or team decisions, or through the optional reversible router installer. See the [Agent Plugins 1.0.0 specification](https://agent-plugins.org/specification).
 
 ## Core and child installation
 
@@ -26,7 +28,9 @@ Removing one child does not remove the core or another child. Missing children r
 
 ## Structural core
 
-The `clonamic` binary supplies deterministic approval, completion, and router install/rollback operations. Skills can preserve the behavioral contract without the binary, but that is a model-side fallback. Documentation and reports must say so when structural enforcement matters.
+The `clonamic` binary supplies deterministic approval, completion, and router install/rollback operations. The installed router block references the canonical root guidance once and does not duplicate it. Skills can preserve the behavioral contract without the binary, but that is a model-side fallback. Documentation and reports must say so when structural enforcement matters.
+
+Team topology is selected prospectively; worker defects, missing evidence, and false completion do not create a team after execution. A pair always runs worker then reviewer, parallelism is only across isolated pairs, and same-file work is serialized. In `main → lead → specialists`, the lead neither executes nor integrates, one specialist owns integration, and no verdict precedes all results plus fresh evidence. Team control depends on native isolated-agent support: without it, `actual_team` is false and a disclosed local sequential second pass is not independent review.
 
 ## External executors
 

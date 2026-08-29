@@ -23,6 +23,13 @@ struct InstallState {
 }
 
 pub fn install_router(request: InstallRequest) -> Result<()> {
+    let guidance = request.plugin_root.join("clonamic-herness-plugin.md");
+    let guidance_metadata = fs::symlink_metadata(&guidance)?;
+    if guidance_metadata.file_type().is_symlink() || !guidance_metadata.is_file() {
+        return Err(Error::Invalid(
+            "canonical guidance must be a regular non-symlink file".into(),
+        ));
+    }
     reject_symlink_components(&request.router)?;
     reject_symlink_components(&request.state)?;
     let original = if request.router.exists() {
@@ -53,8 +60,8 @@ pub fn install_router(request: InstallRequest) -> Result<()> {
     let backup = request.state.with_extension("backup");
     atomic_write(&backup, &original)?;
     let block = format!(
-        "{BEGIN}\nFor persistent writes, load the installed clonamic-write-control skill. Before reporting completion, load clonamic-completion-check. External AI executors run only after an explicit slash command.\nPlugin root: {}\n{END}\n",
-        request.plugin_root.display()
+        "{BEGIN}\nFor non-trivial mutations or team decisions, read {}. Keep simple and read-only requests direct.\n{END}\n",
+        guidance.display()
     );
     let separator = if original_text.is_empty() || original_text.ends_with('\n') {
         ""

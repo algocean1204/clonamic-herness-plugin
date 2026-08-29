@@ -6,6 +6,7 @@ use clonamic_core::installation::{InstallRequest, install_router, uninstall_rout
 use serde_json::Value;
 use std::collections::BTreeSet;
 use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Barrier};
 use std::thread;
@@ -17,6 +18,17 @@ fn now() -> u64 {
         .duration_since(UNIX_EPOCH)
         .expect("clock")
         .as_secs()
+}
+
+fn plugin_root_with_guidance(root: &Path) -> PathBuf {
+    let plugin_root = root.join("plugin");
+    fs::create_dir_all(&plugin_root).unwrap();
+    fs::write(
+        plugin_root.join("clonamic-herness-plugin.md"),
+        b"guidance\n",
+    )
+    .unwrap();
+    plugin_root
 }
 
 #[test]
@@ -166,7 +178,10 @@ fn doctor_accepts_the_root_agent_plugin_layout() {
     let dir = tempdir().unwrap();
     for relative in [
         "plugin.json",
+        "clonamic-herness-plugin.md",
         "skills/clonamic-router/SKILL.md",
+        "skills/clonamic-intent-guard/SKILL.md",
+        "skills/clonamic-team-control/SKILL.md",
         "skills/clonamic-write-control/SKILL.md",
         "skills/clonamic-completion-check/SKILL.md",
         "skills/clonamic-report/SKILL.md",
@@ -189,6 +204,46 @@ fn doctor_accepts_the_root_agent_plugin_layout() {
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
+}
+
+#[test]
+fn doctor_rejects_each_missing_canonical_team_requirement() {
+    let required = [
+        "plugin.json",
+        "clonamic-herness-plugin.md",
+        "skills/clonamic-router/SKILL.md",
+        "skills/clonamic-intent-guard/SKILL.md",
+        "skills/clonamic-team-control/SKILL.md",
+        "skills/clonamic-write-control/SKILL.md",
+        "skills/clonamic-completion-check/SKILL.md",
+        "skills/clonamic-report/SKILL.md",
+        "skills/clonamic-market/SKILL.md",
+    ];
+    for missing in [
+        "clonamic-herness-plugin.md",
+        "skills/clonamic-intent-guard/SKILL.md",
+        "skills/clonamic-team-control/SKILL.md",
+    ] {
+        let dir = tempdir().unwrap();
+        for relative in required.into_iter().filter(|relative| *relative != missing) {
+            let path = dir.path().join(relative);
+            fs::create_dir_all(path.parent().unwrap()).unwrap();
+            fs::write(path, b"fixture").unwrap();
+        }
+
+        let output = Command::new(env!("CARGO_BIN_EXE_clonamic"))
+            .arg("doctor")
+            .arg(dir.path())
+            .output()
+            .unwrap();
+
+        assert!(
+            !output.status.success(),
+            "doctor accepted missing {missing}"
+        );
+        let payload: Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(payload["missing"], serde_json::json!([missing]));
+    }
 }
 
 #[test]
@@ -217,7 +272,7 @@ fn root_manifest_uses_the_agent_plugins_1_0_contract() {
         object["$schema"],
         "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
     );
-    assert_eq!(object["version"], "0.2.0");
+    assert_eq!(object["version"], "0.3.0");
 }
 
 #[test]
@@ -231,7 +286,7 @@ fn install_and_uninstall_restore_original_router_bytes() {
     install_router(InstallRequest {
         router: router.clone(),
         state: state.clone(),
-        plugin_root: dir.path().join("plugin"),
+        plugin_root: plugin_root_with_guidance(dir.path()),
     })
     .unwrap();
     let installed = fs::read_to_string(&router).unwrap();
@@ -240,6 +295,89 @@ fn install_and_uninstall_restore_original_router_bytes() {
 
     uninstall_router(&router, &state).unwrap();
     assert_eq!(fs::read(&router).unwrap(), original);
+}
+
+#[test]
+fn router_install_references_canonical_guidance_once_without_copying_policy() {
+    let dir = tempdir().unwrap();
+    let router = dir.path().join("AGENTS.md");
+    let state = dir.path().join("install.json");
+    let plugin_root = plugin_root_with_guidance(dir.path());
+    fs::write(&router, b"existing user rules\n").unwrap();
+    let original = fs::read(&router).unwrap();
+
+    install_router(InstallRequest {
+        router: router.clone(),
+        state: state.clone(),
+        plugin_root,
+    })
+    .unwrap();
+
+    let installed = fs::read_to_string(&router).unwrap();
+    assert_eq!(installed.matches("clonamic-herness-plugin.md").count(), 1);
+    assert!(!installed.contains("For persistent writes"));
+    assert!(!installed.contains("Before reporting completion"));
+    assert!(!installed.contains("External AI executors"));
+
+    uninstall_router(&router, &state).unwrap();
+    assert_eq!(fs::read(&router).unwrap(), original);
+}
+
+#[test]
+fn router_install_rejects_missing_guidance_without_writes() {
+    let dir = tempdir().unwrap();
+    let router = dir.path().join("AGENTS.md");
+    let state = dir.path().join("install.json");
+    let backup = state.with_extension("backup");
+    fs::write(&router, b"existing user rules\n").unwrap();
+    let original = fs::read(&router).unwrap();
+
+    assert!(
+        install_router(InstallRequest {
+            router: router.clone(),
+            state: state.clone(),
+            plugin_root: dir.path().join("plugin"),
+        })
+        .is_err()
+    );
+
+    assert_eq!(fs::read(&router).unwrap(), original);
+    assert!(!state.exists());
+    assert!(!backup.exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn router_install_rejects_symlinked_guidance_without_writes() {
+    use std::os::unix::fs::symlink;
+
+    let dir = tempdir().unwrap();
+    let router = dir.path().join("AGENTS.md");
+    let state = dir.path().join("install.json");
+    let backup = state.with_extension("backup");
+    let plugin_root = dir.path().join("plugin");
+    fs::create_dir(&plugin_root).unwrap();
+    fs::write(dir.path().join("guidance.md"), b"guidance\n").unwrap();
+    symlink(
+        dir.path().join("guidance.md"),
+        plugin_root.join("clonamic-herness-plugin.md"),
+    )
+    .unwrap();
+    fs::write(&router, b"existing user rules\n").unwrap();
+    let original = fs::read(&router).unwrap();
+
+    assert!(
+        install_router(InstallRequest {
+            router: router.clone(),
+            state: state.clone(),
+            plugin_root,
+        })
+        .is_err()
+    );
+
+    assert_eq!(fs::read(&router).unwrap(), original);
+    assert!(!state.exists());
+    assert!(!backup.exists());
 }
 
 #[test]
@@ -358,7 +496,7 @@ fn atomic_outputs_are_private_on_unix() {
     install_router(InstallRequest {
         router: router.clone(),
         state: install_state.clone(),
-        plugin_root: dir.path().join("plugin"),
+        plugin_root: plugin_root_with_guidance(dir.path()),
     })
     .unwrap();
     for path in [
@@ -387,7 +525,7 @@ fn installation_does_not_consume_a_precreated_temp_collision() {
     install_router(InstallRequest {
         router,
         state,
-        plugin_root: dir.path().join("plugin"),
+        plugin_root: plugin_root_with_guidance(dir.path()),
     })
     .unwrap();
 
@@ -415,7 +553,7 @@ fn reinstall_is_idempotent_and_does_not_duplicate_router_block() {
     let request = || InstallRequest {
         router: router.clone(),
         state: state.clone(),
-        plugin_root: dir.path().join("plugin"),
+        plugin_root: plugin_root_with_guidance(dir.path()),
     };
     install_router(request()).unwrap();
     let first = fs::read(&router).unwrap();
@@ -443,7 +581,7 @@ fn failed_state_write_rolls_router_back() {
         install_router(InstallRequest {
             router: router.clone(),
             state,
-            plugin_root: dir.path().join("plugin"),
+            plugin_root: plugin_root_with_guidance(dir.path()),
         })
         .is_err()
     );
@@ -459,7 +597,7 @@ fn uninstall_preserves_user_edits_after_install() {
     install_router(InstallRequest {
         router: router.clone(),
         state: state.clone(),
-        plugin_root: dir.path().join("plugin"),
+        plugin_root: plugin_root_with_guidance(dir.path()),
     })
     .unwrap();
     let mut edited = fs::read_to_string(&router).unwrap();
@@ -487,7 +625,7 @@ fn symlink_router_is_rejected_without_touching_target() {
         install_router(InstallRequest {
             router,
             state,
-            plugin_root: dir.path().join("plugin"),
+            plugin_root: plugin_root_with_guidance(dir.path()),
         })
         .is_err()
     );
@@ -509,7 +647,7 @@ fn symlink_parent_is_rejected_before_creating_router() {
         install_router(InstallRequest {
             router,
             state: dir.path().join("install.json"),
-            plugin_root: dir.path().join("plugin"),
+            plugin_root: plugin_root_with_guidance(dir.path()),
         })
         .is_err()
     );
@@ -533,7 +671,7 @@ fn symlink_parent_is_rejected_when_router_already_exists() {
         install_router(InstallRequest {
             router: alias.join("AGENTS.md"),
             state: dir.path().join("install.json"),
-            plugin_root: dir.path().join("plugin"),
+            plugin_root: plugin_root_with_guidance(dir.path()),
         })
         .is_err()
     );

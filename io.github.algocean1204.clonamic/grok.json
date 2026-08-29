@@ -6,8 +6,8 @@
     {
       "manifest": "../plugin.json",
       "name": "clonamic-herness-plugin",
-      "description": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
-      "version": "0.2.0",
+      "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
+      "version": "0.3.0",
       "nativeManifest": "../.grok-plugin/plugin.json"
     },
     {

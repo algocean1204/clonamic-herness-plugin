@@ -4,9 +4,9 @@ Small fixes may go straight to a pull request. Open an issue before changing a p
 
 ## Choose the owner first
 
-The core owns routing, write approval, completion, reports, and market selection. Optional packages own domain behavior. Platform adapters only translate discovery and registration formats.
+The core owns routing, intent guard, proportional team control, write approval, completion, reports, and market selection. Optional packages own domain behavior. Platform adapters only translate discovery and registration formats.
 
-Do not copy policy into an adapter or neighboring package. Do not add automatic executor selection, implicit memory, telemetry, credentials, provider sessions, model IDs, private paths, or source-provenance banners.
+Do not copy `clonamic-herness-plugin.md` policy into an adapter, router block, or neighboring package. Do not add automatic executor selection, implicit memory, telemetry, credentials, provider sessions, model IDs, private paths, or source-provenance banners.
 
 ## Split gate
 
@@ -46,6 +46,7 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test --all-targets
 python3 scripts/validate-public.py
+python3 scripts/generate-adapters.py --check
 ```
 
 Child checks run from the child root. Most Python children use:
@@ -63,6 +64,8 @@ The PPT package keeps its engine tests under `skills/clonamic-ppt/tests/` and re
 - Skill names match package IDs.
 - No model, credential, session, user path, or telemetry default was added.
 - Explicit state paths and rollback behavior are tested.
+- Simple and read-only routes remain free of root-guidance and team activation.
+- Team-mode tests prove worker/verifier separation, rejection evidence, bounded rework, and honest capability fallback.
 - Generated adapters match canonical inputs.
 - Public docs distinguish repository checks, live host measurements, and fallbacks.
 - Changelog and compatibility notes describe user-visible changes without claiming unrun validation.

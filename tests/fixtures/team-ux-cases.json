@@ -1,0 +1,512 @@
+[
+  {
+    "name": "simple_read_stays_native",
+    "domain": "team",
+    "input": {},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "independent_review": false, "disclose_limitation": false}
+  },
+  {
+    "name": "small_precise_edit_stays_native",
+    "domain": "team",
+    "input": {"small_precise_change": true},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "independent_review": false, "disclose_limitation": false}
+  },
+  {
+    "name": "unavailable_subagents_do_not_affect_simple_work",
+    "domain": "team",
+    "input": {"native_subagents_available": false},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "independent_review": false, "disclose_limitation": false}
+  },
+  {
+    "name": "large_repetitive_work_does_not_justify_a_team",
+    "domain": "team",
+    "input": {"large_task": true, "repetitive": true},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "independent_review": false, "disclose_limitation": false}
+  },
+  {
+    "name": "tightly_coupled_work_uses_a_sequential_pair",
+    "domain": "team",
+    "input": {
+      "paired_review_needed": true,
+      "benefit_exceeds_coordination_cost": true,
+      "tightly_coupled": true
+    },
+    "expected": {
+      "intended_mode": "paired",
+      "actual_team": true,
+      "execution": "sequential",
+      "independent_review": true,
+      "disclose_limitation": false
+    }
+  },
+  {
+    "name": "independent_work_uses_a_parallel_pair",
+    "domain": "team",
+    "input": {
+      "paired_review_needed": true,
+      "benefit_exceeds_coordination_cost": true,
+      "independent_pairs": true,
+      "worker_reviewer_pair_count": 2
+    },
+    "expected": {
+      "intended_mode": "paired",
+      "actual_team": true,
+      "execution": "parallel_pairs",
+      "independent_review": true,
+      "disclose_limitation": false
+    }
+  },
+  {
+    "name": "three_specialists_use_a_second_tier_lead",
+    "domain": "team",
+    "input": {
+      "benefit_exceeds_coordination_cost": true,
+      "second_tier_necessary": true,
+      "specialist_count": 3
+    },
+    "expected": {"intended_mode": "lead_workers", "actual_team": true, "execution": "parallel_specialists", "independent_review": true, "disclose_limitation": false}
+  },
+  {
+    "name": "missing_completion_evidence_is_rejected",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": true,
+      "fresh_evidence": false,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["fresh evidence is missing"],
+        "evidence": ["no post-change test output"],
+        "missing_requirements": ["fresh_evidence"],
+        "rework_scope": ["run the target verification"],
+        "reverification_conditions": ["post-change verification passes"]
+      }
+    },
+    "expected": {"status": "REJECT", "next": "bounded_rework"}
+  },
+  {
+    "name": "scope_creep_is_rejected",
+    "domain": "intent",
+    "input": {"signals": ["scope_drift"], "smallest_valid_scope": ["requested/file.py"]},
+    "expected": {"status": "reject", "smallest_valid_scope": ["requested/file.py"]}
+  },
+  {
+    "name": "overengineering_speculative_abstraction_is_rejected",
+    "domain": "intent",
+    "input": {"signals": ["speculative_abstraction"], "smallest_valid_scope": ["existing/helper.py"]},
+    "expected": {"status": "reject", "smallest_valid_scope": ["existing/helper.py"]}
+  },
+  {
+    "name": "unavailable_subagents_fall_back_to_local_roles",
+    "domain": "team",
+    "input": {
+      "paired_review_needed": true,
+      "benefit_exceeds_coordination_cost": true,
+      "native_subagents_available": false
+    },
+    "expected": {"intended_mode": "paired", "actual_team": false, "execution": "local_sequential_second_pass", "independent_review": false, "disclose_limitation": true}
+  },
+  {
+    "name": "same_file_collision_forces_sequential_execution",
+    "domain": "team",
+    "input": {
+      "paired_review_needed": true,
+      "benefit_exceeds_coordination_cost": true,
+      "shared_file_collision": true
+    },
+    "expected": {
+      "intended_mode": "paired",
+      "actual_team": true,
+      "execution": "sequential",
+      "independent_review": true,
+      "disclose_limitation": false
+    }
+  },
+  {
+    "name": "first_failed_strategy_gets_bounded_rework",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["contract check failed"],
+        "evidence": ["contract test output"],
+        "missing_requirements": ["required result"],
+        "rework_scope": ["contract implementation"],
+        "reverification_conditions": ["contract test passes"]
+      },
+      "failed_strategy_ids": ["narrow-contract-patch"]
+    },
+    "expected": {"status": "REJECT", "next": "bounded_rework"}
+  },
+  {
+    "name": "three_failed_strategies_end_in_a_blocker",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["all three correction strategies failed"],
+        "evidence": ["three distinct strategy results"],
+        "missing_requirements": ["required result"],
+        "rework_scope": ["no further automatic rework"],
+        "reverification_conditions": ["new user input or external state change"]
+      },
+      "failed_strategy_ids": ["reuse-existing", "narrow-patch", "replace-implementation"]
+    },
+    "expected": {"status": "BLOCKED", "next": "report_blocker"}
+  },
+  {
+    "name": "repeated_strategy_identity_does_not_exhaust_rework",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["the required result is still absent"],
+        "evidence": ["same strategy failed three times"],
+        "missing_requirements": ["required result"],
+        "rework_scope": ["choose a materially different correction"],
+        "reverification_conditions": ["required result exists"]
+      },
+      "failed_strategy_ids": ["same-patch", "same-patch", "same-patch"]
+    },
+    "expected": {"status": "REJECT", "next": "bounded_rework"}
+  },
+  {
+    "name": "blank_strategy_identity_does_not_exhaust_rework",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["the required result is still absent"],
+        "evidence": ["two identified strategies and one blank entry failed"],
+        "missing_requirements": ["required result"],
+        "rework_scope": ["try one materially different identified strategy"],
+        "reverification_conditions": ["required result exists"]
+      },
+      "failed_strategy_ids": ["", "narrow-patch", "reuse-existing"]
+    },
+    "expected": {"status": "REJECT", "next": "bounded_rework"}
+  },
+  {
+    "name": "whitespace_strategy_identity_does_not_exhaust_rework",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["the required result is still absent"],
+        "evidence": ["two identified strategies and one whitespace entry failed"],
+        "missing_requirements": ["required result"],
+        "rework_scope": ["try one materially different identified strategy"],
+        "reverification_conditions": ["required result exists"]
+      },
+      "failed_strategy_ids": ["   ", "narrow-patch", "reuse-existing"]
+    },
+    "expected": {"status": "REJECT", "next": "bounded_rework"}
+  },
+  {
+    "name": "reviewer_before_result_rejects_instead_of_accepting",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["worker result has not been delivered"],
+        "evidence": ["delivered result is absent"],
+        "missing_requirements": ["all_required_results_present"],
+        "rework_scope": ["deliver the bounded worker result"],
+        "reverification_conditions": ["result and fresh evidence are available"]
+      }
+    },
+    "expected": {"status": "REJECT", "next": "bounded_rework"}
+  },
+  {
+    "name": "intent_not_preserved_prevents_accept",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": true,
+      "fresh_evidence": true,
+      "intent_preserved": false,
+      "reject": {
+        "reasons": ["delivered work exceeds intent"],
+        "evidence": ["out-of-scope file in diff"],
+        "missing_requirements": ["intent_preserved"],
+        "rework_scope": ["remove out-of-scope work"],
+        "reverification_conditions": ["diff matches approved scope"]
+      }
+    },
+    "expected": {"status": "REJECT", "next": "bounded_rework"}
+  },
+  {
+    "name": "missing_reject_reasons_invalidates_reject",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": false,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": [],
+        "evidence": ["test missing"],
+        "missing_requirements": ["fresh_evidence"],
+        "rework_scope": ["run tests"],
+        "reverification_conditions": ["tests pass"]
+      }
+    },
+    "expected": {"status": "INVALID_REJECT", "next": "complete_reject_packet"}
+  },
+  {
+    "name": "missing_reject_evidence_invalidates_reject",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": false,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["test missing"],
+        "evidence": [],
+        "missing_requirements": ["fresh_evidence"],
+        "rework_scope": ["run tests"],
+        "reverification_conditions": ["tests pass"]
+      }
+    },
+    "expected": {"status": "INVALID_REJECT", "next": "complete_reject_packet"}
+  },
+  {
+    "name": "missing_reject_requirements_invalidates_reject",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": false,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["test missing"],
+        "evidence": ["no test output"],
+        "missing_requirements": [],
+        "rework_scope": ["run tests"],
+        "reverification_conditions": ["tests pass"]
+      }
+    },
+    "expected": {"status": "INVALID_REJECT", "next": "complete_reject_packet"}
+  },
+  {
+    "name": "missing_reject_rework_scope_invalidates_reject",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": false,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["test missing"],
+        "evidence": ["no test output"],
+        "missing_requirements": ["fresh_evidence"],
+        "rework_scope": [],
+        "reverification_conditions": ["tests pass"]
+      }
+    },
+    "expected": {"status": "INVALID_REJECT", "next": "complete_reject_packet"}
+  },
+  {
+    "name": "missing_reject_reverification_invalidates_reject",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": false,
+      "fresh_evidence": false,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["test missing"],
+        "evidence": ["no test output"],
+        "missing_requirements": ["fresh_evidence"],
+        "rework_scope": ["run tests"],
+        "reverification_conditions": []
+      }
+    },
+    "expected": {"status": "INVALID_REJECT", "next": "complete_reject_packet"}
+  },
+  {
+    "name": "second_tier_lead_only_controls_review",
+    "domain": "team",
+    "input": {
+      "benefit_exceeds_coordination_cost": true,
+      "second_tier_necessary": true,
+      "specialist_count": 4
+    },
+    "expected": {"intended_mode": "lead_workers", "actual_team": true, "execution": "parallel_specialists", "independent_review": true, "disclose_limitation": false}
+  },
+  {
+    "name": "duplicate_implementation_is_rejected",
+    "domain": "intent",
+    "input": {"signals": ["duplicate_implementation"], "smallest_valid_scope": ["reuse existing capability"]},
+    "expected": {"status": "reject", "smallest_valid_scope": ["reuse existing capability"]}
+  },
+  {
+    "name": "reasoning_past_sufficient_evidence_is_rejected",
+    "domain": "intent",
+    "input": {"signals": ["reasoning_past_evidence"], "smallest_valid_scope": ["stop and report"]},
+    "expected": {"status": "reject", "smallest_valid_scope": ["stop and report"]}
+  },
+  {
+    "name": "adjacent_unrequested_work_is_rejected",
+    "domain": "intent",
+    "input": {"signals": ["adjacent_work"], "smallest_valid_scope": ["requested change only"]},
+    "expected": {"status": "reject", "smallest_valid_scope": ["requested change only"]}
+  },
+  {
+    "name": "native_false_completion_remains_native_and_rejects",
+    "domain": "decision",
+    "input": {
+      "request": "작업은 끝났다고 했지만 변경 후 테스트 결과가 없다.",
+      "false_completion": true,
+      "missing_evidence": true,
+      "review_applicable": true,
+      "all_required_results_present": true,
+      "fresh_evidence": false,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["completion lacks fresh evidence"],
+        "evidence": ["no post-change verification result"],
+        "missing_requirements": ["fresh_evidence"],
+        "rework_scope": ["run requested verification"],
+        "reverification_conditions": ["fresh verification passes"]
+      }
+    },
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "intent_verdict": "pass", "review_verdict": "REJECT"}
+  },
+  {
+    "name": "worker_defect_remains_native_and_rejects",
+    "domain": "decision",
+    "input": {
+      "request": "작업자의 결과에 결함이 발견됐다.",
+      "worker_defect": true,
+      "review_applicable": true,
+      "all_required_results_present": false,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["worker result is defective"],
+        "evidence": ["target assertion failed"],
+        "missing_requirements": ["required result"],
+        "rework_scope": ["correct the bounded defect"],
+        "reverification_conditions": ["target assertion passes"]
+      }
+    },
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "intent_verdict": "pass", "review_verdict": "REJECT"}
+  },
+  {
+    "name": "unrequested_framework_stays_native_with_intent_reject",
+    "domain": "decision",
+    "input": {"request": "요청하지 않은 프레임워크도 함께 추가한다.", "intent_signals": ["speculative_abstraction"], "smallest_valid_scope": ["requested change only"]},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "intent_verdict": "reject", "review_verdict": null}
+  },
+  {
+    "name": "same_file_with_review_benefit_is_paired_sequential",
+    "domain": "decision",
+    "input": {"request": "한 파일을 수정하고 독립 검토가 필요한 작업이다.", "benefit_exceeds_coordination_cost": true, "paired_review_needed": true, "shared_file_collision": true},
+    "expected": {"intended_mode": "paired", "actual_team": true, "execution": "sequential", "intent_verdict": "pass", "review_verdict": null}
+  },
+  {
+    "name": "same_file_without_benefit_stays_native",
+    "domain": "decision",
+    "input": {"request": "한 파일을 고치지만 별도 검토 이익은 비용보다 작다.", "paired_review_needed": true, "shared_file_collision": true},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "intent_verdict": "pass", "review_verdict": null}
+  },
+  {
+    "name": "lead_three_specialists_waits_for_results_and_evidence",
+    "domain": "decision",
+    "input": {
+      "request": "세 전문 작업을 리드가 배정하고 한 전문가가 통합한 뒤 전체 증거를 검토한다.",
+      "benefit_exceeds_coordination_cost": true,
+      "second_tier_necessary": true,
+      "specialist_count": 3,
+      "integration_specialist": "specialist-2",
+      "all_specialist_results": true,
+      "review_applicable": true,
+      "all_required_results_present": true,
+      "fresh_evidence": true,
+      "intent_preserved": true
+    },
+    "expected": {"intended_mode": "lead_workers", "actual_team": true, "execution": "parallel_specialists", "intent_verdict": "pass", "review_verdict": "ACCEPT"}
+  },
+  {
+    "name": "lead_missing_specialist_result_cannot_accept",
+    "domain": "decision",
+    "input": {
+      "request": "세 전문가 중 한 명의 결과가 아직 도착하지 않았지만 나머지 완료 조건은 충족했다.",
+      "benefit_exceeds_coordination_cost": true,
+      "second_tier_necessary": true,
+      "specialist_count": 3,
+      "all_specialist_results": false,
+      "review_applicable": true,
+      "all_required_results_present": true,
+      "fresh_evidence": true,
+      "intent_preserved": true,
+      "reject": {
+        "reasons": ["one specialist result is missing"],
+        "evidence": ["received two of three assigned specialist results"],
+        "missing_requirements": ["all_specialist_results"],
+        "rework_scope": ["collect the missing assigned result"],
+        "reverification_conditions": ["all three specialist results and fresh evidence are present"]
+      }
+    },
+    "expected": {"intended_mode": "lead_workers", "actual_team": true, "execution": "parallel_specialists", "intent_verdict": "pass", "review_verdict": "REJECT"}
+  },
+  {
+    "name": "lead_colliding_specialist_writes_are_serialized",
+    "domain": "decision",
+    "input": {
+      "request": "세 전문가의 쓰기 대상이 충돌한다.",
+      "benefit_exceeds_coordination_cost": true,
+      "second_tier_necessary": true,
+      "specialist_count": 3,
+      "specialist_write_collision": true
+    },
+    "expected": {"intended_mode": "lead_workers", "actual_team": true, "execution": "serialized_specialists", "intent_verdict": "pass", "review_verdict": null}
+  },
+  {
+    "name": "two_specialists_no_lead_stays_native",
+    "domain": "decision",
+    "input": {"request": "전문 작업이 둘뿐이라 리드 계층이 필요하지 않다.", "benefit_exceeds_coordination_cost": true, "second_tier_necessary": true, "specialist_count": 2},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "intent_verdict": "pass", "review_verdict": null}
+  },
+  {
+    "name": "unavailable_subagents_use_no_team_local_second_pass",
+    "domain": "decision",
+    "input": {"request": "독립 검토가 유리하지만 이 호스트는 서브에이전트를 지원하지 않는다.", "benefit_exceeds_coordination_cost": true, "paired_review_needed": true, "native_subagents_available": false},
+    "expected": {"intended_mode": "paired", "actual_team": false, "execution": "local_sequential_second_pass", "intent_verdict": "pass", "review_verdict": null}
+  },
+  {
+    "name": "isolated_single_pair_does_not_claim_parallel_pairs",
+    "domain": "decision",
+    "input": {"request": "격리 가능한 작업자-검토자 팀이 하나뿐이다.", "benefit_exceeds_coordination_cost": true, "paired_review_needed": true, "independent_pairs": true, "worker_reviewer_pair_count": 1},
+    "expected": {"intended_mode": "paired", "actual_team": true, "execution": "sequential", "intent_verdict": "pass", "review_verdict": null}
+  },
+  {
+    "name": "two_isolated_pairs_may_run_in_parallel",
+    "domain": "decision",
+    "input": {"request": "서로 격리된 작업자-검토자 팀 둘이 독립 작업을 맡는다.", "benefit_exceeds_coordination_cost": true, "paired_review_needed": true, "independent_pairs": true, "worker_reviewer_pair_count": 2},
+    "expected": {"intended_mode": "paired", "actual_team": true, "execution": "parallel_pairs", "intent_verdict": "pass", "review_verdict": null}
+  },
+  {
+    "name": "adjacent_cleanup_stays_native_with_intent_reject",
+    "domain": "decision",
+    "input": {"request": "요청 파일 수정 뒤 주변 정리도 계속한다.", "intent_signals": ["adjacent_work"], "smallest_valid_scope": ["requested file only"]},
+    "expected": {"intended_mode": "native", "actual_team": false, "execution": "direct", "intent_verdict": "reject", "review_verdict": null}
+  },
+  {
+    "name": "complete_evidence_is_accepted",
+    "domain": "review",
+    "input": {
+      "all_required_results_present": true,
+      "fresh_evidence": true,
+      "intent_preserved": true
+    },
+    "expected": {"status": "ACCEPT", "next": "complete"}
+  }
+]

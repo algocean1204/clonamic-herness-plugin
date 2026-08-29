@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "clonamic-herness-plugin",
-  "version": "0.2.0",
-  "description": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
+  "version": "0.3.0",
+  "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
   "author": {
     "name": "Clonamic"
   },
