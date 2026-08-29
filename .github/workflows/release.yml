@@ -36,7 +36,9 @@ jobs:
       - name: Checksum Windows binary
         if: runner.os == 'Windows'
         shell: pwsh
-        run: '"$((Get-FileHash -Algorithm SHA256 "${{ matrix.asset }}").Hash.ToLower())  ${{ matrix.asset }}" | Out-File -Encoding ascii "${{ matrix.asset }}.sha256"'
+        run: |
+          $hash = (Get-FileHash -Algorithm SHA256 "${{ matrix.asset }}").Hash.ToLower()
+          [IO.File]::WriteAllText("${{ matrix.asset }}.sha256", "$hash  ${{ matrix.asset }}`n", [Text.Encoding]::ASCII)
       - name: Upload release asset
         env:
           GH_TOKEN: ${{ github.token }}

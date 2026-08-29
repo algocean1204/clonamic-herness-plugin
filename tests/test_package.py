@@ -135,6 +135,8 @@ class PackageContractTest(unittest.TestCase):
         self.assertIn("actions/setup-python@v6", workflow)
         self.assertIn(".sha256", release)
         self.assertIn("Get-FileHash", release)
+        self.assertIn("WriteAllText", release)
+        self.assertNotIn("Out-File", release)
 
 
 if __name__ == "__main__":
