@@ -29,7 +29,7 @@ def detached_child_command(pid_file, exit_code=0, linger=False):
         "import pathlib,subprocess,sys,time; "
         f"child=subprocess.Popen([sys.executable,'-c',{child!r}],"
         "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,stdin=subprocess.DEVNULL); "
-        f"pathlib.Path({str(pid_file)!r}).write_text(str(child.pid)); "
+        f"pathlib.Path({str(pid_file)!r}).write_text(str(child.pid),encoding='utf-8'); "
         + ("time.sleep(30); " if linger else "")
         + f"sys.exit({exit_code})"
     )
@@ -171,7 +171,7 @@ class ValidationRunnerTest(unittest.TestCase):
                     )
                     wait_for_file(pid_file)
                     self.assertEqual(exit_code, status)
-                    assert_process_exits(self, int(pid_file.read_text()))
+                    assert_process_exits(self, int(pid_file.read_text(encoding="utf-8")))
 
     def test_interruption_cleanup_detached_child(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -188,7 +188,7 @@ class ValidationRunnerTest(unittest.TestCase):
                 cancel.set()
                 completed = result.result(timeout=5)
             self.assertEqual(130, completed.returncode)
-            assert_process_exits(self, int(pid_file.read_text()))
+            assert_process_exits(self, int(pid_file.read_text(encoding="utf-8")))
 
     @unittest.skipIf(os.name == "nt", "SIGINT delivery is POSIX-specific")
     def test_run_parallel_sigint_cleans_detached_child(self):
@@ -210,7 +210,7 @@ class ValidationRunnerTest(unittest.TestCase):
             os.kill(runner.pid, signal.SIGINT)
             runner.wait(timeout=5)
             self.assertNotEqual(0, runner.returncode)
-            assert_process_exits(self, int(pid_file.read_text()))
+            assert_process_exits(self, int(pid_file.read_text(encoding="utf-8")))
 
     def test_windows_cleanup_uses_a_kill_on_close_job_without_taskkill(self):
         source = (ROOT / "scripts" / "validate-public.py").read_text(encoding="utf-8")

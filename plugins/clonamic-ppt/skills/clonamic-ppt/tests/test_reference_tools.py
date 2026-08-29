@@ -199,7 +199,14 @@ class ReferenceToolTest(unittest.TestCase):
             report = json.loads((out / "qa_report.json").read_text(encoding="utf-8"))
             manifest = json.loads((out / "svg" / "manifest.json").read_text(encoding="utf-8"))
             self.assertTrue(manifest["qa_only"])
-            self.assertEqual(len(json.loads((out / "deck_ir.json").read_text())["slides"]), len(manifest["slides"]))
+            self.assertEqual(
+                len(
+                    json.loads(
+                        (out / "deck_ir.json").read_text(encoding="utf-8")
+                    )["slides"]
+                ),
+                len(manifest["slides"]),
+            )
             self.assertEqual(str(out / "svg"), report["artifacts"]["svg"])
             self.assertTrue((out / "presentation.pptx").is_file())
 
@@ -224,7 +231,9 @@ class ReferenceToolTest(unittest.TestCase):
                 capture_output=True,
             )
             self.assertEqual(0, proc.returncode, proc.stderr)
-            contracts = json.loads((out / "deck_ir.json").read_text())["reference_contracts"]
+            contracts = json.loads(
+                (out / "deck_ir.json").read_text(encoding="utf-8")
+            )["reference_contracts"]
             self.assertGreater(contracts["median_word_ceiling"], 0)
             for name in ("design_dna.json", "word_budget.json"):
                 self.assertTrue((out / "reference_contracts" / name).is_file())
@@ -340,7 +349,11 @@ class ReferenceToolTest(unittest.TestCase):
             )
 
     def test_svg_chart_contains_all_categories_names_and_values_and_parses(self):
-        deck = json.loads((ROOT / "assets/fixtures/reference_contract/deck_ir.json").read_text())
+        deck = json.loads(
+            (ROOT / "assets/fixtures/reference_contract/deck_ir.json").read_text(
+                encoding="utf-8"
+            )
+        )
         with tempfile.TemporaryDirectory() as temporary:
             manifest = render_ir_svg(deck, Path(temporary))
             for row in manifest["slides"]:
@@ -401,7 +414,7 @@ class ReferenceToolTest(unittest.TestCase):
                 capture_output=True,
                 timeout=10,
             )
-            payload = json.loads(report.read_text())
+            payload = json.loads(report.read_text(encoding="utf-8"))
         self.assertNotEqual(0, proc.returncode)
         self.assertGreater(payload["major"], 0)
         self.assertFalse(payload["pass"])
