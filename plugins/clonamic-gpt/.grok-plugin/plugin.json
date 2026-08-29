@@ -1,0 +1,11 @@
+{
+  "name": "clonamic-gpt",
+  "version": "0.1.0",
+  "description": "One bounded call through the installed Codex CLI.",
+  "license": "MIT",
+  "keywords": [
+    "gpt",
+    "executor",
+    "bounded-call"
+  ]
+}

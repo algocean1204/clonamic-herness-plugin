@@ -1,0 +1,29 @@
+{
+  "name": "clonamic-memory",
+  "version": "0.1.0",
+  "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "recall",
+    "forget",
+    "graph"
+  ],
+  "author": {
+    "name": "Clonamic"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Clonamic Memory",
+    "shortDescription": "Explicit local store, recall, forget, link, and bounded graph operations.",
+    "longDescription": "Explicit local store, recall, forget, link, and bounded graph operations.",
+    "developerName": "Clonamic",
+    "category": "Memory",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Use Clonamic Memory for this task."
+    ]
+  }
+}

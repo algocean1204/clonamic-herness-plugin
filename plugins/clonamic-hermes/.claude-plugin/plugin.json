@@ -1,0 +1,11 @@
+{
+  "name": "clonamic-hermes",
+  "version": "0.1.0",
+  "description": "One bounded call through the installed Hermes CLI.",
+  "license": "MIT",
+  "keywords": [
+    "hermes",
+    "executor",
+    "bounded-call"
+  ]
+}

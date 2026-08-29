@@ -1,20 +1,152 @@
 {
   "name": "clonamic",
-  "description": "Portable AI coding harness plugins from Clonamic",
+  "description": "Portable Agent Plugins from Clonamic",
   "owner": {
     "name": "Clonamic"
   },
   "plugins": [
     {
       "name": "clonamic-herness-plugin",
-      "description": "Approve writes once, verify completion, and keep agent output concise.",
+      "description": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
+      "version": "0.2.0",
+      "source": {
+        "type": "local",
+        "path": "./"
+      },
+      "category": "core",
+      "tags": [
+        "ai-harness",
+        "coding-agent",
+        "approval",
+        "verification",
+        "agents-md"
+      ]
+    },
+    {
+      "name": "clonamic-development",
+      "description": "Conservative modular design, patch discipline, and bounded native multi-agent review for software development.",
       "version": "0.1.0",
       "source": {
         "type": "local",
-        "path": "./plugins/clonamic-herness-plugin"
+        "path": "./plugins/clonamic-development"
       },
       "category": "development",
-      "tags": ["harness", "approval", "verification", "agents"]
+      "tags": [
+        "architecture",
+        "refactoring",
+        "verification",
+        "development"
+      ]
+    },
+    {
+      "name": "clonamic-korean",
+      "description": "Preservation-first clarity review and editing for Korean prose documents.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-korean"
+      },
+      "category": "writing",
+      "tags": [
+        "korean",
+        "documents",
+        "clarity",
+        "editing"
+      ]
+    },
+    {
+      "name": "clonamic-ppt",
+      "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-ppt"
+      },
+      "category": "presentation",
+      "tags": [
+        "presentation",
+        "pptx",
+        "slides",
+        "layout",
+        "qa"
+      ]
+    },
+    {
+      "name": "clonamic-preprocessing",
+      "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-preprocessing"
+      },
+      "category": "workflow",
+      "tags": [
+        "input",
+        "clarification",
+        "queue",
+        "loop-auto"
+      ]
+    },
+    {
+      "name": "clonamic-memory",
+      "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-memory"
+      },
+      "category": "memory",
+      "tags": [
+        "memory",
+        "recall",
+        "forget",
+        "graph"
+      ]
+    },
+    {
+      "name": "clonamic-gpt",
+      "description": "One bounded call through the installed Codex CLI.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-gpt"
+      },
+      "category": "executor",
+      "tags": [
+        "gpt",
+        "executor",
+        "bounded-call"
+      ]
+    },
+    {
+      "name": "clonamic-claude",
+      "description": "One bounded call through the installed Claude CLI.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-claude"
+      },
+      "category": "executor",
+      "tags": [
+        "claude",
+        "executor",
+        "bounded-call"
+      ]
+    },
+    {
+      "name": "clonamic-hermes",
+      "description": "One bounded call through the installed Hermes CLI.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-hermes"
+      },
+      "category": "executor",
+      "tags": [
+        "hermes",
+        "executor",
+        "bounded-call"
+      ]
     }
   ]
 }

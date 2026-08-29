@@ -1,7 +1,0 @@
-[
-  {"id": "read", "persistent_write": false, "specifications": 0, "approvals": 0},
-  {"id": "clear_write", "persistent_write": true, "specifications": 1, "approvals": 1},
-  {"id": "ambiguous_write", "persistent_write": true, "specifications": 2, "approvals": 2},
-  {"id": "approved_loop", "persistent_write": true, "additional_approvals": 0},
-  {"id": "false_done", "required_complete": false, "completion_allowed": false}
-]

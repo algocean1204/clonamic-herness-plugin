@@ -1,0 +1,6 @@
+interface:
+  display_name: "Clonamic Development Router"
+  short_description: "Select the smallest safe development method"
+  default_prompt: "Use $clonamic-development-router to route this development request proportionally."
+policy:
+  allow_implicit_invocation: true

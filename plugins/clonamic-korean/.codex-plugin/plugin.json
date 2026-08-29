@@ -1,0 +1,29 @@
+{
+  "name": "clonamic-korean",
+  "version": "0.1.0",
+  "description": "Preservation-first clarity review and editing for Korean prose documents.",
+  "license": "MIT",
+  "keywords": [
+    "korean",
+    "documents",
+    "clarity",
+    "editing"
+  ],
+  "author": {
+    "name": "Clonamic"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Clonamic Korean",
+    "shortDescription": "Preservation-first clarity review and editing for Korean prose documents.",
+    "longDescription": "Preservation-first clarity review and editing for Korean prose documents.",
+    "developerName": "Clonamic",
+    "category": "Writing",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Use Clonamic Korean for this task."
+    ]
+  }
+}

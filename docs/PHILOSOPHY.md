@@ -1,35 +1,49 @@
 # Philosophy
 
-Clonamic exists to remove friction from AI-assisted work. A control that slows ordinary reading, repeats a decision, or silently changes the user's machine is a defect.
+Clonamic removes process that does not protect the user. Reading should be fast. Persistent changes should be deliberate. Completion should be observed.
 
-## Trust the model where judgment helps
+## Reads stay direct
 
-The model decides how much to inspect, which implementation fits the project, whether a request is ambiguous, and what evidence proves the result. Static rules should not prescribe every file, command, or reasoning step.
+Questions, explanations, opinions, inspection, review, and status checks go straight to the host's native path. They do not create a specification, approval request, plan file, or workflow report.
 
-Deterministic code is reserved for boundaries where a wrong guess has a concrete cost: persistent writes, destructive commands, secret exposure, external side effects, rollback, and completion evidence.
+## Writes get one proportional decision
 
-## Reads are free; writes are deliberate
+A tiny precise write needs a tiny packet. A clear non-trivial write needs one development specification. A work specification appears only when intent is materially ambiguous and must be locked before implementation choices are made.
 
-Questions, opinions, explanations, status checks, review, and inspection do not need a specification. A persistent write receives the smallest useful packet. Clear writes need one development packet. A separate work packet exists only when the user's intent must be locked before analysis.
+The user approves the packet once. That decision covers the named inspect, fix, retest, apply, deploy, and backup loop. A command boundary or failed test does not create another approval gate. Scope, authority, output, or risk must materially change before another decision is needed.
 
-Approval is a decision correlation mechanism. It is not a password. Formatting differences do not invalidate the decision, and one approved packet covers the complete test/fix/apply loop.
+Approval codes correlate a packet. They are not authentication. Credentials and platform permission prompts stay with the platform.
 
-## Broad capability, narrow activation
+## Approved loops finish the work
 
-The plugin ships several capabilities, but it loads only the module needed for the current stage. The always-on router is three lines. Domain procedures, external executors, architecture design, and heavy verification stay dormant until selected.
+After approval, the agent continues inside the accepted boundary until every required item passes or a real user-only or external blocker remains. It does not stop merely because the first patch compiled, one test failed, or another safe correction round is needed.
 
-## Explicit executor control
+## Packages load narrowly
 
-The current agent works by default. Grok, Codex, Claude, and Hermes are available through explicit slash commands. The harness never chooses another model because a task is large, repetitive, or expensive.
+The core owns routing, write control, completion, reporting, and market selection. Optional packages own domain behavior. The market can select a package, but it cannot assume installation or enable a child on the user's behalf.
 
-## Completion is observed
+Development stays native for ordinary work. Modular design, Supercoder, and Ultracode activate only when their evidence gates pass. Ultracode needs native isolated agents and a costly unresolved decision. Task size alone does nothing.
 
-Before reporting completion, the agent compares the user's required items with current artifacts, fresh tests, applied state, and remote state when relevant. Missing work continues. A repeated real blocker is reported as a blocker, not hidden behind a completion sentence.
+External executors are simpler: the user names one, or none runs. No automatic provider choice, same-provider recursion, retry chain, or quiet substitution.
 
-## The user's environment is not ours
+## Memory is explicit
 
-Installation is additive and reversible. Existing model settings, plugins, MCP servers, credentials, memory, sessions, and project files stay untouched. Removal restores the managed router change and leaves unrelated user edits in place.
+Memory runs only on an explicit store, recall, forget, link, or graph request. Its database path comes from the caller. Recalled text is data and never enters unrelated work automatically.
 
-## Reports carry decisions, not process narration
+Preprocessing follows the same rule. Queues and `loop_auto` use explicit paths and explicit opt-in.
 
-The first line states the result. Failures and unverified items appear first. Evidence uses commands, counts, hashes, or file locations. Tool order and repeated conclusions are omitted.
+## Completion needs current evidence
+
+A completion claim compares every required item with current artifacts, applied or remote state, and evidence gathered after the last mutation. Exit status proves process exit. It does not prove the requested state.
+
+Unmet work continues when it can. A real repeated blocker is reported as a blocker.
+
+## Reports start with the result
+
+The first line states the outcome and one useful number or cause. Failures and unverified required items appear first. A report with four or more non-blank lines is one flat list. Tool order and repeated summaries are omitted.
+
+`clonamic-korean` does not rewrite those reports. Its scope is Korean prose documents, not host workflow output.
+
+## The user's machine stays theirs
+
+Installation is additive and reversible. Clonamic does not collect telemetry, import credentials, copy provider sessions, choose model IDs, create hidden memory, or preserve private paths in public artifacts. Generated adapters translate host formats and carry no policy of their own.

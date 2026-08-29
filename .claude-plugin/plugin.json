@@ -1,0 +1,18 @@
+{
+  "name": "clonamic-herness-plugin",
+  "version": "0.2.0",
+  "description": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
+  "author": {
+    "name": "Clonamic"
+  },
+  "homepage": "https://github.com/algocean1204/clonamic-herness-plugin",
+  "repository": "https://github.com/algocean1204/clonamic-herness-plugin",
+  "license": "MIT",
+  "keywords": [
+    "ai-harness",
+    "coding-agent",
+    "approval",
+    "verification",
+    "agents-md"
+  ]
+}

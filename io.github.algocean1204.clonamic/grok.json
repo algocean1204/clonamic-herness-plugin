@@ -1,0 +1,71 @@
+{
+  "namespace": "io.github.algocean1204.clonamic",
+  "platform": "grok",
+  "catalog": "../catalog/plugins.json",
+  "plugins": [
+    {
+      "manifest": "../plugin.json",
+      "name": "clonamic-herness-plugin",
+      "description": "Portable judgment, write approval, completion verification, and concise reporting for AI coding agents.",
+      "version": "0.2.0",
+      "nativeManifest": "../.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-development/plugin.json",
+      "name": "clonamic-development",
+      "description": "Conservative modular design, patch discipline, and bounded native multi-agent review for software development.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-development/.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-korean/plugin.json",
+      "name": "clonamic-korean",
+      "description": "Preservation-first clarity review and editing for Korean prose documents.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-korean/.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-ppt/plugin.json",
+      "name": "clonamic-ppt",
+      "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-ppt/.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-preprocessing/plugin.json",
+      "name": "clonamic-preprocessing",
+      "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-preprocessing/.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-memory/plugin.json",
+      "name": "clonamic-memory",
+      "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-memory/.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-gpt/plugin.json",
+      "name": "clonamic-gpt",
+      "description": "One bounded call through the installed Codex CLI.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-gpt/.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-claude/plugin.json",
+      "name": "clonamic-claude",
+      "description": "One bounded call through the installed Claude CLI.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-claude/.grok-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-hermes/plugin.json",
+      "name": "clonamic-hermes",
+      "description": "One bounded call through the installed Hermes CLI.",
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-hermes/.grok-plugin/plugin.json"
+    }
+  ],
+  "marketplace": "../.grok-plugin/marketplace.json"
+}

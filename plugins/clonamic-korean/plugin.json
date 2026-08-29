@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "clonamic-korean",
+  "version": "0.1.0",
+  "description": "Preservation-first clarity review and editing for Korean prose documents.",
+  "license": "MIT",
+  "keywords": ["korean", "documents", "clarity", "editing"]
+}

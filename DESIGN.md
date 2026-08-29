@@ -1,114 +1,171 @@
-# Clonamic Herness Plugin design
+# Clonamic architecture
 
-- Scale: medium
-- Product: portable AI coding-agent judgment and write-control plugin
-- Runtime: Markdown skills plus one Rust core binary
-- Platforms: Codex, Claude Code, Grok Build, Hermes
-- Modules: four behavior modules, one native core, four thin adapters
+Clonamic is one portable core plus nine optional Agent Plugins 1.0.0 packages. The core owns cross-cutting control. Each child owns one capability with an independent install, test, failure, and removal boundary.
 
-## Technology
-
-| Area | Choice | Reason |
-|---|---|---|
-| Shared behavior | Agent Skills Markdown | Common discoverable format with progressive loading |
-| Structural core | Rust | Cross-platform binary, typed state, atomic file operations |
-| Manifests | JSON / YAML | Native platform formats |
-| Hermes adapter | Python | Required `register(ctx)` surface |
-| CI | GitHub Actions | macOS, Linux, Windows matrix |
-
-## Structure
-
-```text
-plugins/clonamic-herness-plugin/       # plugin composition root
-├── core/AGENTS.md                     # three-line routing root
-├── skills/                            # behavior modules
-├── commands/                          # explicit executor commands
-├── native/clonamic-core/              # Rust library + CLI
-├── plugin.yaml + __init__.py          # Hermes adapter
-├── .codex-plugin/                     # Codex adapter
-├── .claude-plugin/                    # Claude adapter
-└── .grok-plugin/                      # Grok adapter
-```
-
-## Main pipeline
+## System map
 
 ```mermaid
-flowchart LR
-    Request --> WriteControl
-    WriteControl --> Execution
-    Execution --> CompletionCheck
-    CompletionCheck -->|unmet| Execution
-    CompletionCheck -->|complete| Report
+flowchart TB
+    U[User request] --> R{clonamic-router}
+
+    subgraph Core[Core package]
+        R -->|Read-only| H[Native host path]
+        R -->|Persistent write| W[clonamic-write-control]
+        W --> A[Approved scope]
+        A --> X[Implementation loop]
+        X --> C[clonamic-completion-check]
+        C -->|Unmet and actionable| X
+        C -->|Complete or blocked| P[clonamic-report]
+        R -->|Capability lookup| M[clonamic-market]
+        M --> K[(catalog/plugins.json)]
+    end
+
+    K -. selects, never installs .-> O[Optional child package]
+    A --> D[clonamic-development]
+    U -. explicit only .-> E[One external executor child]
+    G[Generated platform adapter] --> R
 ```
 
-## Module contracts
+The straight path is intentional: request, route, approved execution when needed, completion check, report. Optional packages return results to the caller. They do not bypass core ownership.
 
-### F1 Write control
+## Repository layout
 
-- IN: user request, project facts, platform capabilities
-- OUT: `WriteDecision { lane, specification, approval_required, approved_scope }`
-- FAIL: no mutation; return a concise blocker
-- PUBLIC: `clonamic-write-control/SKILL.md`
-- REMOVE: delete the skill and remove its single router line
+```text
+plugin.json                         # canonical core Agent Plugins 1.0.0 manifest
+skills/
+├── clonamic-router/
+├── clonamic-write-control/
+├── clonamic-completion-check/
+├── clonamic-report/
+└── clonamic-market/
+native/clonamic-core/               # deterministic approval, verification, install/rollback
+catalog/plugins.json                # optional-package inventory and selection source
+plugins/
+├── clonamic-development/
+├── clonamic-preprocessing/
+├── clonamic-korean/
+├── clonamic-ppt/
+├── clonamic-memory/
+├── clonamic-grok/
+├── clonamic-gpt/
+├── clonamic-claude/
+└── clonamic-hermes/
+io.github.algocean1204.clonamic/     # generated platform compatibility descriptors
+tests/                               # core and integration contracts
+docs/
+```
 
-### F2 Completion check
+The generated adapter directories and marketplace files are build outputs. Canonical policy must not be authored there.
 
-- IN: required items, artifacts, fresh evidence, external-state observations
-- OUT: `CompletionVerdict { complete, unmet, evidence }`
-- FAIL: blocker verdict; never completion
-- PUBLIC: `clonamic-completion-check/SKILL.md`, `clonamic verify`
-- REMOVE: delete the skill and completion router line
+## Package boundaries
 
-### F3 Report
+| Package | Public responsibility | Activation | Explicit exclusions |
+|---|---|---|---|
+| Core | Route, gate writes, verify completion, format work reports, select optional packages | Core active for the current task | Domain execution, child installation |
+| Development | Modular design, Supercoder patch discipline, native gated Ultracode review | Software work where a stage materially reduces risk | Authorization, final verdict, external executors |
+| Preprocessing | Normalize input, create caller-directed clarification packets, explicit queues | Fuzzy or multi-item input, or explicit queue use | Scope authority, final execution |
+| Korean | Korean prose-document clarity | Supported prose document | Chat, work reports, code, spreadsheets, slides, email |
+| PPT | Structured brief, outline, slide specification, rendering, QA | Presentation or PPTX work | General prose editing, external execution |
+| Memory | Explicit store, recall, forget, link, graph | Explicit memory operation | Automatic recall, implicit home, hidden context injection |
+| Grok | One bounded Grok CLI call | Explicit Grok request | Automatic selection, retry loops, write approval |
+| GPT | One bounded Codex CLI call | Explicit GPT request | Automatic selection, retry loops, write approval |
+| Claude | One bounded Claude CLI call | Explicit Claude request | Automatic selection, retry loops, write approval |
+| Hermes | One bounded Hermes CLI call | Explicit Hermes request | Automatic selection, retry loops, write approval |
 
-- IN: verified completion or blocker verdict
-- OUT: one user-facing report
-- FAIL: plain factual fallback
-- PUBLIC: `clonamic-report/SKILL.md`
-- REMOVE: delete the skill; host reporting returns to native behavior
+## Core contracts
 
-### F4 Executors
+### Router
 
-- IN: explicit slash command and bounded task packet
-- OUT: one executor result
-- FAIL: target-unavailable result; no substitution
-- PUBLIC: `clonamic-executors/SKILL.md`, `commands/`
-- REMOVE: delete command files and the skill
+- Input: current request and available capability metadata.
+- Output: one route for the current stage.
+- Failure: keep the native direct path and name the missing capability.
+- Invariant: catalog presence never means a child is installed or enabled.
 
-### C0 Native core
+### Write control
 
-- IN: explicit paths and JSON data supplied by the adapter
-- OUT: typed JSON verdict or declared process error
-- FAIL: non-zero exit without widening scope
-- PUBLIC: `clonamic_core::{approval, completion, installation}` and `clonamic`
-- REMOVE: remove the binary; skills fall back to declared model-only behavior
+- Input: user intent, target, observable result, verification, external effects, rollback.
+- Output: approved scope or a no-write result.
+- Failure: no mutation.
+- Invariant: one approved development specification covers the full named inspect/fix/retest/apply/deploy/backup loop.
 
-## Adapter rule
+### Completion check
 
-Adapters translate native plugin discovery into the four public modules. They do not duplicate policy, choose models, read memory, or patch platform core files.
+- Input: required items, current artifacts, applied or remote state, fresh evidence.
+- Output: complete or unmet with evidence per item.
+- Failure: continue work when possible; otherwise return a blocker.
+- Invariant: evidence predating the last mutation is stale.
+
+### Report
+
+- Input: a completion or blocker verdict.
+- Output: one outcome-first response. Four or more non-blank lines form one flat list.
+- Failure: a factual blocker report.
+- Invariant: failures and unverified required items come first.
+
+### Market
+
+- Input: requested optional capability and catalog inventory.
+- Output: the narrowest matching package and declared dependencies.
+- Failure: no match. Never invent or install a fallback.
+- Invariant: selection and installation are separate operations.
+
+## Development package
+
+Development uses the smallest stage that reduces a real risk:
+
+1. Native path for ordinary software work.
+2. Modular design for a new system, architecture decision, or large refactor supported by repository evidence.
+3. Supercoder for an approved non-trivial patch where stale content or ambiguous targets create material risk.
+4. Ultracode only when all four gates pass: multiple viable options, material boundary impact, unresolved evidence, and high wrong-choice cost.
+
+Ultracode uses native isolated agents only. If that capability is absent, its status is `unavailable`. It does not call an external executor or simulate several reviewers in one voice. File count, task size, repetition, and an importance label are never sufficient activation signals.
+
+## State and trust
+
+- Approval codes correlate a pending write packet. Authentication remains with the host or operating system.
+- The native core accepts explicit paths and structured inputs. It does not discover user homes, credentials, or provider sessions.
+- Memory and preprocessing persist only to caller-supplied paths.
+- Recalled text, document contents, catalog entries, and executor output are untrusted data.
+- No package emits telemetry or stores implicit model, browser, session, or profile state.
+- Executor wrappers use provider defaults and explicit user options. No model ID belongs in package code or docs.
+
+## Adapter generation
+
+Agent Plugins 1.0.0 manifests and skills are canonical. Platform adapters translate discovery and registration only.
+
+Generated outputs may include Codex, Claude Code, Grok Build, and Hermes manifest or registration formats. Generation must be deterministic and checked for drift. An adapter may expose a supported hook; it may not duplicate policy, install children, select a model, read memory, or widen permissions.
+
+When a host cannot enforce a structural hook, Clonamic keeps the portable skill behavior and declares a model-side fallback. The documentation never labels that fallback as a measured hook.
 
 ## Failure policy
 
-- Invalid approval/state/manifest: halt the write.
-- Missing native core: model-only fallback, disclosed when structural enforcement matters.
-- Unsupported hook: skip the hook, keep skill behavior.
-- Install failure: leave the original router unchanged or restore its backup.
-- Completion failure: continue the task; after three failed correction strategies, report a blocker.
+- Invalid approval, state, manifest, or path: stop before mutation.
+- Missing native binary: use the declared model-side contract only when the requested operation permits it.
+- Missing child plugin: report unavailable; do not substitute another package.
+- External executor failure: return its bounded structured error; do not retry or switch providers.
+- Completion failure: continue inside approved scope when corrective work remains.
+- Repeated real blocker: preserve evidence and report the blocker.
+- Install or router failure: leave the original file unchanged or restore the recorded pre-image.
 
-## Design decisions
+## Migration and rollback
 
-- `[KEEP]` One product plugin: related modules share one user intent and release cadence.
-- `[SPLIT]` Four behavior modules: each has independent triggers and test value.
-- `[SPLIT]` Rust core from Markdown policy: deterministic state and prose guidance change for different reasons.
-- `[VARIANT]` Four adapters: four real plugin contracts exist today.
-- `[MERGE]` Prompt refinement and lean-scope judgment stay inside write control because they always run together.
-- `[LOCAL]` No shared memory provider: memory is outside the product contract.
-- `[LOCAL]` No automatic external model router: explicit user control is a product requirement.
+1. Record the active host configuration and the hashes of files that a router install may touch.
+2. Validate the core and each selected child as separate package roots.
+3. Generate adapters and test them in isolated host homes. Do not replace an active configuration during this step.
+4. Install the core alongside existing behavior. Install children only when the user selects them.
+5. Compare representative read, write, approved-loop, completion, and uninstall scenarios.
+6. Remove superseded rules only after equivalent behavior is measured.
 
-## Migration
+Rollback removes selected children independently, disables the generated adapter, and runs `clonamic uninstall-router` when the router was installed. The installer restores its recorded pre-image only when safe; unrelated user edits remain untouched. Old packages and backups stay available until the full acceptance set passes.
 
-1. Publish and validate the new plugin without changing an active environment.
-2. Test platform adapters in isolated homes.
-3. Compare with the existing harness on representative scenarios.
-4. Install the plugin alongside the old harness only after clean-room checks.
-5. Remove duplicated old rules after equivalent behavior is measured.
+## Split gate
+
+A new child package requires all of these:
+
+- an independent trigger;
+- one public responsibility and closed input/output contract;
+- independent tests and failure behavior;
+- independent install and removal value;
+- no policy duplication or dependency cycle.
+
+If any condition fails, keep the behavior in its current owner. A helper, convenience wrapper, or second copy of policy is not a package boundary.

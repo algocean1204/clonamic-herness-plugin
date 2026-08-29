@@ -1,0 +1,28 @@
+{
+  "name": "clonamic-gpt",
+  "version": "0.1.0",
+  "description": "One bounded call through the installed Codex CLI.",
+  "license": "MIT",
+  "keywords": [
+    "gpt",
+    "executor",
+    "bounded-call"
+  ],
+  "author": {
+    "name": "Clonamic"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Clonamic GPT",
+    "shortDescription": "One bounded call through the installed Codex CLI.",
+    "longDescription": "One bounded call through the installed Codex CLI.",
+    "developerName": "Clonamic",
+    "category": "Executor",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Use Clonamic GPT for this task."
+    ]
+  }
+}

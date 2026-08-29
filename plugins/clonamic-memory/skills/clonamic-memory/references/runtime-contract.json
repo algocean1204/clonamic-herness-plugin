@@ -1,0 +1,8 @@
+{
+  "public_surface": "scripts/memory.py",
+  "operations": ["store", "recall", "forget", "link", "graph"],
+  "memory_fields": ["id", "content", "tags", "created_at", "updated_at"],
+  "edge_fields": ["source", "target", "relation"],
+  "graph_bounds": {"max_depth": 4, "max_nodes": 100},
+  "path_policy": "Every database path is supplied by the caller."
+}

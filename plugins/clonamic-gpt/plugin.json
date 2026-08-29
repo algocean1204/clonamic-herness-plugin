@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "clonamic-gpt",
+  "version": "0.1.0",
+  "description": "One bounded call through the installed Codex CLI.",
+  "license": "MIT",
+  "keywords": ["gpt", "executor", "bounded-call"]
+}

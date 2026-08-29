@@ -1,0 +1,28 @@
+{
+  "name": "clonamic-hermes",
+  "version": "0.1.0",
+  "description": "One bounded call through the installed Hermes CLI.",
+  "license": "MIT",
+  "keywords": [
+    "hermes",
+    "executor",
+    "bounded-call"
+  ],
+  "author": {
+    "name": "Clonamic"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Clonamic Hermes",
+    "shortDescription": "One bounded call through the installed Hermes CLI.",
+    "longDescription": "One bounded call through the installed Hermes CLI.",
+    "developerName": "Clonamic",
+    "category": "Executor",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Use Clonamic Hermes for this task."
+    ]
+  }
+}
