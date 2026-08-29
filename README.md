@@ -3,7 +3,7 @@
 [![CI](https://github.com/algocean1204/clonamic-herness-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/algocean1204/clonamic-herness-plugin/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Clonamic keeps read-only and small precise work on the native path, bounds non-trivial work against user intent, creates a worker-and-verifier team only when its value exceeds its coordination cost, puts one proportional gate in front of persistent writes, and verifies required outcomes before reporting completion. The repository ships one required Core Harness package and nine optional Agent Plugins 1.0.0 capability packages.
+Clonamic keeps read-only and small precise work on the native path, bounds non-trivial work against user intent, creates a worker-and-verifier team only when its value exceeds its coordination cost, puts one proportional gate in front of persistent writes, and verifies required outcomes before reporting completion. The repository ships one required Core Harness package and twelve optional Agent Plugins 1.0.0 capability packages.
 
 한국어 요약: 질문과 읽기는 바로 처리합니다. 실제 쓰기는 범위에 맞는 승인 한 번만 받고, 승인된 수정·검증 루프는 필요한 결과가 나올 때까지 자율적으로 이어갑니다. 완료 보고는 결과와 증거를 먼저 보여 주는 평면 목록입니다.
 
@@ -12,9 +12,12 @@ Clonamic keeps read-only and small precise work on the native path, bounds non-t
 | Package | Owns | Does not own |
 |---|---|---|
 | `clonamic-herness-plugin` | Routing, intent guard, proportional team control, write control, completion checks, outcome-first reports, market selection | Domain work, child installation |
-| `clonamic-development` | Modular design, conservative patching, native gated Ultracode review | Approval, completion, external executors |
+| `clonamic-code-plugin` | Proportional coding, safe patching, modular design, explicit Ultracode | Approval, completion, external executor selection |
 | `clonamic-preprocessing` | Input normalization, clarification packets, explicit queues and `loop_auto` | Scope inference, final execution |
-| `clonamic-korean` | Korean prose-document clarity | Chat, work reports, code, spreadsheets, slides, email |
+| `clonamic-writing-plugin` | Publication writing, Korean clarity, deterministic cleanup | Work reports, code, spreadsheets, slides, email |
+| `clonamic-design-plugin` | Optional frontend, Figma, color, theme, browser QA, visual media | Core coding policy |
+| `clonamic-data-plugin` | Optional dataset and Hugging Face workflows | General coding policy |
+| `clonamic-documents-plugin` | Optional HWPX and document-specialist workflows | General artifact runtimes |
 | `clonamic-ppt` | Editable presentation rendering and QA | General document editing, external execution |
 | `clonamic-memory` | Explicit local store, recall, forget, link, and graph operations | Automatic context injection, hidden storage |
 | `clonamic-grok` | One explicit bounded Grok CLI call | Automatic routing, retries, completion claims |
@@ -22,14 +25,14 @@ Clonamic keeps read-only and small precise work on the native path, bounds non-t
 | `clonamic-claude` | One explicit bounded Claude CLI call | Automatic routing, retries, completion claims |
 | `clonamic-hermes` | One explicit bounded Hermes CLI call | Automatic routing, retries, completion claims |
 
-Every child has its own root `plugin.json`, skill directory, MIT license, tests, and removal boundary. Core has no off switch in `clonamic.json`. In a host that calls the resolver, optional toggles control routing eligibility; they neither install a missing package nor unload a package from the host process.
+Every child has its own root `plugin.json`, skill directory, package license, tests, and removal boundary. The Clonamic-authored package layer is MIT; vendored or modified skill assets retain their included license and notice files listed in [third-party notices](THIRD_PARTY_NOTICES.md). Core has no off switch in `clonamic.json`. In a host that calls the resolver, optional toggles control routing eligibility; they neither install a missing package nor unload a package from the host process.
 
 ## Operating contract
 
 | Request | Route |
 |---|---|
 | Question, explanation, inspection, review, or status | Direct host response. No specification or approval. |
-| Small precise mutation | Direct native execution with write control. No team or root-guidance load. |
+| Small precise mutation | One-line write packet, one approval, then direct native execution. No team or root-guidance load. |
 | Non-trivial mutation or real team decision | Load the canonical root guidance once, bound intent, then choose native or team execution. |
 | Clear persistent write | One compact development specification and one approval. |
 | Materially ambiguous persistent write | Work specification to lock intent, then one development specification before mutation. |
@@ -40,7 +43,7 @@ Every child has its own root `plugin.json`, skill directory, MIT license, tests,
 | External executor | Only the executor explicitly named by the user. No substitution. |
 | Trusted automation | Use its preapproved grant without conversational approval; scope drift returns noninteractive `needs_authorization`. |
 
-Approval codes correlate a decision with its write packet. They are not passwords or authentication factors. Password, OAuth, biometric, operating-system, and platform prompts remain outside Clonamic.
+Approval codes correlate a decision with its write packet. They are not passwords or authentication factors. Plain `승인` selects the sole pending packet; when several packets are pending, `승인:ABC123` selects one. Backticks, whitespace, a fullwidth colon, and lowercase codes are accepted. Password, OAuth, biometric, operating-system, and platform prompts remain outside Clonamic.
 
 Team selection is prospective. A later worker defect, missing evidence, or false completion rejects the result but never retroactively creates a team. Within each pair, the worker finishes before its reviewer starts; only two or more isolated pairs may run in parallel, and same-file work is serialized. A second tier is `main → lead → specialists`: the lead assigns and reviews but neither executes nor integrates, one assigned specialist owns integration, and the verdict waits for every specialist result plus fresh evidence. Without native subagents, `actual_team` remains false and the host may perform only a disclosed local sequential second pass, not independent review.
 
@@ -101,7 +104,7 @@ grok plugin install algocean1204/clonamic-herness-plugin --trust
 hermes plugins install algocean1204/clonamic-herness-plugin --enable
 ```
 
-Review source before using `--trust` or `--enable`. Codex and Claude can install an optional child by its catalog name. Grok accepts a repository subdirectory selector such as `algocean1204/clonamic-herness-plugin#plugins/clonamic-development`. Hermes installs the portable root; child-package availability depends on the installed Hermes release and is not claimed without a host measurement.
+Review source before using `--trust` or `--enable`. Codex and Claude can install an optional child by its catalog name. Grok accepts a repository subdirectory selector such as `algocean1204/clonamic-herness-plugin#plugins/clonamic-code-plugin`. Hermes installs the portable root; child-package availability depends on the installed Hermes release and is not claimed without a host measurement.
 
 Agent Plugins 1.0.0 clients load the repository root for the core package:
 
@@ -116,9 +119,12 @@ Agent Plugins 1.0.0 portably discovers only immediate `skills/*/SKILL.md` compon
 Optional packages are separate roots under `plugins/`:
 
 ```text
-plugins/clonamic-development/
+plugins/clonamic-code-plugin/
 plugins/clonamic-preprocessing/
-plugins/clonamic-korean/
+plugins/clonamic-writing-plugin/
+plugins/clonamic-design-plugin/
+plugins/clonamic-data-plugin/
+plugins/clonamic-documents-plugin/
 plugins/clonamic-ppt/
 plugins/clonamic-memory/
 plugins/clonamic-grok/
@@ -129,7 +135,7 @@ plugins/clonamic-hermes/
 
 The root market can identify the package that matches a request. Agent Plugins 1.0.0 does not define portable child-plugin installation, so the host or user still installs and enables each selected child.
 
-`clonamic.json` is the configuration input for hosts that integrate the Clonamic resolver. The shipped file has `schema_version: 1` and enables all nine optional packages. Callers pass the shipped default, user overlay, and project overlay as explicit paths. The resolver merges them in that order, so project values win. User and project files may contain only the toggles they change. An invalid present layer fails closed to Core-only operation.
+`clonamic.json` is the configuration input for hosts that integrate the Clonamic resolver. The shipped file has `schema_version: 1` and lists all twelve optional packages. Callers pass the shipped default, user overlay, and project overlay as explicit paths. The resolver merges them in that order, so project values win. User and project files may contain only the toggles they change. An invalid present layer fails closed to Core-only operation.
 
 The resolver reports `configured`, `installed`, `platform_supported`, `dependencies_ready`, `effective`, and `reason` for every package. An optional package becomes effective only when all four dimensions permit it. `enabled_but_unavailable` means the toggle is on but installation, platform support, or a dependency prevents use. A vendor-neutral or special-purpose host uses the `agent-plugins` platform identifier, keeps Core active, passes its installed-package set and configuration layers to `clonamic resolve-plugins`, then exposes only optional roots whose `effective` value is true.
 
@@ -152,7 +158,7 @@ clonamic resolve-plugins <catalog.json> <plugin-root> <default.json|-> <user.jso
 
 ```json
 {
-  "installed": ["clonamic-development", "clonamic-memory", "clonamic-ppt"]
+  "installed": ["clonamic-code-plugin", "clonamic-memory", "clonamic-ppt"]
 }
 ```
 

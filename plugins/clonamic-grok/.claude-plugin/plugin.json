@@ -2,6 +2,9 @@
   "name": "clonamic-grok",
   "version": "0.1.0",
   "description": "One bounded call through the installed Grok CLI.",
+  "author": {
+    "name": "Clonamic"
+  },
   "license": "MIT",
   "keywords": [
     "grok",

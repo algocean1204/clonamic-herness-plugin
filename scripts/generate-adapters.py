@@ -47,6 +47,35 @@ NATIVE_METADATA_FIELDS = (
     "license",
     "keywords",
 )
+EXECUTOR_TEMPLATE = ROOT / "scripts" / "executor_call_template.py"
+EXECUTOR_PROVIDERS = {
+    "clonamic-gpt": {
+        "executor": "clonamic-gpt",
+        "executable": "codex",
+        "arguments": ["exec", "--ephemeral", "--sandbox", "read-only", "{cli_args}", "{prompt}"],
+    },
+    "clonamic-grok": {
+        "executor": "clonamic-grok",
+        "executable": "grok",
+        "arguments": [
+            "--permission-mode", "plan", "--disable-web-search", "--no-subagents",
+            "--tools", "", "{cli_args}", "-p", "{prompt}",
+        ],
+    },
+    "clonamic-claude": {
+        "executor": "clonamic-claude",
+        "executable": "claude",
+        "arguments": [
+            "-p", "--no-session-persistence", "--permission-mode", "plan", "--tools", "",
+            "{cli_args}", "{prompt}",
+        ],
+    },
+    "clonamic-hermes": {
+        "executor": "clonamic-hermes",
+        "executable": "hermes",
+        "arguments": ["{cli_args}", "--ignore-rules", "-z", "{prompt}", "-t", ""],
+    },
+}
 
 
 class CatalogError(ValueError):
@@ -341,6 +370,12 @@ def expected_outputs():
             outputs[native_manifest_path(entry["manifest"], platform)] = render(
                 minimal_native_manifest(manifest)
             )
+    template = EXECUTOR_TEMPLATE.read_text(encoding="utf-8")
+    for name, provider in EXECUTOR_PROVIDERS.items():
+        payload = json.dumps(provider, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        outputs[
+            ROOT / "plugins" / name / "skills" / name / "scripts" / "call.py"
+        ] = template.replace("__CLONAMIC_PROVIDER__", payload)
     return outputs
 
 

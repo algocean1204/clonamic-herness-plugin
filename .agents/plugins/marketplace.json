@@ -17,10 +17,10 @@
       "category": "core"
     },
     {
-      "name": "clonamic-development",
+      "name": "clonamic-code-plugin",
       "source": {
         "source": "local",
-        "path": "./plugins/clonamic-development"
+        "path": "./plugins/clonamic-code-plugin"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -29,16 +29,52 @@
       "category": "development"
     },
     {
-      "name": "clonamic-korean",
+      "name": "clonamic-writing-plugin",
       "source": {
         "source": "local",
-        "path": "./plugins/clonamic-korean"
+        "path": "./plugins/clonamic-writing-plugin"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "writing"
+    },
+    {
+      "name": "clonamic-design-plugin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/clonamic-design-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "design"
+    },
+    {
+      "name": "clonamic-data-plugin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/clonamic-data-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "data"
+    },
+    {
+      "name": "clonamic-documents-plugin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/clonamic-documents-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "documents"
     },
     {
       "name": "clonamic-ppt",

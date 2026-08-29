@@ -4,5 +4,6 @@
   "version": "0.1.0",
   "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
   "license": "MIT",
+  "author": {"name": "Clonamic"},
   "keywords": ["input", "clarification", "queue", "loop-auto"]
 }

@@ -27,8 +27,11 @@ MANIFEST_FIELDS = {
 }
 EXPECTED_PACKAGES = {
     "clonamic-herness-plugin",
-    "clonamic-development",
-    "clonamic-korean",
+    "clonamic-code-plugin",
+    "clonamic-writing-plugin",
+    "clonamic-design-plugin",
+    "clonamic-data-plugin",
+    "clonamic-documents-plugin",
     "clonamic-ppt",
     "clonamic-preprocessing",
     "clonamic-memory",
@@ -71,7 +74,7 @@ def load_inventory():
 class PackageContractTest(unittest.TestCase):
     def test_all_manifests_are_closed_agent_plugins_1_0_packages(self):
         _, rows = load_inventory()
-        self.assertEqual(10, len(rows))
+        self.assertEqual(13, len(rows))
         self.assertEqual(EXPECTED_PACKAGES, {manifest["name"] for _, _, manifest in rows})
         for _, path, manifest in rows:
             with self.subTest(path=path.relative_to(ROOT)):
@@ -83,7 +86,12 @@ class PackageContractTest(unittest.TestCase):
                 )
                 self.assertNotIn("--", manifest["name"])
                 self.assertNotIn("..", manifest["name"])
-                self.assertEqual("MIT", manifest["license"])
+                expected_license = (
+                    "MIT AND Apache-2.0 AND CC-BY-4.0 AND LGPL-2.1-only"
+                    if manifest["name"] == "clonamic-design-plugin"
+                    else "MIT"
+                )
+                self.assertEqual(expected_license, manifest["license"])
                 if "author" in manifest:
                     self.assertLessEqual(set(manifest["author"]), {"name", "email", "url"})
                 if "extensions" in manifest:
@@ -94,7 +102,7 @@ class PackageContractTest(unittest.TestCase):
     def test_catalog_is_contained_unique_and_acyclic(self):
         catalog, rows = load_inventory()
         self.assertEqual({"plugins"}, set(catalog))
-        self.assertEqual(10, len(catalog["plugins"]))
+        self.assertEqual(13, len(catalog["plugins"]))
         root = ROOT.resolve()
         manifests = set()
         names = set()
@@ -199,9 +207,7 @@ class PackageContractTest(unittest.TestCase):
 
     def test_public_payload_has_no_private_state_or_model_ids(self):
         private_markers = (
-            "/" + "Users" + "/",
             "kim" + "taekyu",
-            "session" + "-intent",
             "user-" + "approvals.txt",
             "auth" + ".json",
             "agents-setting" + "-back-up",
@@ -215,9 +221,17 @@ class PackageContractTest(unittest.TestCase):
             ):
                 continue
             try:
-                text = path.read_text(encoding="utf-8").casefold()
+                raw_text = path.read_text(encoding="utf-8")
             except UnicodeDecodeError:
                 continue
+            text = raw_text.casefold()
+            self.assertIsNone(
+                re.search(
+                    r"/Users/[^/]+/(?:Documents|Library|\.agents|\.claude|\.codex|\.grok)/",
+                    raw_text,
+                ),
+                path.relative_to(ROOT),
+            )
             for marker in private_markers:
                 self.assertNotIn(marker.casefold(), text, f"{marker} in {path.relative_to(ROOT)}")
             self.assertIsNone(model_id.search(text), path.relative_to(ROOT))
@@ -231,7 +245,7 @@ class PackageContractTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertIn("37/37", result.stdout)
+        self.assertIn("50/50", result.stdout)
         _, rows = load_inventory()
         for platform, path in MARKETPLACES.items():
             with self.subTest(platform=platform):

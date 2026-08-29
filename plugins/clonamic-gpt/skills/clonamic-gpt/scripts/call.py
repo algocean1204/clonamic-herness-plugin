@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run one bounded Codex CLI request and emit one JSON result."""
+"""Run one bounded named CLI request and emit one JSON result."""
 
 from __future__ import annotations
 
@@ -15,8 +15,9 @@ import threading
 import time
 
 
-EXECUTOR = "clonamic-gpt"
-EXECUTABLE = "codex"
+PROVIDER = json.loads(r'''{"arguments":["exec","--ephemeral","--sandbox","read-only","{cli_args}","{prompt}"],"executable":"codex","executor":"clonamic-gpt"}''')
+EXECUTOR = PROVIDER["executor"]
+EXECUTABLE = PROVIDER["executable"]
 DEFAULT_TIMEOUT = 120.0
 MIN_TIMEOUT = 0.05
 MAX_TIMEOUT = 600.0
@@ -200,7 +201,15 @@ def terminate(proc: subprocess.Popen[bytes], *, platform: str | None = None) -> 
 
 
 def command(executable: str, cli_args: list[str], prompt: str) -> list[str]:
-    return [executable, "exec", "--ephemeral", "--sandbox", "read-only", *cli_args, prompt]
+    output = [executable]
+    for token in PROVIDER["arguments"]:
+        if token == "{cli_args}":
+            output.extend(cli_args)
+        elif token == "{prompt}":
+            output.append(prompt)
+        else:
+            output.append(token)
+    return output
 
 
 def main(argv: list[str] | None = None) -> int:

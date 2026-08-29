@@ -12,8 +12,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "clonamic-development": {"type": "boolean"},
-        "clonamic-korean": {"type": "boolean"},
+        "clonamic-code-plugin": {"type": "boolean"},
+        "clonamic-writing-plugin": {"type": "boolean"},
+        "clonamic-design-plugin": {"type": "boolean"},
+        "clonamic-data-plugin": {"type": "boolean"},
+        "clonamic-documents-plugin": {"type": "boolean"},
         "clonamic-ppt": {"type": "boolean"},
         "clonamic-preprocessing": {"type": "boolean"},
         "clonamic-memory": {"type": "boolean"},

@@ -12,8 +12,11 @@ CATALOG = ROOT / "catalog/plugins.json"
 CONFIG = ROOT / "clonamic.json"
 SCHEMA = ROOT / "schemas/clonamic-config.schema.json"
 CHILDREN = {
-    "clonamic-development",
-    "clonamic-korean",
+    "clonamic-code-plugin",
+    "clonamic-writing-plugin",
+    "clonamic-design-plugin",
+    "clonamic-data-plugin",
+    "clonamic-documents-plugin",
     "clonamic-ppt",
     "clonamic-preprocessing",
     "clonamic-memory",
@@ -31,13 +34,13 @@ def load(path):
 class PluginConfigContractTest(unittest.TestCase):
     def test_catalog_marks_only_the_root_required(self):
         rows = load(CATALOG)["plugins"]
-        self.assertEqual(10, len(rows))
+        self.assertEqual(13, len(rows))
         self.assertTrue(rows[0]["required"])
         self.assertEqual("plugin.json", rows[0]["manifest"])
         self.assertTrue(all(row["required"] is False for row in rows[1:]))
         self.assertTrue(all("agent-plugins" in row["platforms"] for row in rows))
 
-    def test_shipped_config_has_exactly_nine_enabled_children(self):
+    def test_shipped_config_has_exactly_twelve_enabled_children(self):
         payload = load(CONFIG)
         self.assertEqual({"$schema", "schema_version", "plugins"}, set(payload))
         self.assertEqual(1, payload["schema_version"])

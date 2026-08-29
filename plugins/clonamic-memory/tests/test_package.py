@@ -4,7 +4,6 @@ import io
 import json
 import os
 import sqlite3
-import shutil
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
@@ -15,7 +14,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
-MANIFEST_FIELDS = {"$schema", "name", "version", "description", "license", "keywords"}
+MANIFEST_FIELDS = {"$schema", "name", "version", "description", "license", "author", "keywords"}
 
 
 def load_runtime(root):
@@ -32,9 +31,9 @@ def load_runtime(root):
 class MemoryPackageTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp.name).resolve() / "package"
-        shutil.copytree(ROOT, self.root)
-        self.runtime = load_runtime(self.root)
+        self.root = Path(self.temp.name).resolve()
+        self.package = ROOT
+        self.runtime = load_runtime(self.package)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -65,15 +64,16 @@ class MemoryPackageTest(unittest.TestCase):
         )
 
     def test_closed_manifest_and_single_direct_skill(self):
-        manifest = json.loads((self.root / "plugin.json").read_text(encoding="utf-8"))
+        manifest = json.loads((self.package / "plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(SCHEMA, manifest["$schema"])
         self.assertEqual(MANIFEST_FIELDS, set(manifest))
         self.assertEqual("clonamic-memory", manifest["name"])
         self.assertEqual("MIT", manifest["license"])
-        skills = list((self.root / "skills").glob("*/SKILL.md"))
+        self.assertEqual({"name": "Clonamic"}, manifest["author"])
+        skills = list((self.package / "skills").glob("*/SKILL.md"))
         self.assertEqual(["clonamic-memory"], [path.parent.name for path in skills])
         self.assertTrue((skills[0].parent / "agents" / "openai.yaml").is_file())
-        self.assertFalse((self.root / "scripts").exists())
+        self.assertFalse((self.package / "scripts").exists())
 
     def test_explicit_store_recall_and_forget(self):
         database = self.database_path()
@@ -594,7 +594,7 @@ class MemoryPackageTest(unittest.TestCase):
 
     def test_distribution_contains_no_sqlite_runtime_files(self):
         forbidden_suffixes = (".sqlite", ".sqlite3", ".db", "-wal", "-shm")
-        files = [path for path in self.root.rglob("*") if path.is_file()]
+        files = [path for path in self.package.rglob("*") if path.is_file()]
         self.assertFalse([path for path in files if path.name.endswith(forbidden_suffixes)])
 
     def test_cli_records_source_then_stores_and_recalls(self):
@@ -649,12 +649,12 @@ class MemoryPackageTest(unittest.TestCase):
             "au" + "th_",
             "creden" + "tials",
         )
-        for path in self.root.rglob("*"):
+        for path in self.package.rglob("*"):
             if not path.is_file() or "tests" in path.parts:
                 continue
             text = path.read_text(encoding="utf-8").casefold()
             for token in forbidden:
-                self.assertNotIn(token, text, f"{token} in {path.relative_to(self.root)}")
+                self.assertNotIn(token, text, f"{token} in {path.relative_to(self.package)}")
 
 
 if __name__ == "__main__":

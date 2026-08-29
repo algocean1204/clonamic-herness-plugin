@@ -21,19 +21,20 @@ def run(command, env):
 
 
 def worker_count(env):
-    raw = env.get("CLONAMIC_TEST_WORKERS", "4")
+    raw = env.get("CLONAMIC_TEST_WORKERS", str(min(8, os.cpu_count() or 1)))
     try:
         workers = int(raw)
     except ValueError as error:
-        raise ValueError("CLONAMIC_TEST_WORKERS must be an integer from 1 to 4") from error
-    if not 1 <= workers <= 4:
-        raise ValueError("CLONAMIC_TEST_WORKERS must be from 1 to 4")
+        raise ValueError("CLONAMIC_TEST_WORKERS must be an integer from 1 to 8") from error
+    if not 1 <= workers <= 8:
+        raise ValueError("CLONAMIC_TEST_WORKERS must be from 1 to 8")
     return workers
 
 
 def build_plan():
     package_commands = [
-        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"]
+        [sys.executable, "-m", "unittest", f"tests.{path.stem}", "-v"]
+        for path in sorted((ROOT / "tests").glob("test_*.py"))
     ]
     for package_tests in sorted(ROOT.glob("plugins/*/tests")):
         if any(package_tests.glob("test*.py")):
@@ -51,12 +52,12 @@ def build_plan():
     return {
         "before": [
             [sys.executable, "scripts/generate-adapters.py", "--check"],
+            ["cargo", "build", "--quiet", "--bin", "clonamic"],
         ],
         "packages": package_commands,
         "after": [
             [sys.executable, "plugins/clonamic-ppt/skills/clonamic-ppt/tests/run_all.py"],
             ["cargo", "fmt", "--check"],
-            ["cargo", "check", "--all-targets"],
             ["cargo", "clippy", "--all-targets", "--", "-D", "warnings"],
             ["cargo", "test", "--all-targets"],
         ],
@@ -241,6 +242,9 @@ def main():
         status = run(command, env)
         if status != 0:
             return status
+    env["CLONAMIC_TEST_BINARY"] = str(
+        ROOT / "target" / "debug" / ("clonamic.exe" if os.name == "nt" else "clonamic")
+    )
     env["CLONAMIC_ROOT_SUITE_ACTIVE"] = "1"
     status = run_parallel(plan["packages"], env, workers)
     if status != 0:

@@ -2,8 +2,11 @@
   "$schema": "./schemas/clonamic-config.schema.json",
   "schema_version": 1,
   "plugins": {
-    "clonamic-development": true,
-    "clonamic-korean": true,
+    "clonamic-code-plugin": true,
+    "clonamic-writing-plugin": true,
+    "clonamic-design-plugin": true,
+    "clonamic-data-plugin": true,
+    "clonamic-documents-plugin": true,
     "clonamic-ppt": true,
     "clonamic-preprocessing": true,
     "clonamic-memory": true,

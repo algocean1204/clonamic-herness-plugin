@@ -4,5 +4,6 @@
   "version": "0.1.0",
   "description": "One bounded call through the installed Claude CLI.",
   "license": "MIT",
+  "author": {"name": "Clonamic"},
   "keywords": ["claude", "executor", "bounded-call"]
 }

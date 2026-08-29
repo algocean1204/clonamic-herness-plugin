@@ -1,8 +1,0 @@
-{
-  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "clonamic-development",
-  "version": "0.1.0",
-  "description": "Conservative modular design, patch discipline, and bounded native multi-agent review for software development.",
-  "license": "MIT",
-  "keywords": ["architecture", "refactoring", "verification", "development"]
-}

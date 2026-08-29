@@ -72,33 +72,35 @@ class ValidationRunnerTest(unittest.TestCase):
     def test_plan_keeps_only_independent_package_tests_parallel(self):
         plan = VALIDATOR.build_plan()
         self.assertEqual("scripts/generate-adapters.py", plan["before"][0][1])
-        self.assertEqual(1, len(plan["before"]))
-        self.assertEqual("tests", plan["packages"][0][-2])
+        self.assertEqual(2, len(plan["before"]))
+        self.assertEqual(["cargo", "build"], [plan["before"][1][0], plan["before"][1][1]])
+        root_modules = [f"tests.{path.stem}" for path in sorted((ROOT / "tests").glob("test_*.py"))]
+        self.assertEqual(root_modules, [command[-2] for command in plan["packages"][: len(root_modules)]])
         self.assertEqual(
             sorted(
                 str(path.relative_to(ROOT))
                 for path in ROOT.glob("plugins/*/tests")
                 if any(path.glob("test*.py"))
             ),
-            [command[-2] for command in plan["packages"][1:]],
+            [command[-2] for command in plan["packages"][len(root_modules) :]],
         )
         self.assertEqual(
             "plugins/clonamic-ppt/skills/clonamic-ppt/tests/run_all.py",
             plan["after"][0][1],
         )
         self.assertEqual(
-            ["fmt", "check", "clippy", "test"],
+            ["fmt", "clippy", "test"],
             [command[1] for command in plan["after"][1:]],
         )
 
-    def test_worker_override_accepts_only_one_through_four(self):
-        for value in range(1, 5):
+    def test_worker_override_accepts_only_one_through_eight(self):
+        for value in range(1, 9):
             with self.subTest(value=value):
                 self.assertEqual(
                     value, VALIDATOR.worker_count({"CLONAMIC_TEST_WORKERS": str(value)})
                 )
-        self.assertEqual(4, VALIDATOR.worker_count({}))
-        for value in ("0", "5", "many"):
+        self.assertEqual(min(8, os.cpu_count() or 1), VALIDATOR.worker_count({}))
+        for value in ("0", "9", "many"):
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     VALIDATOR.worker_count({"CLONAMIC_TEST_WORKERS": value})
@@ -224,7 +226,7 @@ class ValidationRunnerTest(unittest.TestCase):
         "avoid recursive root-suite verification",
     )
     def test_root_suite_is_readonly_under_parallel_supervision(self):
-        command = VALIDATOR.build_plan()["packages"][0]
+        command = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"]
         before = subprocess.run(
             ["git", "diff", "--no-ext-diff", "--binary"],
             cwd=ROOT,

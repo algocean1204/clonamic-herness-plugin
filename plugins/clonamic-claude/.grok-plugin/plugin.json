@@ -2,6 +2,9 @@
   "name": "clonamic-claude",
   "version": "0.1.0",
   "description": "One bounded call through the installed Claude CLI.",
+  "author": {
+    "name": "Clonamic"
+  },
   "license": "MIT",
   "keywords": [
     "claude",

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "approval_budget": {
+    "read_only": 0,
+    "clear_write": 1,
+    "materially_ambiguous_write": 2,
+    "approved_loop_additional": 0,
+    "automation_additional": 0,
+    "internal_additional": 0
+  },
+  "platform_action": {
+    "conversational_approval": 0,
+    "status": "waiting_platform_action",
+    "consume_run": false
+  },
+  "scope_change": {
+    "interactive": false,
+    "status": "needs_authorization"
+  }
+}

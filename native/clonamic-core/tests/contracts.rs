@@ -1,5 +1,6 @@
 use clonamic_core::approval::{
-    ApprovalDecision, ApprovalRequest, Grant, approve, issue, normalize_approval,
+    ApprovalDecision, ApprovalRequest, Grant, approve as approve_in_set, issue as issue_in_set,
+    normalize_approval,
 };
 use clonamic_core::automation::{
     AutomationGrant, AutomationRunRequest, CredentialPolicy, RunStatus, claim_run, initialize_grant,
@@ -29,6 +30,25 @@ fn now() -> u64 {
         .duration_since(UNIX_EPOCH)
         .expect("clock")
         .as_secs()
+}
+
+fn issue(path: &Path, request: ApprovalRequest) -> clonamic_core::Result<Grant> {
+    issue_in_set(path.parent().expect("approval state parent"), path, request)
+}
+
+fn approve(
+    path: &Path,
+    session_id: &str,
+    input: &str,
+    now: u64,
+) -> clonamic_core::Result<ApprovalDecision> {
+    approve_in_set(
+        path.parent().expect("approval state parent"),
+        path,
+        session_id,
+        input,
+        now,
+    )
 }
 
 fn plugin_root_with_guidance(root: &Path) -> PathBuf {
@@ -97,6 +117,163 @@ fn approval_is_session_bound_idempotent_and_expiring() {
         )
         .unwrap(),
         ApprovalDecision::Expired
+    );
+}
+
+#[test]
+fn sole_pending_approval_accepts_plain_owner_input() {
+    let dir = tempdir().unwrap();
+    let state = dir.path().join("approval.json");
+    let grant = issue(
+        &state,
+        ApprovalRequest {
+            session_id: "session-a".into(),
+            scope_digest: "a".repeat(64),
+            expires_at: now() + 60,
+        },
+    )
+    .unwrap();
+    let decision = approve(&state, "session-a", "승인", now()).unwrap();
+    assert_eq!(decision, ApprovalDecision::Activated);
+    assert_eq!(grant.session_id, "session-a");
+}
+
+#[test]
+fn plain_approval_rejects_multiple_pending_packets_atomically() {
+    let dir = tempdir().unwrap();
+    let first_state = dir.path().join("first.json");
+    let second_state = dir.path().join("second.json");
+    let first = issue(
+        &first_state,
+        ApprovalRequest {
+            session_id: "session-a".into(),
+            scope_digest: "a".repeat(64),
+            expires_at: now() + 60,
+        },
+    )
+    .unwrap();
+    issue(
+        &second_state,
+        ApprovalRequest {
+            session_id: "session-a".into(),
+            scope_digest: "b".repeat(64),
+            expires_at: now() + 60,
+        },
+    )
+    .unwrap();
+
+    let barrier = Arc::new(Barrier::new(3));
+    let mut handles = Vec::new();
+    for state in [first_state.clone(), second_state.clone()] {
+        let barrier = Arc::clone(&barrier);
+        handles.push(thread::spawn(move || {
+            barrier.wait();
+            approve(&state, "session-a", "승인", now()).unwrap()
+        }));
+    }
+    barrier.wait();
+    assert_eq!(
+        handles
+            .into_iter()
+            .map(|handle| handle.join().unwrap())
+            .collect::<Vec<_>>(),
+        vec![
+            ApprovalDecision::MultiplePending,
+            ApprovalDecision::MultiplePending,
+        ]
+    );
+    assert_eq!(
+        approve(
+            &first_state,
+            "session-a",
+            &format!("승인:{}", first.code),
+            now(),
+        )
+        .unwrap(),
+        ApprovalDecision::Activated
+    );
+    assert_eq!(
+        approve(&second_state, "session-a", "`승인`", now()).unwrap(),
+        ApprovalDecision::Activated
+    );
+}
+
+#[test]
+fn explicit_approval_set_rejects_concurrent_cross_directory_state() {
+    let dir = tempdir().unwrap();
+    let set_root = dir.path().join("approval-set");
+    let outside = dir.path().join("outside");
+    fs::create_dir_all(&set_root).unwrap();
+    fs::create_dir_all(&outside).unwrap();
+    let valid = set_root.join("valid.json");
+    let invalid = outside.join("invalid.json");
+    let barrier = Arc::new(Barrier::new(3));
+    let mut handles = Vec::new();
+    for (state, digest) in [(valid.clone(), 'a'), (invalid.clone(), 'b')] {
+        let barrier = Arc::clone(&barrier);
+        let set_root = set_root.clone();
+        handles.push(thread::spawn(move || {
+            barrier.wait();
+            issue_in_set(
+                &set_root,
+                &state,
+                ApprovalRequest {
+                    session_id: "session-a".into(),
+                    scope_digest: digest.to_string().repeat(64),
+                    expires_at: now() + 60,
+                },
+            )
+            .is_ok()
+        }));
+    }
+    barrier.wait();
+    let outcomes = handles
+        .into_iter()
+        .map(|handle| handle.join().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(outcomes, vec![true, false]);
+    assert!(!invalid.exists());
+    assert_eq!(
+        approve_in_set(&set_root, &valid, "session-a", "승인", now()).unwrap(),
+        ApprovalDecision::Activated
+    );
+}
+
+#[test]
+fn approval_cli_requires_and_uses_the_explicit_set_root() {
+    let dir = tempdir().unwrap();
+    let state = dir.path().join("grant.json");
+    let expires = (now() + 60).to_string();
+    let issued = Command::new(env!("CARGO_BIN_EXE_clonamic"))
+        .args([
+            "issue",
+            dir.path().to_str().unwrap(),
+            state.to_str().unwrap(),
+            "session-a",
+            &"a".repeat(64),
+            &expires,
+        ])
+        .output()
+        .unwrap();
+    assert!(issued.status.success(), "{:?}", issued.stderr);
+    let grant: Grant = serde_json::from_slice(&issued.stdout).unwrap();
+    assert_eq!(grant.session_id, "session-a");
+
+    let approved = Command::new(env!("CARGO_BIN_EXE_clonamic"))
+        .args([
+            "approve",
+            dir.path().to_str().unwrap(),
+            state.to_str().unwrap(),
+            "session-a",
+            "`승인`",
+            &now().to_string(),
+        ])
+        .output()
+        .unwrap();
+    assert!(approved.status.success(), "{:?}", approved.stderr);
+    assert_eq!(
+        String::from_utf8(approved.stdout).unwrap().trim(),
+        "\"activated\""
     );
 }
 
@@ -1460,8 +1637,11 @@ fn repository_root() -> PathBuf {
 
 fn all_installed() -> BTreeSet<String> {
     [
-        "clonamic-development",
-        "clonamic-korean",
+        "clonamic-code-plugin",
+        "clonamic-writing-plugin",
+        "clonamic-design-plugin",
+        "clonamic-data-plugin",
+        "clonamic-documents-plugin",
         "clonamic-ppt",
         "clonamic-preprocessing",
         "clonamic-memory",
@@ -1640,7 +1820,7 @@ fn plugin_resolution_distinguishes_installation_dependencies_and_effective_scope
     )
     .unwrap();
     assert!(resolution.plugin("clonamic-memory").unwrap().installed);
-    let development = resolution.plugin("clonamic-development").unwrap();
+    let development = resolution.plugin("clonamic-code-plugin").unwrap();
     assert!(development.configured && development.platform_supported);
     assert!(!development.installed || !development.effective);
     assert_eq!(development.reason, "enabled_but_unavailable");
@@ -1670,7 +1850,7 @@ fn plugin_resolution_distinguishes_installation_dependencies_and_effective_scope
     )
     .unwrap();
     let development = dependency_resolution
-        .plugin("clonamic-development")
+        .plugin("clonamic-code-plugin")
         .unwrap();
     assert_eq!(development.dependencies, vec!["clonamic-preprocessing"]);
     assert!(!development.dependencies_ready);
@@ -1692,13 +1872,13 @@ fn disabled_plugins_only_reduce_existing_automation_scope() {
         &all_installed(),
     )
     .unwrap();
-    let current: BTreeSet<String> = ["clonamic-development", "clonamic-memory"]
+    let current: BTreeSet<String> = ["clonamic-code-plugin", "clonamic-memory"]
         .into_iter()
         .map(str::to_string)
         .collect();
     assert_eq!(
         reduce_automation_scope(&disabled, &current),
-        ["clonamic-development"]
+        ["clonamic-code-plugin"]
             .into_iter()
             .map(str::to_string)
             .collect()

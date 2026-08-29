@@ -1,8 +1,11 @@
 {
   "schema_version": 1,
   "plugins": {
-    "clonamic-development": "yes",
-    "clonamic-korean": true,
+    "clonamic-code-plugin": "yes",
+    "clonamic-writing-plugin": true,
+    "clonamic-design-plugin": true,
+    "clonamic-data-plugin": true,
+    "clonamic-documents-plugin": true,
     "clonamic-ppt": true,
     "clonamic-preprocessing": true,
     "clonamic-memory": true,

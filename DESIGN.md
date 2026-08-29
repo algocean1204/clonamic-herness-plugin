@@ -1,6 +1,6 @@
 # Clonamic architecture
 
-Clonamic is one required Core Harness plus nine optional Agent Plugins 1.0.0 capability packages. The core owns cross-cutting control. Each child owns one capability with an independent install, test, failure, and removal boundary.
+Clonamic is one required Core Harness plus twelve optional Agent Plugins 1.0.0 capability packages. The core owns cross-cutting control. Each child owns one capability with an independent install, test, failure, and removal boundary.
 
 ## System map
 
@@ -31,7 +31,7 @@ flowchart TB
     end
 
     K -. selects, never installs .-> O[Optional child package]
-    A --> D[clonamic-development]
+    A --> D[clonamic-code-plugin]
     U -. explicit only .-> E[One external executor child]
     G[Generated platform adapter] --> R
 ```
@@ -56,9 +56,12 @@ catalog/plugins.json                # optional-package inventory and selection s
 clonamic.json                       # complete shipped optional-package defaults
 schemas/clonamic-config.schema.json # closed v1 config and partial-overlay schema
 plugins/
-├── clonamic-development/
+├── clonamic-code-plugin/
 ├── clonamic-preprocessing/
-├── clonamic-korean/
+├── clonamic-writing-plugin/
+├── clonamic-design-plugin/
+├── clonamic-data-plugin/
+├── clonamic-documents-plugin/
 ├── clonamic-ppt/
 ├── clonamic-memory/
 ├── clonamic-grok/
@@ -77,9 +80,12 @@ The generated adapter directories and marketplace files are build outputs. Canon
 | Package | Public responsibility | Activation | Explicit exclusions |
 |---|---|---|---|
 | Core | Route, bound intent, choose proportional team use, gate writes, verify completion, format work reports, select optional packages | Core active for the current task | Domain execution, child installation |
-| Development | Modular design, Supercoder patch discipline, native gated Ultracode review | Software work where a stage materially reduces risk | Authorization, final verdict, external executors |
+| Code | Proportional coding, Supercoder patch discipline, modular design, explicit Ultracode | Software work where a stage materially reduces risk | Authorization, final verdict, external executors |
 | Preprocessing | Normalize input, create caller-directed clarification packets, explicit queues | Fuzzy or multi-item input, or explicit queue use | Scope authority, final execution |
-| Korean | Korean prose-document clarity | Supported prose document | Chat, work reports, code, spreadsheets, slides, email |
+| Writing | Publication writing, Korean clarity, deterministic cleanup | User-authored prose | Work reports, code, spreadsheets, slides, email |
+| Design | Frontend, Figma, visual systems, browser QA, media art | Explicit design or visual work | Core coding policy |
+| Data | Dataset and Hugging Face workflows | Explicit dataset work | Core coding policy |
+| Documents | HWPX and document-specialist workflows | Explicit matching format | General artifact runtimes |
 | PPT | Structured brief, outline, slide specification, rendering, QA | Presentation or PPTX work | General prose editing, external execution |
 | Memory | Explicit store, recall, forget, link, graph | Explicit memory operation | Automatic recall, implicit home, hidden context injection |
 | Grok | One bounded Grok CLI call | Explicit Grok request | Automatic selection, retry loops, write approval |
@@ -144,9 +150,9 @@ The shipped `clonamic.json` is complete and versioned. User and project configs 
 
 `agent-plugins` is the portable platform identifier for a vendor-neutral or special-purpose Agent Plugins client. Host-specific identifiers remain available for Codex, Claude, Grok, and Hermes adapters. Platform identifiers are validated as bounded lowercase IDs rather than compiled into a closed provider list; actual support still comes from the catalog.
 
-## Development package
+## Code package
 
-Development uses the smallest stage that reduces a real risk:
+Code work uses the smallest stage that reduces a real risk:
 
 1. Native path for ordinary software work.
 2. Modular design for a new system, architecture decision, or large refactor supported by repository evidence.

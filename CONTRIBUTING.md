@@ -27,11 +27,14 @@ Every Agent Plugins 1.0.0 package needs:
 ```text
 plugin.json
 LICENSE
-skills/<matching-id>/SKILL.md
+skills/<skill-id>/SKILL.md
 tests or a package-local deterministic verification command
 ```
 
-The outer directory, manifest `name`, and canonical skill ID must match. Optional scripts, references, and assets stay inside the owning skill unless the runtime has a real package-level reason to place them elsewhere.
+The outer package directory must match the manifest `name`. Each directory under `skills/` must match
+the `name` in its own `SKILL.md`; a package may contain several independently routed skills when they
+share one installation and removal boundary. Optional scripts, references, and assets stay inside the
+owning skill unless the runtime has a real package-level reason to place them elsewhere.
 
 Generated platform manifests and marketplace files are not hand-edited. Change the canonical manifest or catalog, regenerate, then verify zero drift.
 
@@ -62,7 +65,7 @@ The PPT package keeps its engine tests under `skills/clonamic-ppt/tests/` and re
 
 - Responsibility stayed with one owner.
 - Root and child manifests remain closed and parseable.
-- Skill names match package IDs.
+- Package directories match manifest IDs; every skill directory matches its own frontmatter ID.
 - No model, credential, session, user path, or telemetry default was added.
 - Explicit state paths and rollback behavior are tested.
 - Simple and read-only routes remain free of root-guidance and team activation.

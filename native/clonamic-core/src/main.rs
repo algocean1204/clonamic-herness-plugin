@@ -107,8 +107,9 @@ fn run(args: Vec<String>) -> Result<()> {
         [command, input] if command == "normalize-approval" => {
             println!("{}", normalize_approval(input)?);
         }
-        [command, state, session, digest, expires] if command == "issue" => {
+        [command, set_root, state, session, digest, expires] if command == "issue" => {
             let grant = issue(
+                Path::new(set_root),
                 Path::new(state),
                 ApprovalRequest {
                     session_id: session.clone(),
@@ -118,8 +119,14 @@ fn run(args: Vec<String>) -> Result<()> {
             )?;
             println!("{}", serde_json::to_string(&grant)?);
         }
-        [command, state, session, input, now] if command == "approve" => {
-            let decision = approve(Path::new(state), session, input, parse_u64(now, "now")?)?;
+        [command, set_root, state, session, input, now] if command == "approve" => {
+            let decision = approve(
+                Path::new(set_root),
+                Path::new(state),
+                session,
+                input,
+                parse_u64(now, "now")?,
+            )?;
             println!("{}", serde_json::to_string(&decision)?);
         }
         [command, manifest] if command == "verify" => {

@@ -56,7 +56,7 @@ Unmet work continues when it can. A real repeated blocker is reported as a block
 
 The first line states the outcome and one useful number or cause. Failures and unverified required items appear first. A report with four or more non-blank lines is one flat list. Tool order and repeated summaries are omitted.
 
-`clonamic-korean` does not rewrite those reports. Its scope is Korean prose documents, not host workflow output.
+`clonamic-writing-plugin` does not rewrite work reports. Its scope is user-authored prose, not host workflow output.
 
 ## The user's machine stays theirs
 

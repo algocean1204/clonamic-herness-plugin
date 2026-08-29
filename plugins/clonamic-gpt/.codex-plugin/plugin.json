@@ -2,15 +2,15 @@
   "name": "clonamic-gpt",
   "version": "0.1.0",
   "description": "One bounded call through the installed Codex CLI.",
+  "author": {
+    "name": "Clonamic"
+  },
   "license": "MIT",
   "keywords": [
     "gpt",
     "executor",
     "bounded-call"
   ],
-  "author": {
-    "name": "Clonamic"
-  },
   "skills": "./skills/",
   "interface": {
     "displayName": "Clonamic GPT",

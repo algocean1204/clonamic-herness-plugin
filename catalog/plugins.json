@@ -8,16 +8,37 @@
       "dependencies": []
     },
     {
-      "manifest": "plugins/clonamic-development/plugin.json",
+      "manifest": "plugins/clonamic-code-plugin/plugin.json",
       "required": false,
       "category": "development",
       "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },
     {
-      "manifest": "plugins/clonamic-korean/plugin.json",
+      "manifest": "plugins/clonamic-writing-plugin/plugin.json",
       "required": false,
       "category": "writing",
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
+      "dependencies": []
+    },
+    {
+      "manifest": "plugins/clonamic-design-plugin/plugin.json",
+      "required": false,
+      "category": "design",
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
+      "dependencies": []
+    },
+    {
+      "manifest": "plugins/clonamic-data-plugin/plugin.json",
+      "required": false,
+      "category": "data",
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
+      "dependencies": []
+    },
+    {
+      "manifest": "plugins/clonamic-documents-plugin/plugin.json",
+      "required": false,
+      "category": "documents",
       "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
       "dependencies": []
     },

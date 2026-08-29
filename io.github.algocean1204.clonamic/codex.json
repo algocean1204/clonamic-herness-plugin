@@ -13,20 +13,44 @@
       "nativeManifest": "../.codex-plugin/plugin.json"
     },
     {
-      "manifest": "../plugins/clonamic-development/plugin.json",
-      "name": "clonamic-development",
-      "description": "Conservative modular design, patch discipline, and bounded native multi-agent review for software development.",
+      "manifest": "../plugins/clonamic-code-plugin/plugin.json",
+      "name": "clonamic-code-plugin",
+      "description": "Proportional coding workflows, safe patching, modular design, and explicit bounded adversarial review.",
       "required": false,
       "version": "0.1.0",
-      "nativeManifest": "../plugins/clonamic-development/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-code-plugin/.codex-plugin/plugin.json"
     },
     {
-      "manifest": "../plugins/clonamic-korean/plugin.json",
-      "name": "clonamic-korean",
-      "description": "Preservation-first clarity review and editing for Korean prose documents.",
+      "manifest": "../plugins/clonamic-writing-plugin/plugin.json",
+      "name": "clonamic-writing-plugin",
+      "description": "Optional publication writing, Korean clarity, and deterministic final prose cleanup.",
       "required": false,
       "version": "0.1.0",
-      "nativeManifest": "../plugins/clonamic-korean/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-writing-plugin/.codex-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-design-plugin/plugin.json",
+      "name": "clonamic-design-plugin",
+      "description": "Optional design, browser QA, visual systems, and media-art skills.",
+      "required": false,
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-design-plugin/.codex-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-data-plugin/plugin.json",
+      "name": "clonamic-data-plugin",
+      "description": "Optional dataset and Hugging Face workflow guidance.",
+      "required": false,
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-data-plugin/.codex-plugin/plugin.json"
+    },
+    {
+      "manifest": "../plugins/clonamic-documents-plugin/plugin.json",
+      "name": "clonamic-documents-plugin",
+      "description": "Optional HWPX and document-specialist workflows.",
+      "required": false,
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-documents-plugin/.codex-plugin/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-ppt/plugin.json",

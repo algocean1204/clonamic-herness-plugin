@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
-MANIFEST_FIELDS = {"$schema", "name", "version", "description", "license", "keywords"}
+MANIFEST_FIELDS = {"$schema", "name", "version", "description", "license", "author", "keywords"}
 
 
 def load_runtime(root):
@@ -47,15 +47,21 @@ class PreprocessingPackageTest(unittest.TestCase):
     def queue_path(self):
         return self.root / "state" / "queue.json"
 
-    def test_closed_manifest_and_single_direct_skill(self):
+    def test_closed_manifest_and_two_bounded_skills(self):
         manifest = json.loads((self.root / "plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(SCHEMA, manifest["$schema"])
         self.assertEqual(MANIFEST_FIELDS, set(manifest))
         self.assertEqual("clonamic-preprocessing", manifest["name"])
         self.assertEqual("MIT", manifest["license"])
+        self.assertEqual({"name": "Clonamic"}, manifest["author"])
         skills = list((self.root / "skills").glob("*/SKILL.md"))
-        self.assertEqual(["clonamic-preprocessing"], [path.parent.name for path in skills])
-        self.assertTrue((skills[0].parent / "agents" / "openai.yaml").is_file())
+        self.assertEqual(
+            ["clonamic-grill-me", "clonamic-preprocessing"],
+            [path.parent.name for path in skills],
+        )
+        self.assertTrue(
+            (self.root / "skills/clonamic-preprocessing/agents/openai.yaml").is_file()
+        )
         self.assertFalse((self.root / "scripts").exists())
 
     def test_normalization_is_stable_and_preserves_paragraphs(self):

@@ -15,7 +15,12 @@ from tests.test_team_contract import evaluate_decision, load_json
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "long-form-ux-cases.json"
 CORE = ROOT / "native" / "clonamic-core"
-BINARY = ROOT / "target" / "debug" / ("clonamic.exe" if os.name == "nt" else "clonamic")
+BINARY = Path(
+    os.environ.get(
+        "CLONAMIC_TEST_BINARY",
+        ROOT / "target" / "debug" / ("clonamic.exe" if os.name == "nt" else "clonamic"),
+    )
+)
 EXPECTED_FIELDS = {
     "source",
     "authority",
@@ -52,6 +57,8 @@ class LongFormUxTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.cases = load_json(FIXTURE)["cases"]
+        if BINARY.is_file() and os.environ.get("CLONAMIC_TEST_BINARY"):
+            return
         result = subprocess.run(
             ["cargo", "build", "--quiet", "--bin", "clonamic"],
             cwd=CORE,

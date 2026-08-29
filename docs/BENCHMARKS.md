@@ -10,7 +10,7 @@ No public model-quality score is published yet. Measured validation runtime is r
 |---|---|---|
 | Native baseline | None | Measure the host without Clonamic |
 | Core only | `clonamic-herness-plugin` | Measure routing, one write gate, completion checks, reporting, install, and rollback |
-| Full package | Core plus all nine children | Measure optional routing, development gates, explicit state, document/PPT work, and bounded executor wrappers |
+| Full package | Core plus all twelve children | Measure optional routing, coding gates, explicit state, specialist work, and bounded executor wrappers |
 
 The full profile does not automatically call an external provider. Executor scenarios run only when the scenario explicitly names that executor. Offline contract benchmarks use fake local CLIs.
 

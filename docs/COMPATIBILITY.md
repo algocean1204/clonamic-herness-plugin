@@ -22,7 +22,7 @@ Agent Plugins 1.0.0 does not automatically load arbitrary root Markdown, recursi
 
 ## Core and child installation
 
-The root package is the portable core. Nine child packages are independent roots. `clonamic-market` can select a matching child from `catalog/plugins.json`, but Agent Plugins 1.0.0 does not define portable cross-plugin installation. The host or user installs and enables the selected child.
+The root package is the portable core. Twelve child packages are independent roots. `clonamic-market` can select a matching child from `catalog/plugins.json`, but Agent Plugins 1.0.0 does not define portable cross-plugin installation. The host or user installs and enables the selected child.
 
 Removing one child does not remove the core or another child. Missing children return unavailable; the core does not substitute a neighboring capability.
 
