@@ -99,12 +99,11 @@ claude plugin install clonamic-herness-plugin@clonamic
 
 # Grok Build
 grok plugin install algocean1204/clonamic-herness-plugin --trust
-
-# Hermes
-hermes plugins install algocean1204/clonamic-herness-plugin --enable
 ```
 
-Review source before using `--trust` or `--enable`. Codex and Claude can install an optional child by its catalog name. Grok accepts a repository subdirectory selector such as `algocean1204/clonamic-herness-plugin#plugins/clonamic-code-plugin`. Hermes installs the portable root; child-package availability depends on the installed Hermes release and is not claimed without a host measurement.
+Review source before using `--trust`. Codex and Claude can install an optional child by its catalog name. Grok accepts a repository subdirectory selector such as `algocean1204/clonamic-herness-plugin#plugins/clonamic-code-plugin`.
+
+Hermes remote installation of this monorepo is currently unavailable: its community-plugin scanner evaluates optional packages and bundled assets together and rejects the root as dangerous. Clonamic does not recommend disabling or bypassing that scanner. The generated Hermes descriptor remains repository-checked compatibility output, not an installation claim.
 
 Agent Plugins 1.0.0 clients load the repository root for the core package:
 

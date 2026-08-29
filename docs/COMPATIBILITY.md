@@ -14,7 +14,7 @@ Compatibility claims use three labels:
 | Codex | Generated Codex marketplace and manifest outputs | Artifact shape and core contracts | No blanket live-install claim | Model-side skill contract when a structural hook is unavailable |
 | Claude Code | Generated Claude marketplace and plugin outputs | Artifact shape and core contracts | No blanket live-install claim | Skills remain usable without claiming hook enforcement |
 | Grok Build | Generated Grok marketplace and plugin outputs | Artifact shape only unless a release record says otherwise | No Grok validation success is claimed | Skills remain usable; missing commands or hooks are reported unavailable |
-| Hermes | Generated registration output | Registration and package contracts can be checked locally | No blanket live-install claim | Direct skill loading or explicit CLI use, without claiming hook enforcement |
+| Hermes | Generated registration output | Registration and package contracts can be checked locally | Remote monorepo install was blocked by the community-plugin scanner; no files installed | Direct review and skill loading only when the host permits it; never bypass the scanner |
 
 Generated files are compatibility outputs. Their presence does not prove that a host installed, enabled, or executed them.
 
@@ -53,3 +53,4 @@ CLI availability and authentication are host conditions. Repository tests can us
 - Password, OAuth, biometric, and operating-system prompts remain platform actions.
 - Unsupported hooks are never reported as active.
 - A marketplace entry is inventory or selection metadata, not proof of installation.
+- Hermes currently scans the full repository rather than only the root package surface, so optional executable and bundled-library assets block remote monorepo installation. Generated metadata does not override that host verdict.
