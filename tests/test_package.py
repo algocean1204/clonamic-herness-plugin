@@ -131,6 +131,8 @@ class PackageContractTest(unittest.TestCase):
         self.assertIn("windows-latest", workflow)
         self.assertIn("rustup toolchain install 1.85.1", workflow)
         self.assertNotIn("dtolnay", workflow)
+        self.assertIn("actions/checkout@v6", workflow)
+        self.assertIn("actions/setup-python@v6", workflow)
         self.assertIn(".sha256", release)
         self.assertIn("Get-FileHash", release)
 

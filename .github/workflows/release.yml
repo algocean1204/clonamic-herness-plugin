@@ -20,7 +20,7 @@ jobs:
             asset: clonamic-windows-x86_64.exe
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: rustup toolchain install 1.85.1 --profile minimal
       - run: cargo build --release --bin clonamic
       - name: Stage Unix binary
