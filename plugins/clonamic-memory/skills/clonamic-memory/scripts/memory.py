@@ -8,6 +8,7 @@ import json
 import re
 import sqlite3
 from collections import deque
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -37,7 +38,7 @@ def store(path: str | Path, memory_id: str, content: str, tags: Iterable[str]) -
     resolved_content = _required(content, "content")
     resolved_tags = _tags(tags)
     now = _now()
-    with _connect(path) as connection:
+    with _database(path) as connection:
         connection.execute(
             """
             INSERT INTO memories (id, content, tags, created_at, updated_at)
@@ -57,7 +58,7 @@ def recall(path: str | Path, query: str, *, limit: int = 20) -> list[dict[str, A
     terms = set(_tokens(_required(query, "query")))
     if limit < 1 or limit > 100:
         raise ValueError("limit must be between 1 and 100")
-    with _connect(path) as connection:
+    with _database(path) as connection:
         rows = connection.execute("SELECT * FROM memories").fetchall()
     scored: list[tuple[int, str, sqlite3.Row]] = []
     folded_query = query.casefold()
@@ -79,7 +80,7 @@ def recall(path: str | Path, query: str, *, limit: int = 20) -> list[dict[str, A
 
 def forget(path: str | Path, memory_id: str) -> bool:
     resolved_id = _required(memory_id, "id")
-    with _connect(path) as connection:
+    with _database(path) as connection:
         cursor = connection.execute("DELETE FROM memories WHERE id = ?", (resolved_id,))
     return cursor.rowcount == 1
 
@@ -90,7 +91,7 @@ def link(path: str | Path, source: str, target: str, relation: str) -> dict[str,
     resolved_relation = _required(relation, "relation")
     if resolved_source == resolved_target:
         raise ValueError("self edges are not allowed")
-    with _connect(path) as connection:
+    with _database(path) as connection:
         existing = {
             row["id"]
             for row in connection.execute(
@@ -114,7 +115,7 @@ def graph(path: str | Path, anchor: str, *, depth: int = 2, limit: int = 20) -> 
         raise ValueError("depth must be between 0 and 4")
     if limit < 1 or limit > 100:
         raise ValueError("limit must be between 1 and 100")
-    with _connect(path) as connection:
+    with _database(path) as connection:
         if connection.execute("SELECT 1 FROM memories WHERE id = ?", (resolved_anchor,)).fetchone() is None:
             raise KeyError(resolved_anchor)
         visited = {resolved_anchor}
@@ -171,6 +172,16 @@ def _connect(path: str | Path) -> sqlite3.Connection:
     connection.execute("PRAGMA foreign_keys = ON")
     connection.executescript(SCHEMA)
     return connection
+
+
+@contextmanager
+def _database(path: str | Path):
+    connection = _connect(path)
+    try:
+        with connection:
+            yield connection
+    finally:
+        connection.close()
 
 
 def _required(value: str, field: str) -> str:

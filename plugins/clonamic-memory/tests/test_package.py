@@ -88,6 +88,67 @@ class MemoryPackageTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.runtime.link(database, "a", "a", "relates_to")
 
+    def test_every_public_operation_closes_before_database_reuse(self):
+        runtime = self.runtime
+        real_connect = runtime.sqlite3.connect
+        opened = []
+
+        class TrackingConnection(runtime.sqlite3.Connection):
+            closed = False
+
+            def close(self):
+                self.closed = True
+                return super().close()
+
+        def tracked_connect(*args, **kwargs):
+            kwargs["factory"] = TrackingConnection
+            connection = real_connect(*args, **kwargs)
+            opened.append(connection)
+            return connection
+
+        def assert_closed_and_reusable(database):
+            self.assertTrue(opened)
+            self.assertTrue(all(connection.closed for connection in opened))
+            opened.clear()
+            moved = database.with_suffix(".moved")
+            database.replace(moved)
+            moved.replace(database)
+
+        database = self.database_path()
+        runtime.sqlite3.connect = tracked_connect
+        try:
+            runtime.store(database, "a", "node a", [])
+            assert_closed_and_reusable(database)
+            runtime.store(database, "b", "node b", [])
+            assert_closed_and_reusable(database)
+            runtime.recall(database, "node", limit=5)
+            assert_closed_and_reusable(database)
+            runtime.link(database, "a", "b", "relates_to")
+            assert_closed_and_reusable(database)
+            runtime.graph(database, "a", depth=1, limit=5)
+            assert_closed_and_reusable(database)
+            runtime.forget(database, "b")
+            assert_closed_and_reusable(database)
+            database.unlink()
+        finally:
+            runtime.sqlite3.connect = real_connect
+            for connection in opened:
+                connection.close()
+
+    def test_database_context_rolls_back_and_closes_on_exception(self):
+        database = self.database_path()
+        with self.assertRaises(RuntimeError):
+            with self.runtime._database(database) as connection:
+                connection.execute(
+                    "INSERT INTO memories (id, content, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                    ("transient", "discard me", "[]", "now", "now"),
+                )
+                raise RuntimeError("stop")
+        self.assertEqual([], self.runtime.recall(database, "discard", limit=5))
+        moved = database.with_suffix(".moved")
+        database.replace(moved)
+        moved.unlink()
+
     def test_production_surface_excludes_automatic_or_cross_package_state(self):
         forbidden = (
             "hot_" + "inject",
