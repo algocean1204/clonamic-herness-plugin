@@ -1,0 +1,12 @@
+{
+  "request_class": "ambiguous_write",
+  "approval_budget": 2,
+  "stop_budget": 2,
+  "specification_budget": 2,
+  "report_budget": 1,
+  "allowed_targets": ["src/example.py"],
+  "expected_final_status": "complete",
+  "minimum_passed_verifications": 1,
+  "rollback_required": false,
+  "require_observed": false
+}

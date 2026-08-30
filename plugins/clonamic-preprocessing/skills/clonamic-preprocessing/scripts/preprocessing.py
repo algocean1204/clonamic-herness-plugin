@@ -29,6 +29,8 @@ def normalize_text(value: str) -> str:
 
 
 def clarification_contract(text: str, missing_fields: Iterable[str]) -> dict[str, Any]:
+    if not isinstance(text, str):
+        raise TypeError("text must be a string")
     normalized = normalize_text(text)
     fields: list[str] = []
     for raw in missing_fields:
@@ -45,6 +47,7 @@ def clarification_contract(text: str, missing_fields: Iterable[str]) -> dict[str
         for field in fields
     ]
     return {
+        "original_text": text,
         "normalized_text": normalized,
         "required": bool(questions),
         "ready_for_queue": bool(normalized) and not questions,
@@ -71,6 +74,8 @@ def enqueue(
     lock_timeout: float = 2.0,
     lock_stale_after: float = 30.0,
 ) -> dict[str, Any]:
+    if not isinstance(text, str):
+        raise TypeError("queue text must be a string")
     normalized = normalize_text(text)
     if not normalized:
         raise ValueError("queue text must not be empty")
@@ -83,7 +88,8 @@ def enqueue(
             raise ValueError(f"duplicate item id: {resolved_id}")
         item = {
             "id": resolved_id,
-            "text": normalized,
+            "text": text,
+            "normalized_text": normalized,
             "priority": int(priority),
             "sequence": state["next_sequence"],
             "state": "pending",
@@ -194,6 +200,14 @@ def _read_state(path: str | Path) -> dict[str, Any]:
         raise ValueError("invalid queue file")
     if not isinstance(raw.get("next_sequence"), int) or raw["next_sequence"] < 0:
         raise ValueError("invalid queue sequence")
+    for item in raw["items"]:
+        if not isinstance(item, dict) or not isinstance(item.get("text"), str):
+            raise ValueError("invalid queue item")
+        normalized = item.get("normalized_text")
+        if normalized is None:
+            item["normalized_text"] = normalize_text(item["text"])
+        elif not isinstance(normalized, str):
+            raise ValueError("invalid normalized queue text")
     return raw
 
 

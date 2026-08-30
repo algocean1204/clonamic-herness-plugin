@@ -33,6 +33,7 @@ Run every profile in a clean temporary repository and isolated host home:
 13. Migrate, search, traverse, back up, and restore an explicit SQLite memory fixture.
 14. Merge complete defaults with partial user and project toggles, reject an invalid layer to Core-only, and distinguish configured, installed, platform-supported, dependency-ready, and effective states.
 15. Process hostile reference/template archives, compare every SVG and editable PPTX slide, and report unavailable raster QA without a false pass.
+16. Grade a normalized host event log against blind read/write, approval, automation, team fallback, verification, rollback, blocker, and final-report budgets.
 
 ## Measurements
 
@@ -64,5 +65,7 @@ A published result must include:
 - exact commands and raw machine-readable results.
 
 Long-form model evaluation uses independently authored prompts of at least 1,500 characters. Deterministic contract checks and black-box model outcomes are reported separately; no fixture ID, model name, expected route, or composite score is allowed to become production routing logic.
+
+The repository contains at least twenty blind prompts spanning six read-only classes and write, automation, internal, failure, and team paths. Their fixture metadata checks deterministic contracts only. Black-box results require redacted normalized JSONL from the actual host and are graded with `scripts/evaluate-ux-events.py`; approval and stop counts are derived from events rather than expected fixture values.
 
 Label repository-only checks separately from live host measurements. Do not infer live installation from a manifest check, and do not report Grok validation success without a recorded Grok run.

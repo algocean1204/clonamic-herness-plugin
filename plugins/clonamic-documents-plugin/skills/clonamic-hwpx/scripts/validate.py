@@ -23,18 +23,7 @@ import zipfile
 from pathlib import Path
 from typing import List, Tuple, Dict, Optional
 from dataclasses import dataclass, field
-
-try:
-    from lxml import etree
-    HAS_LXML = True
-except ImportError:
-    HAS_LXML = False
-
-try:
-    from bs4 import BeautifulSoup
-    HAS_BS4 = True
-except ImportError:
-    HAS_BS4 = False
+from xml.etree import ElementTree
 
 
 @dataclass
@@ -180,13 +169,7 @@ class HWPXValidator:
         for xml_file in xml_files:
             rel_path = xml_file.relative_to(self.work_dir)
             try:
-                if HAS_LXML:
-                    parser = etree.XMLParser()
-                    etree.parse(str(xml_file), parser)
-                else:
-                    # Fallback: try to parse with built-in xml
-                    import xml.etree.ElementTree as ET
-                    ET.parse(xml_file)
+                ElementTree.parse(xml_file)
 
             except Exception as e:
                 error_msg = str(e)
@@ -196,53 +179,17 @@ class HWPXValidator:
                 self.report.error("XML_WELLFORMED", error_msg, str(rel_path), line_num)
 
     def _check_tag_balance(self):
-        """Check that important tags are balanced using lxml if available."""
+        """Check that section XML is structurally balanced."""
         section_files = list((self.work_dir / 'Contents').glob('section*.xml'))
 
         for section_file in section_files:
             rel_path = section_file.relative_to(self.work_dir)
 
-            # Use lxml for accurate tag counting if available
-            if HAS_LXML:
-                try:
-                    tree = etree.parse(str(section_file))
-                    # If it parses, tags are balanced
-                    continue
-                except etree.XMLSyntaxError as e:
-                    # Extract specific error info
-                    self.report.error(
-                        "TAG_BALANCE",
-                        f"XML syntax error: {e}",
-                        str(rel_path),
-                        e.lineno if hasattr(e, 'lineno') else 0
-                    )
-                    continue
-
-            # Fallback to regex-based check (less accurate)
-            content = section_file.read_text(encoding='utf-8')
-
-            for tag in self.BALANCED_TAGS:
-                # More precise patterns
-                # Opening tags: <tag> or <tag attr="val">
-                open_pattern = f'<{re.escape(tag)}(?:\\s[^>]*)?>(?!</)'
-                # Closing tags: </tag>
-                close_pattern = f'</{re.escape(tag)}>'
-                # Self-closing: <tag/> or <tag attr="val"/>
-                self_closing_pattern = f'<{re.escape(tag)}(?:\\s[^>]*)?/>'
-
-                # Find all matches
-                opens = len(re.findall(open_pattern, content))
-                closes = len(re.findall(close_pattern, content))
-                self_closes = len(re.findall(self_closing_pattern, content))
-
-                # Non-self-closing opens should equal closes
-                non_self_opens = opens
-                if non_self_opens != closes:
-                    self.report.error(
-                        "TAG_BALANCE",
-                        f"Tag <{tag}> may be unbalanced: {non_self_opens} opening, {closes} closing (regex check, may have false positives)",
-                        str(rel_path)
-                    )
+            try:
+                ElementTree.parse(section_file)
+            except ElementTree.ParseError as error:
+                line = error.position[0] if error.position else 0
+                self.report.error("TAG_BALANCE", str(error), str(rel_path), line)
 
     def _check_manifest_consistency(self):
         """Check that manifest (content.hpf) matches actual files."""
@@ -251,26 +198,17 @@ class HWPXValidator:
             return  # Already reported in required files check
 
         try:
-            if HAS_LXML:
-                tree = etree.parse(str(manifest_path))
-                root = tree.getroot()
-                items = root.findall('.//{http://www.idpf.org/2007/opf}item')
-            else:
-                if HAS_BS4:
-                    content = manifest_path.read_text(encoding='utf-8')
-                    soup = BeautifulSoup(content, 'xml')
-                    items = soup.find_all('item')
-                else:
-                    return  # Can't check without lxml or bs4
+            root = ElementTree.parse(manifest_path).getroot()
+            items = [
+                element
+                for element in root.iter()
+                if element.tag.rsplit('}', 1)[-1] == 'item'
+            ]
 
             # Check each item in manifest
             for item in items:
-                if HAS_LXML:
-                    href = item.get('href')
-                    item_id = item.get('id')
-                else:
-                    href = item.get('href')
-                    item_id = item.get('id')
+                href = item.get('href')
+                item_id = item.get('id')
 
                 if href and href.startswith('BinData/'):
                     file_path = self.work_dir / 'Contents' / href
@@ -288,7 +226,7 @@ class HWPXValidator:
             if bindata_dir.exists():
                 manifest_hrefs = set()
                 for item in items:
-                    href = item.get('href') if HAS_LXML else item.get('href')
+                    href = item.get('href')
                     if href:
                         manifest_hrefs.add(href.replace('BinData/', ''))
 

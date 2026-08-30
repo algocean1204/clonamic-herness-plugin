@@ -15,3 +15,8 @@
 - Consolidate coding workflows into `clonamic-code-plugin` with explicit Supercoder and Ultracode stages.
 - Add optional writing, design, data, and document-specialist packages without increasing Core context.
 - Add approval-friction budgets, plain sole-packet approval, one executor runtime source, and CPU-scaled validation.
+- Add twenty blind UX prompts and an event-derived evaluator that separates deterministic contracts from model behavior.
+- Preserve preprocessing payloads while exposing normalization separately; remove HWPX native shim and BeautifulSoup dependencies.
+- Add runtime readiness to plugin resolution and a fail-closed PPT doctor.
+- Harden executor prompt transport and descendant cleanup across normal, failure, timeout, and interruption paths.
+- Parallelize PPT validation, bound every validation command, reject symlinked manifests and stale generated outputs, and validate release targets before upload.

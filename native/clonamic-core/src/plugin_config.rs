@@ -1,3 +1,4 @@
+use crate::atomic::reject_symlink_components;
 use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -29,6 +30,7 @@ pub struct PluginState {
     pub platform_supported: bool,
     pub dependencies: Vec<String>,
     pub dependencies_ready: bool,
+    pub runtime_ready: bool,
     pub effective: bool,
     pub reason: String,
     pub manifest: String,
@@ -66,6 +68,8 @@ struct CatalogEntry {
     category: String,
     platforms: Vec<String>,
     dependencies: Vec<String>,
+    #[serde(default)]
+    runtime_ready_required: bool,
 }
 
 #[derive(Deserialize)]
@@ -100,6 +104,15 @@ pub fn resolve_plugins(
     paths: &ResolvePaths,
     platform: &str,
     installed: &BTreeSet<String>,
+) -> Result<PluginResolution> {
+    resolve_plugins_with_runtime(paths, platform, installed, &BTreeSet::new())
+}
+
+pub fn resolve_plugins_with_runtime(
+    paths: &ResolvePaths,
+    platform: &str,
+    installed: &BTreeSet<String>,
+    runtime_ready: &BTreeSet<String>,
 ) -> Result<PluginResolution> {
     if !valid_platform_id(platform) {
         return Err(Error::Invalid("unsupported platform".into()));
@@ -136,13 +149,14 @@ pub fn resolve_plugins(
         let configured = required || configured.get(&row.name).copied().unwrap_or(false);
         let installed = required || installed.contains(&row.name);
         let supported = row.entry.platforms.iter().any(|value| value == platform);
+        let runtime_ready = !row.entry.runtime_ready_required || runtime_ready.contains(&row.name);
         let (effective, reason) = if required {
             (true, "required")
         } else if invalid {
             (false, "invalid_config")
         } else if !configured {
             (false, "disabled_by_config")
-        } else if !installed || !supported {
+        } else if !installed || !supported || !runtime_ready {
             (false, "enabled_but_unavailable")
         } else {
             (true, "enabled")
@@ -155,6 +169,7 @@ pub fn resolve_plugins(
             platform_supported: supported,
             dependencies: row.dependencies.clone(),
             dependencies_ready: true,
+            runtime_ready,
             effective,
             reason: reason.into(),
             manifest: row.entry.manifest.clone(),
@@ -234,6 +249,8 @@ pub fn reduce_automation_scope(
 }
 
 fn load_inventory(paths: &ResolvePaths) -> Result<Vec<InventoryRow>> {
+    reject_symlink_components(&paths.manifest_root)?;
+    let manifest_root = fs::canonicalize(&paths.manifest_root)?;
     let catalog: Catalog = serde_json::from_slice(&fs::read(&paths.catalog)?)?;
     if catalog.plugins.is_empty() {
         return Err(Error::Invalid("catalog is empty".into()));
@@ -255,8 +272,13 @@ fn load_inventory(paths: &ResolvePaths) -> Result<Vec<InventoryRow>> {
         if entry.category.is_empty() {
             return Err(Error::Invalid("catalog category is required".into()));
         }
-        let manifest: Manifest =
-            serde_json::from_slice(&fs::read(paths.manifest_root.join(&entry.manifest))?)?;
+        let manifest_path = manifest_root.join(&entry.manifest);
+        reject_symlink_components(&manifest_path)?;
+        let canonical = fs::canonicalize(&manifest_path)?;
+        if !canonical.starts_with(&manifest_root) {
+            return Err(Error::Invalid("catalog manifest path escapes root".into()));
+        }
+        let manifest: Manifest = serde_json::from_slice(&fs::read(canonical)?)?;
         if !plugin_names.insert(manifest.name.clone())
             || names
                 .insert(entry.manifest.clone(), manifest.name)

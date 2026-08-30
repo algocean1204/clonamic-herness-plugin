@@ -46,6 +46,12 @@ class FrictionBudgetTest(unittest.TestCase):
                     self.assertEqual(0, expected["approval_count"])
                 self.assertLessEqual(expected["approval_count"], 2)
 
+    def test_fixture_counts_are_not_presented_as_observed_events(self):
+        source = (ROOT / "tests/test_long_form_ux.py").read_text(encoding="utf-8")
+        self.assertIn("Deterministic contract coverage", source)
+        self.assertIn("observed event logs", source)
+        self.assertNotIn("test_expected_tuples_execute", source)
+
 
 if __name__ == "__main__":
     unittest.main()

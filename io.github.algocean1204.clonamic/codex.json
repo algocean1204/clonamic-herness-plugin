@@ -9,6 +9,7 @@
       "name": "clonamic-herness-plugin",
       "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
       "required": true,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../.codex-plugin/plugin.json"
     },
@@ -17,6 +18,7 @@
       "name": "clonamic-code-plugin",
       "description": "Proportional coding workflows, safe patching, modular design, and explicit bounded adversarial review.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-code-plugin/.codex-plugin/plugin.json"
     },
@@ -25,6 +27,7 @@
       "name": "clonamic-writing-plugin",
       "description": "Optional publication writing, Korean clarity, and deterministic final prose cleanup.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-writing-plugin/.codex-plugin/plugin.json"
     },
@@ -33,6 +36,7 @@
       "name": "clonamic-design-plugin",
       "description": "Optional design, browser QA, visual systems, and media-art skills.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-design-plugin/.codex-plugin/plugin.json"
     },
@@ -41,6 +45,7 @@
       "name": "clonamic-data-plugin",
       "description": "Optional dataset and Hugging Face workflow guidance.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-data-plugin/.codex-plugin/plugin.json"
     },
@@ -49,6 +54,7 @@
       "name": "clonamic-documents-plugin",
       "description": "Optional HWPX and document-specialist workflows.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-documents-plugin/.codex-plugin/plugin.json"
     },
@@ -57,6 +63,7 @@
       "name": "clonamic-ppt",
       "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
       "required": false,
+      "runtimeReadyRequired": true,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-ppt/.codex-plugin/plugin.json"
     },
@@ -65,6 +72,7 @@
       "name": "clonamic-preprocessing",
       "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-preprocessing/.codex-plugin/plugin.json"
     },
@@ -73,6 +81,7 @@
       "name": "clonamic-memory",
       "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-memory/.codex-plugin/plugin.json"
     },
@@ -81,6 +90,7 @@
       "name": "clonamic-grok",
       "description": "One bounded call through the installed Grok CLI.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-grok/.codex-plugin/plugin.json"
     },
@@ -89,6 +99,7 @@
       "name": "clonamic-claude",
       "description": "One bounded call through the installed Claude CLI.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-claude/.codex-plugin/plugin.json"
     },
@@ -97,6 +108,7 @@
       "name": "clonamic-hermes",
       "description": "One bounded call through the installed Hermes CLI.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0",
       "nativeManifest": "../plugins/clonamic-hermes/.codex-plugin/plugin.json"
     }

@@ -1,26 +1,38 @@
 # Validation performance
 
-The authoritative serial baseline is 12.390 seconds. The latest integrated three-run median is 5.320 seconds with eight Python-suite workers.
+The pre-change warm eight-worker median was 5.320 seconds for 26 local commands. The current suite
+runs 28 commands with a 4.480-second median: 0.840 seconds faster, or 15.8%, while adding event UX,
+runtime readiness, security, and portability coverage.
 
 ## Measurement
 
-The integrated measurements ran on macOS 26.5.1 arm64 with Python 3.9.6 and Cargo 1.97.1. Dependencies and Rust build artifacts were warm, Cargo ran offline, and `CLONAMIC_TEST_WORKERS=8`. Each run executed `python3 scripts/validate-public.py` with output suppressed while preserving its exit status.
+Measurements ran on macOS arm64 with Python 3.9.6 and Cargo 1.97.1. Every cell is the median of
+three complete `python3 scripts/validate-public.py` runs. Warm runs reused `target/`; cold runs used
+a new `CARGO_TARGET_DIR` each time. All runs exited zero with identical command coverage.
 
-| Measurement | Run 1 | Run 2 | Run 3 | Median |
-| --- | ---: | ---: | ---: | ---: |
-| Authoritative serial baseline | — | — | — | 12.390 s |
-| Integrated parallel validation | 5.300 s | 5.320 s | 5.400 s | 5.320 s |
+| Profile | Run 1 | Run 2 | Run 3 | Median |
+|---|---:|---:|---:|---:|
+| Warm, 1 worker | 17.510 s | 17.130 s | 17.260 s | 17.260 s |
+| Warm, 2 workers | 9.820 s | 9.720 s | 9.590 s | 9.720 s |
+| Warm, 4 workers | 6.060 s | 6.120 s | 6.140 s | 6.120 s |
+| Warm, 8 workers | 4.460 s | 4.480 s | 4.500 s | 4.480 s |
+| Cold, 8 workers | 13.150 s | 11.720 s | 11.480 s | 11.720 s |
 
-The median decreased by 7.070 seconds, or 57.1%. A full one-worker run completed in 13.771 seconds before the later config, package, and PPT safety suites were added. The current integrated suite includes 26 local commands covering executable provenance, automation, session, team, intent, review, process-tree cleanup, context-budget, plugin configuration, expanded memory, and hostile OOXML checks.
+Eight workers remain the default. The improvement comes from overlapping independent Python,
+package, PPT, and rustfmt checks; removing copy-only package tests and the POSIX supervisor process;
+and retaining Cargo clippy/test as ordered post-gates. No fixture sleep, timeout assertion, test,
+manifest check, security check, or command identity was removed.
 
-## Execution plan
+## Execution and failure behavior
 
-The adapter drift check runs first. The root Python suite and independent `plugins/*/tests` suites then run concurrently, with root output first followed by stable sorted package paths. PPT checks and every Rust command remain sequential. All parallel Python results are collected before the first failure in plan order is returned.
+Adapter drift and the debug binary build run first. Independent checks then run concurrently with
+stable plan-order output. Every command has a configurable 300-second local deadline; CI uses 600
+seconds per command plus a 30-minute job deadline. A timeout returns 124 and cleans the owned process
+tree. Cargo clippy and tests remain sequential to avoid target-directory lock contention.
 
-`CLONAMIC_TEST_WORKERS` accepts integers from 1 through 8 and defaults to the smaller of eight or the detected CPU count. Worker-count tests verify identical result and failure ordering. A nested root-suite check also verifies that concurrent root tests leave the tracked diff unchanged and that supervised descendants do not survive.
+## Quality boundary
 
-## Quality gate
-
-Speed is reported separately from behavior quality. Fourteen independently authored user and automation scenarios each exceed 1,500 characters, reject duplicate paragraphs and near-duplicate prompts, and execute the real core CLI plus the canonical team, intent, and review evaluators. Expected results cover trusted and unverified sources, forged automation markers, scope changes, platform credentials, unavailable team capability, bounded review, and blocked completion. No model name, model score, keyword score, or fixture-specific routing threshold affects validation success.
-
-Process supervision is also a correctness gate. Tests start descendants that outlive their direct parent and prove cleanup after success, nonzero failure, cancellation, and POSIX interruption. POSIX uses a dedicated process group; Windows uses a kill-on-close Job Object without an external process-tree utility.
+Twenty independently authored prompts of at least 1,500 characters provide deterministic contract
+coverage, including six read-only classes. They do not prove model behavior. Black-box UX claims
+require observed normalized host JSONL and are graded separately with
+`scripts/evaluate-ux-events.py`; synthetic schema fixtures are explicitly ineligible as evidence.

@@ -5,6 +5,8 @@ description: Run one bounded installed Hermes CLI request only when explicitly a
 
 # Hermes Executor
 
+Hermes currently receives the bounded prompt as a command-line value, so same-host process inspection can see it while the call runs. Never send credentials or secret values through this wrapper. Codex and Claude use stdin; Grok uses a private prompt file.
+
 Run one local wrapper call:
 
 ```bash

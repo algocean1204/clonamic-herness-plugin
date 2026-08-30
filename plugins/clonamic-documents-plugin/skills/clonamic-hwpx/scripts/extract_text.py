@@ -9,7 +9,7 @@ import zipfile
 import os
 import sys
 from typing import List, Optional
-from bs4 import BeautifulSoup
+from xml.etree import ElementTree
 
 
 # HWPX XML Namespaces
@@ -24,13 +24,12 @@ NAMESPACES = {
 
 def extract_text_from_section(xml_content: bytes) -> List[str]:
     """Extract text from a section XML file."""
-    soup = BeautifulSoup(xml_content, 'lxml-xml')
+    root = ElementTree.fromstring(xml_content)
     texts = []
 
-    # Find all text elements (hp:t)
-    for t_elem in soup.find_all(['t', 'hp:t']):
-        if t_elem.string:
-            text = t_elem.string.strip()
+    for element in root.iter():
+        if element.tag.rsplit('}', 1)[-1] == 't' and element.text:
+            text = element.text.strip()
             if text:
                 texts.append(text)
 

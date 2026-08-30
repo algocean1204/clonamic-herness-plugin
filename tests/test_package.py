@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import re
 import shutil
 import subprocess
@@ -62,6 +63,15 @@ def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def load_generator():
+    path = ROOT / "scripts/generate-adapters.py"
+    spec = importlib.util.spec_from_file_location("clonamic_generate_adapters", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 def load_inventory():
     catalog = load_json(CATALOG_PATH)
     rows = []
@@ -72,6 +82,22 @@ def load_inventory():
 
 
 class PackageContractTest(unittest.TestCase):
+    def test_managed_output_inventory_detects_obsolete_manifest_and_executor(self):
+        root = Path(tempfile.mkdtemp(prefix="clonamic-managed-output-"))
+        try:
+            manifest = root / "plugins/obsolete/.codex-plugin/plugin.json"
+            executor = root / "plugins/obsolete/skills/obsolete/scripts/call.py"
+            manifest.parent.mkdir(parents=True)
+            executor.parent.mkdir(parents=True)
+            manifest.write_text("{}", encoding="utf-8")
+            executor.write_text("PROVIDER = json.loads(r'''{}''')", encoding="utf-8")
+            self.assertEqual(
+                {manifest, executor},
+                load_generator().managed_output_paths(root),
+            )
+        finally:
+            shutil.rmtree(root)
+
     def test_all_manifests_are_closed_agent_plugins_1_0_packages(self):
         _, rows = load_inventory()
         self.assertEqual(13, len(rows))
@@ -109,8 +135,12 @@ class PackageContractTest(unittest.TestCase):
         graph = {}
         for entry, path, manifest in rows:
             with self.subTest(manifest=entry["manifest"]):
-                self.assertEqual(
-                    {"manifest", "required", "category", "platforms", "dependencies"}, set(entry)
+                self.assertLessEqual(
+                    set(entry),
+                    {"manifest", "required", "category", "platforms", "dependencies", "runtime_ready_required"},
+                )
+                self.assertTrue(
+                    {"manifest", "required", "category", "platforms", "dependencies"}.issubset(entry)
                 )
                 self.assertNotIn("name", entry)
                 self.assertNotIn("version", entry)
@@ -162,21 +192,11 @@ class PackageContractTest(unittest.TestCase):
                     self.assertRegex(text, rf"(?m)^name: {re.escape(skill_path.parent.name)}$")
                     self.assertRegex(text, r"(?m)^description: .+$")
                     self.assertNotIn("TODO", text)
-                with tempfile.TemporaryDirectory() as temporary:
-                    isolated = Path(temporary) / manifest["name"]
-                    isolated.mkdir()
-                    shutil.copy2(manifest_path, isolated / "plugin.json")
-                    shutil.copytree(package / "skills", isolated / "skills")
-                    self.assertEqual(
-                        manifest["name"], load_json(isolated / "plugin.json")["name"]
-                    )
-                    self.assertEqual(
-                        [path.parent.name for path in direct],
-                        [
-                            path.parent.name
-                            for path in sorted((isolated / "skills").glob("*/SKILL.md"))
-                        ],
-                    )
+                boundary = package.resolve()
+                self.assertTrue(manifest_path.resolve().is_relative_to(boundary))
+                self.assertTrue(
+                    all(path.resolve().is_relative_to(boundary) for path in direct)
+                )
 
     def test_executor_handoff_is_complete_and_legacy_wrapper_is_absent(self):
         self.assertFalse((ROOT / "plugins" / "clonamic-herness-plugin").exists())
@@ -246,6 +266,11 @@ class PackageContractTest(unittest.TestCase):
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertIn("50/50", result.stdout)
+        generator = load_generator()
+        self.assertEqual(
+            set(generator.expected_outputs()),
+            generator.managed_output_paths(ROOT),
+        )
         _, rows = load_inventory()
         for platform, path in MARKETPLACES.items():
             with self.subTest(platform=platform):
@@ -327,27 +352,26 @@ class PackageContractTest(unittest.TestCase):
                     else:
                         self.assertEqual(expected_minimal, native)
 
-    def test_native_manifest_and_direct_skills_travel_together_in_isolation(self):
+    def test_native_manifest_and_direct_skills_share_one_package_boundary(self):
         _, rows = load_inventory()
         for _, manifest_path, canonical in rows:
             package = manifest_path.parent
+            boundary = package.resolve()
             expected_skills = [
                 path.parent.name for path in sorted((package / "skills").glob("*/SKILL.md"))
             ]
             for platform, directory in NATIVE_DIRS.items():
                 with self.subTest(package=canonical["name"], platform=platform):
-                    with tempfile.TemporaryDirectory() as temporary:
-                        isolated = Path(temporary) / canonical["name"]
-                        isolated.mkdir()
-                        shutil.copytree(package / "skills", isolated / "skills")
-                        shutil.copytree(package / directory, isolated / directory)
-                        native = load_json(isolated / directory / "plugin.json")
-                        discovered = [
-                            path.parent.name
-                            for path in sorted((isolated / "skills").glob("*/SKILL.md"))
-                        ]
-                        self.assertEqual(canonical["name"], native["name"])
-                        self.assertEqual(expected_skills, discovered)
+                    native_path = package / directory / "plugin.json"
+                    self.assertTrue(native_path.resolve().is_relative_to(boundary))
+                    self.assertTrue((package / "skills").resolve().is_relative_to(boundary))
+                    native = load_json(native_path)
+                    discovered = [
+                        path.parent.name
+                        for path in sorted((package / "skills").glob("*/SKILL.md"))
+                    ]
+                    self.assertEqual(canonical["name"], native["name"])
+                    self.assertEqual(expected_skills, discovered)
 
     def test_executor_packages_are_not_offered_to_their_own_host(self):
         self_targets = {
@@ -362,13 +386,23 @@ class PackageContractTest(unittest.TestCase):
 
     def test_ci_uses_the_offline_local_validation_entrypoint(self):
         workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        release = (ROOT / ".github" / "workflows" / "release.yml").read_text(
+            encoding="utf-8"
+        )
         validator = (ROOT / "scripts" / "validate-public.py").read_text(encoding="utf-8")
         self.assertIn("python scripts/validate-public.py", workflow)
+        self.assertIn("timeout-minutes:", workflow)
         self.assertIn("generate-adapters.py", validator)
         self.assertIn("cargo", validator)
         self.assertIn("unittest", validator)
         self.assertIn("CARGO_NET_OFFLINE", validator)
+        self.assertIn("CLONAMIC_TEST_TIMEOUT_SECONDS", validator)
         self.assertIn("cargo fetch --locked", workflow)
+        self.assertIn("Validate release tag", release)
+        self.assertIn("Validate runner architecture", release)
+        self.assertIn("python scripts/validate-public.py", release)
+        self.assertIn("Smoke-test staged binary", release)
+        self.assertIn("timeout-minutes:", release)
         for network_client in ("curl ", "wget ", "requests.", "urllib."):
             self.assertNotIn(network_client, validator)
 

@@ -10,33 +10,34 @@ import csv
 import os
 import sys
 from typing import List, Dict, Any
-from bs4 import BeautifulSoup
+from xml.etree import ElementTree
+
+
+def _local_name(element) -> str:
+    return element.tag.rsplit('}', 1)[-1]
 
 
 def extract_cell_text(cell_elem) -> str:
     """Extract text from a table cell."""
     texts = []
-    for t_elem in cell_elem.find_all(['t', 'hp:t']):
-        if t_elem.string:
-            texts.append(t_elem.string.strip())
+    for element in cell_elem.iter():
+        if _local_name(element) == 't' and element.text:
+            texts.append(element.text.strip())
     return ' '.join(texts)
 
 
 def extract_tables_from_section(xml_content: bytes) -> List[List[List[str]]]:
     """Extract all tables from a section XML file."""
-    soup = BeautifulSoup(xml_content, 'lxml-xml')
+    root = ElementTree.fromstring(xml_content)
     tables = []
 
-    # Find all table elements
-    for tbl_elem in soup.find_all(['tbl', 'hp:tbl']):
+    for tbl_elem in (element for element in root.iter() if _local_name(element) == 'tbl'):
         table_data = []
 
-        # Find all rows
-        for tr_elem in tbl_elem.find_all(['tr', 'hp:tr']):
+        for tr_elem in (element for element in tbl_elem.iter() if _local_name(element) == 'tr'):
             row_data = []
 
-            # Find all cells
-            for tc_elem in tr_elem.find_all(['tc', 'hp:tc']):
+            for tc_elem in (element for element in tr_elem if _local_name(element) == 'tc'):
                 cell_text = extract_cell_text(tc_elem)
                 row_data.append(cell_text)
 

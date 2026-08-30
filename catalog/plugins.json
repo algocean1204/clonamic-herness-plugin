@@ -47,7 +47,8 @@
       "required": false,
       "category": "presentation",
       "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes"],
-      "dependencies": []
+      "dependencies": [],
+      "runtime_ready_required": true
     },
     {
       "manifest": "plugins/clonamic-preprocessing/plugin.json",

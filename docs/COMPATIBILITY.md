@@ -36,13 +36,17 @@ Team topology is selected prospectively; worker defects, missing evidence, and f
 
 Prompt provenance and automation authority require a host adapter that can attest whether a prompt came from an interactive user, scheduler, or internal worker. Without attestation, authority is `none`; a textual automation label never upgrades it. In-scope claimed automation is noninteractive, while credentials and operating-system prompts remain platform actions.
 
+Agent UX evaluation is host-neutral only after the host exports normalized redacted JSONL events. Repository fixtures cannot observe chat waits, duplicate specifications, reports, or tool calls and are never presented as model-quality evidence.
+
 The optional memory child uses Python's standard `sqlite3` at a caller-supplied path. It creates and migrates state lazily and does not require a server, Docker, vector extension, uv, or a virtual environment. FTS5 is opportunistic; the scan fallback preserves results when FTS5 is unavailable.
 
-The PPT child produces structural and SVG QA artifacts after input validation passes; blocked input produces `qa_report.json` without render artifacts. Raster QA depends on an available office renderer and image tooling. Automatic LibreOffice use is disabled on macOS unless `CLONAMIC_ALLOW_MACOS_SOFFICE=1`; unavailable raster QA is reported as unavailable, not passed. Host-side PowerPoint fidelity still requires visual inspection in the target application.
+The HWPX child uses standard-library XML parsing and never compiles or loads a temporary native shim. LibreOffice conversion requires an installed `soffice`; a blocked socket environment is reported unavailable rather than bypassed with `LD_PRELOAD`.
+
+The PPT child produces structural and SVG QA artifacts after input validation passes; blocked input produces `qa_report.json` without render artifacts. Its doctor checks Node, the lockfile, `pptxgenjs`, and the guarded image-size link. The resolver reports `runtime_ready:false` until that setup passes. Raster QA depends on an available office renderer and image tooling. Automatic LibreOffice use is disabled on macOS unless `CLONAMIC_ALLOW_MACOS_SOFFICE=1`; unavailable raster QA is reported as unavailable, not passed. Host-side PowerPoint fidelity still requires visual inspection in the target application.
 
 ## External executors
 
-`clonamic-grok`, `clonamic-gpt`, `clonamic-claude`, and `clonamic-hermes` call only the named installed CLI. They use provider defaults plus explicit user options. They do not choose a model ID, read provider sessions, access memory, retry, or switch executors.
+`clonamic-grok`, `clonamic-gpt`, `clonamic-claude`, and `clonamic-hermes` call only the named installed CLI. They use provider defaults plus explicit user options. Codex and Claude receive prompts through stdin, Grok through a private temporary file, and Hermes through argv with an explicit privacy warning. Every exit path cleans descendants. They do not choose a model ID, read provider sessions, access memory, retry, or switch executors.
 
 CLI availability and authentication are host conditions. Repository tests can use local fakes to verify argv, timeout, process cleanup, recursion blocking, redaction, and JSON output without making a provider request.
 

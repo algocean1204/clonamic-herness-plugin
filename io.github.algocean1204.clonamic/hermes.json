@@ -9,6 +9,7 @@
       "name": "clonamic-herness-plugin",
       "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
       "required": true,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -16,6 +17,7 @@
       "name": "clonamic-code-plugin",
       "description": "Proportional coding workflows, safe patching, modular design, and explicit bounded adversarial review.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -23,6 +25,7 @@
       "name": "clonamic-writing-plugin",
       "description": "Optional publication writing, Korean clarity, and deterministic final prose cleanup.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -30,6 +33,7 @@
       "name": "clonamic-design-plugin",
       "description": "Optional design, browser QA, visual systems, and media-art skills.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -37,6 +41,7 @@
       "name": "clonamic-data-plugin",
       "description": "Optional dataset and Hugging Face workflow guidance.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -44,6 +49,7 @@
       "name": "clonamic-documents-plugin",
       "description": "Optional HWPX and document-specialist workflows.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -51,6 +57,7 @@
       "name": "clonamic-ppt",
       "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
       "required": false,
+      "runtimeReadyRequired": true,
       "version": "0.1.0"
     },
     {
@@ -58,6 +65,7 @@
       "name": "clonamic-preprocessing",
       "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -65,6 +73,7 @@
       "name": "clonamic-memory",
       "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -72,6 +81,7 @@
       "name": "clonamic-grok",
       "description": "One bounded call through the installed Grok CLI.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -79,6 +89,7 @@
       "name": "clonamic-gpt",
       "description": "One bounded call through the installed Codex CLI.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     },
     {
@@ -86,6 +97,7 @@
       "name": "clonamic-claude",
       "description": "One bounded call through the installed Claude CLI.",
       "required": false,
+      "runtimeReadyRequired": false,
       "version": "0.1.0"
     }
   ]

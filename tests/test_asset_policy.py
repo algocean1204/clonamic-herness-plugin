@@ -33,6 +33,11 @@ CODE_SKILLS = {
 
 
 class AssetPolicyTest(unittest.TestCase):
+    def test_package_contracts_do_not_copy_complete_trees_to_test_discovery(self):
+        source = (ROOT / "tests/test_package.py").read_text(encoding="utf-8")
+        self.assertNotIn("shutil.copytree", source)
+        self.assertNotIn("TemporaryDirectory", source)
+
     def test_catalog_matches_active_and_selective_policy(self):
         catalog = json.loads((ROOT / "catalog/plugins.json").read_text(encoding="utf-8"))
         names = {

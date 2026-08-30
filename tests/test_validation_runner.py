@@ -76,22 +76,30 @@ class ValidationRunnerTest(unittest.TestCase):
         self.assertEqual(["cargo", "build"], [plan["before"][1][0], plan["before"][1][1]])
         root_modules = [f"tests.{path.stem}" for path in sorted((ROOT / "tests").glob("test_*.py"))]
         self.assertEqual(root_modules, [command[-2] for command in plan["packages"][: len(root_modules)]])
-        self.assertEqual(
-            sorted(
-                str(path.relative_to(ROOT))
-                for path in ROOT.glob("plugins/*/tests")
-                if any(path.glob("test*.py"))
-            ),
-            [command[-2] for command in plan["packages"][len(root_modules) :]],
+        expected_package_tests = sorted(
+            str(path.relative_to(ROOT))
+            for path in ROOT.glob("plugins/*/tests")
+            if any(path.glob("test*.py"))
         )
         self.assertEqual(
-            "plugins/clonamic-ppt/skills/clonamic-ppt/tests/run_all.py",
-            plan["after"][0][1],
+            expected_package_tests,
+            [
+                command[-2]
+                for command in plan["packages"]
+                if "discover" in command
+            ],
         )
+        ppt = [sys.executable, "plugins/clonamic-ppt/skills/clonamic-ppt/tests/run_all.py"]
+        rustfmt = ["cargo", "fmt", "--check"]
+        self.assertIn(ppt, plan["packages"])
+        self.assertIn(rustfmt, plan["packages"])
+        self.assertNotIn(ppt, plan["after"])
+        self.assertNotIn(rustfmt, plan["after"])
         self.assertEqual(
-            ["fmt", "clippy", "test"],
-            [command[1] for command in plan["after"][1:]],
+            2 + len(root_modules) + len(expected_package_tests) + 2 + 2,
+            sum(len(commands) for commands in plan.values()),
         )
+        self.assertEqual(["clippy", "test"], [command[1] for command in plan["after"]])
 
     def test_worker_override_accepts_only_one_through_eight(self):
         for value in range(1, 9):
@@ -104,6 +112,45 @@ class ValidationRunnerTest(unittest.TestCase):
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     VALIDATOR.worker_count({"CLONAMIC_TEST_WORKERS": value})
+
+    def test_command_deadline_is_bounded_and_configurable(self):
+        self.assertEqual(300.0, VALIDATOR.command_timeout({}))
+        self.assertEqual(
+            0.1,
+            VALIDATOR.command_timeout({"CLONAMIC_TEST_TIMEOUT_SECONDS": "0.1"}),
+        )
+        for value in ("0", "3601", "many"):
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    VALIDATOR.command_timeout(
+                        {"CLONAMIC_TEST_TIMEOUT_SECONDS": value}
+                    )
+
+    def test_binary_path_follows_cargo_target_dir(self):
+        expected_name = "clonamic.exe" if os.name == "nt" else "clonamic"
+        self.assertEqual(
+            ROOT / "target/debug" / expected_name,
+            VALIDATOR.test_binary_path({}),
+        )
+        self.assertEqual(
+            Path("/tmp/clonamic-target/debug") / expected_name,
+            VALIDATOR.test_binary_path({"CARGO_TARGET_DIR": "/tmp/clonamic-target"}),
+        )
+
+    def test_capture_timeout_terminates_the_owned_process_group(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            pid_file = Path(temporary) / "timed-out.pid"
+            started = time.monotonic()
+            completed = VALIDATOR._capture(
+                detached_child_command(pid_file, linger=True),
+                os.environ.copy(),
+                timeout=0.1,
+            )
+            wait_for_file(pid_file)
+            self.assertEqual(124, completed.returncode)
+            self.assertIn("timed out after 0.1 seconds", completed.stderr)
+            self.assertLess(time.monotonic() - started, 1.0)
+            assert_process_exits(self, int(pid_file.read_text(encoding="utf-8")))
 
     def test_parallel_packages_reduce_wall_time(self):
         commands = [
@@ -213,6 +260,12 @@ class ValidationRunnerTest(unittest.TestCase):
             runner.wait(timeout=5)
             self.assertNotEqual(0, runner.returncode)
             assert_process_exits(self, int(pid_file.read_text(encoding="utf-8")))
+
+    @unittest.skipIf(os.name == "nt", "POSIX process groups use start_new_session")
+    def test_posix_capture_uses_native_session_creation_without_a_python_supervisor(self):
+        source = (ROOT / "scripts" / "validate-public.py").read_text(encoding="utf-8")
+        self.assertIn('options["start_new_session"] = True', source)
+        self.assertNotIn("os.setpgid", source)
 
     def test_windows_cleanup_uses_a_kill_on_close_job_without_taskkill(self):
         source = (ROOT / "scripts" / "validate-public.py").read_text(encoding="utf-8")

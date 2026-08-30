@@ -71,6 +71,62 @@ class PreprocessingPackageTest(unittest.TestCase):
         )
         self.assertEqual("ABC", self.runtime.normalize_text("ＡＢＣ"))
 
+    def test_queue_preserves_original_payload_and_keeps_a_normalized_view(self):
+        queue = self.queue_path()
+        original = '```python\nif ready:\n    print("a  b")\n```\n\uff21ＢＣ'
+        item = self.runtime.enqueue(queue, original, item_id="code")
+        self.assertEqual(original, item["text"])
+        self.assertEqual(
+            '```python\nif ready:\nprint("a b")\n```\nABC',
+            item["normalized_text"],
+        )
+        claimed = self.runtime.claim_next(queue, worker_id="worker")
+        self.assertEqual(original, claimed["text"])
+        self.assertEqual(item["normalized_text"], claimed["normalized_text"])
+
+    def test_normalization_result_never_replaces_literal_execution_text(self):
+        queue = self.queue_path()
+        original = 'target:\n\t@printf "x  y\\n"\npath: "C:\\\\Temp"'
+        result = self.runtime.clarification_contract(original, [])
+        self.assertEqual(original, result["original_text"])
+        self.assertNotEqual(original, result["normalized_text"])
+        self.runtime.enqueue(queue, original, item_id="literal")
+        self.assertEqual(
+            original,
+            self.runtime.claim_next(queue, worker_id="worker")["text"],
+        )
+
+    def test_legacy_queue_item_gains_comparison_text_without_rewriting_payload(self):
+        queue = self.queue_path()
+        original = 'if ready:\n    print("a  b")'
+        queue.parent.mkdir(parents=True, exist_ok=True)
+        queue.write_text(
+            json.dumps(
+                {
+                    "version": 1,
+                    "next_sequence": 1,
+                    "items": [
+                        {
+                            "id": "legacy",
+                            "text": original,
+                            "priority": 10,
+                            "sequence": 0,
+                            "state": "pending",
+                            "attempts": 0,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        claimed = self.runtime.claim_next(queue, worker_id="worker")
+        self.assertEqual(original, claimed["text"])
+        self.assertEqual(self.runtime.normalize_text(original), claimed["normalized_text"])
+        self.runtime.record(queue, "legacy", claimed["claim_id"], "done", {"ok": True})
+        stored = self.runtime.queue_state(queue)["items"][0]
+        self.assertEqual(original, stored["text"])
+        self.assertEqual("done", stored["state"])
+
     def test_clarification_uses_only_caller_supplied_missing_fields(self):
         ready = self.runtime.clarification_contract("Ship the release", [])
         self.assertFalse(ready["required"])

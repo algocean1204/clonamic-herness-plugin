@@ -23,7 +23,15 @@ class CallTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.bin = Path(self.temp.name)
         fake_source = (
-            "import os, sys, time\n"
+            "import os, subprocess, sys, time\n"
+            "prompt = sys.stdin.read()\n"
+            "if '--prompt-file' in sys.argv:\n"
+            "    path = sys.argv[sys.argv.index('--prompt-file') + 1]\n"
+            "    prompt = open(path, encoding='utf-8').read()\n"
+            "    print('prompt_file_mode=' + oct(os.stat(path).st_mode & 0o777))\n"
+            "if os.environ.get('FAKE_MODE') == 'orphan':\n"
+            "    child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
+            "    open(os.environ['PID_FILE'], 'w').write(str(child.pid))\n"
             "if os.environ.get('FAKE_MODE') == 'sleep':\n"
             "    open(os.environ['PID_FILE'], 'w').write(str(os.getpid()))\n"
             "    time.sleep(60)\n"
@@ -32,6 +40,7 @@ class CallTests(unittest.TestCase):
             "    print('B' * 200000, file=sys.stderr)\n"
             "    raise SystemExit(0)\n"
             "print('argv=' + repr(sys.argv[1:]))\n"
+            "print('prompt=' + repr(prompt))\n"
             "print('OPENAI_API_KEY=\"open ai secret value\"')\n"
             "print(\"ANTHROPIC_API_KEY='anthropic multi word key'\")\n"
             "print('XAI_API_KEY=xai-provider-secret')\n"
@@ -161,27 +170,32 @@ class CallTests(unittest.TestCase):
             with self.assertRaises(ProcessLookupError):
                 os.kill(pid, 0)
 
-    def test_windows_termination_uses_taskkill_tree(self) -> None:
+    def test_normal_exit_cleans_descendant_process_tree(self) -> None:
+        pid_file = self.bin / "orphan-pid"
+        env = self.env.copy()
+        env["FAKE_MODE"] = "orphan"
+        env["PID_FILE"] = str(pid_file)
+        proc, result = self.call("hello", env=env)
+        self.assertEqual(0, proc.returncode, result)
+        pid = int(pid_file.read_text(encoding="utf-8"))
+        if os.name != "nt":
+            with self.assertRaises(ProcessLookupError):
+                os.kill(pid, 0)
+
+    def test_windows_termination_uses_kill_on_close_job(self) -> None:
         spec = importlib.util.spec_from_file_location("clonamic_hermes_call", CALL)
         module = importlib.util.module_from_spec(spec)
         assert spec.loader is not None
         spec.loader.exec_module(module)
 
-        class Process:
-            pid = 42
+        source = CALL.read_text(encoding="utf-8")
+        self.assertIn("_windows_job", source)
+        self.assertIn("0x00002000", source)
+        self.assertNotIn('"taskkill"', source)
 
-            def poll(self):
-                return None
-
-            def wait(self, timeout=None):
-                return 0
-
-            def kill(self):
-                raise AssertionError("taskkill should handle the tree")
-
-        with mock.patch.object(module.subprocess, "run") as run:
-            module.terminate(Process(), platform="nt")
-        self.assertEqual(run.call_args.args[0], ["taskkill", "/PID", "42", "/T", "/F"])
+    def test_skill_discloses_prompt_argv_visibility(self) -> None:
+        skill = (ROOT / "skills" / PLUGIN / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("process inspection", skill)
 
     def test_skill_forbids_self_hosting(self) -> None:
         skill = (ROOT / "skills" / PLUGIN / "SKILL.md").read_text(encoding="utf-8")

@@ -36,6 +36,34 @@ EXPECTED_FIELDS = {
     "session_label",
     "body_sha256",
 }
+CASE_FIELDS = {
+    "id",
+    "scenario",
+    "ux_class",
+    "prompt",
+    "provenance",
+    "execution",
+    "contract_input",
+    "expected",
+}
+READ_ONLY_CLASSES = {
+    "question",
+    "explanation",
+    "inspection",
+    "review",
+    "status",
+    "recommendation",
+}
+CONTROL_LABELS = {
+    "approval_count",
+    "conversational_stops",
+    "final status",
+    "final_status",
+    "intended_mode",
+    "actual_team",
+    "review_verdict",
+    "expected route",
+}
 ALLOWED = {
     "source": {"user", "automation", "internal", "unverified"},
     "authority": {
@@ -54,6 +82,8 @@ ALLOWED = {
 
 
 class LongFormUxTest(unittest.TestCase):
+    """Deterministic contract coverage; model UX requires observed event logs."""
+
     @classmethod
     def setUpClass(cls):
         cls.cases = load_json(FIXTURE)["cases"]
@@ -119,10 +149,11 @@ class LongFormUxTest(unittest.TestCase):
         return json.loads(line.split(": ", 1)[1])
 
     def test_fixture_has_independently_authored_long_prompts(self):
-        self.assertGreaterEqual(len(self.cases), 12)
+        self.assertGreaterEqual(len(self.cases), 20)
         self.assertEqual(len(self.cases), len({case["id"] for case in self.cases}))
         owners = {}
         for case in self.cases:
+            self.assertEqual(CASE_FIELDS, set(case), case["id"])
             prompt = case["prompt"]
             self.assertGreaterEqual(len(prompt), 1_500, case["id"])
             self.assertGreaterEqual(len(prompt.split()), 180, case["id"])
@@ -146,6 +177,21 @@ class LongFormUxTest(unittest.TestCase):
                     0.58,
                     f"near-duplicate prompts: {left['id']} / {right['id']} = {ratio:.3f}",
                 )
+
+    def test_prompts_are_blind_and_cover_six_read_only_classes(self):
+        read_classes = set()
+        for case in self.cases:
+            prompt = case["prompt"].casefold()
+            with self.subTest(case=case["id"]):
+                self.assertFalse(
+                    {label for label in CONTROL_LABELS if label in prompt},
+                    "prompt exposes evaluator control labels",
+                )
+                if not case["execution"]["write_requested"]:
+                    self.assertEqual("direct", case["expected"]["route"])
+                    self.assertEqual(0, case["expected"]["approval_count"])
+                    read_classes.add(case["ux_class"])
+        self.assertTrue(READ_ONLY_CLASSES.issubset(read_classes))
 
     def test_expected_results_are_closed_and_hash_the_exact_prompt(self):
         for case in self.cases:
@@ -192,7 +238,7 @@ class LongFormUxTest(unittest.TestCase):
             any(case["contract_input"].get("native_subagents_available") is False for case in self.cases)
         )
 
-    def test_expected_tuples_execute_core_and_contract_evaluators(self):
+    def test_fixture_metadata_executes_deterministic_contract_evaluators(self):
         intent = load_json(ROOT / "skills/clonamic-intent-guard/references/intent-contract.json")
         team = load_json(ROOT / "skills/clonamic-team-control/references/team-contract.json")
         review = load_json(ROOT / "skills/clonamic-team-control/references/review-contract.json")

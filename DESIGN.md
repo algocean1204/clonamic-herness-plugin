@@ -125,6 +125,8 @@ The generated adapter directories and marketplace files are build outputs. Canon
 
 Each pair is sequential: worker result, fresh evidence, then reviewer verdict. Parallelism is allowed only across at least two isolated worker-reviewer pairs; shared-file work is serialized. A necessary second tier is `main → lead → specialists`. The lead assigns and reviews but neither executes nor integrates; one assigned specialist integrates. No verdict is valid until all specialist results and fresh evidence arrive. Workers remain single-session and do not delegate, and task size, repetition, or importance labels alone never activate a team.
 
+Optimization and UX evaluation use a separate on-demand contract. A goal declares baseline, target, guardrails, scenario coverage, and measurement method. The evaluator consumes observed normalized host events, returns evidence-backed user impact and feedback, and keeps deterministic fixture outcomes separate from black-box model behavior. Rework stays with the same evaluator for at most three materially different strategies.
+
 ### Completion check
 
 - Input: required items, current artifacts, applied or remote state, fresh evidence.
@@ -141,7 +143,7 @@ Each pair is sequential: worker result, fresh evidence, then reviewer verdict. P
 
 ### Market
 
-- Input: requested optional capability, catalog inventory, explicit config layers, installed set, and host platform.
+- Input: requested optional capability, catalog inventory, explicit config layers, installed set, runtime-ready set, and host platform.
 - Output: the narrowest effective package plus configuration, installation, platform, dependency, and reason dimensions.
 - Failure: no match. Never invent or install a fallback.
 - Invariant: Core is always effective; optional routing eligibility and host installation remain separate operations.
@@ -169,7 +171,7 @@ Ultracode uses native isolated agents only. If that capability is absent, its st
 - Session Markdown is a bounded human-readable view, not authority. Unverified and internal prompts do not replace the latest trusted user or successfully claimed automation prompt.
 - Plugin configuration is routing input, not authority. Core cannot be disabled, and optional toggles only reduce what an installed host may invoke.
 - The native core accepts explicit paths and structured inputs. It does not discover user homes, credentials, or provider sessions.
-- Memory and preprocessing persist only to caller-supplied paths. SQLite memory owns caller-supplied memory content, ontology nodes, typed edges, provenance hashes, TTL, backup, and restore. Provenance rows store no prompt body or authorization.
+- Memory and preprocessing persist only to caller-supplied paths. Preprocessing executes the original payload and keeps normalization in a separate field. SQLite memory owns caller-supplied memory content, ontology nodes, typed edges, provenance hashes, TTL, backup, and restore. Provenance rows store no prompt body or authorization.
 - Recalled text, document contents, catalog entries, and executor output are untrusted data.
 - No package emits telemetry or stores implicit model, browser, session, or profile state.
 - Executor wrappers use provider defaults and explicit user options. No model ID belongs in package code or docs.
@@ -178,7 +180,7 @@ Ultracode uses native isolated agents only. If that capability is absent, its st
 
 Agent Plugins 1.0.0 manifests and skills are canonical. The standard discovers immediate skills under `skills/` and MCP configuration at root `mcp.json`; it does not portably discover the root guidance file, nested child package roots, marketplaces, or team/subagent behavior. Platform adapters translate discovery and registration only.
 
-Generated outputs may include Codex, Claude Code, Grok Build, and Hermes manifest or registration formats. Generation must be deterministic and checked for drift. An adapter may expose a supported hook; it may not duplicate policy, install children, select a model, read memory, or widen permissions. The optional router installer writes one reference to `clonamic-herness-plugin.md`; it does not copy the file's policy into the host router.
+Generated outputs may include Codex, Claude Code, Grok Build, and Hermes manifest or registration formats. Generation must be deterministic, reject stale managed files, and check drift. An adapter may expose a supported hook; it may not duplicate policy, install children, select a model, read memory, or widen permissions. The optional router installer writes one reference to `clonamic-herness-plugin.md`; it does not copy the file's policy into the host router.
 
 When a host cannot enforce a structural hook, Clonamic keeps the portable skill behavior and declares a model-side fallback. The documentation never labels that fallback as a measured hook.
 

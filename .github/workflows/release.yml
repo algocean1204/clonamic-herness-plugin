@@ -14,15 +14,41 @@ jobs:
         include:
           - os: ubuntu-latest
             asset: clonamic-linux-x86_64
+            architecture: x86_64
           - os: macos-latest
             asset: clonamic-macos-aarch64
+            architecture: arm64
           - os: windows-latest
             asset: clonamic-windows-x86_64.exe
+            architecture: amd64
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      CLONAMIC_TEST_TIMEOUT_SECONDS: "600"
     steps:
       - uses: actions/checkout@v6
-      - run: rustup toolchain install 1.85.1 --profile minimal
-      - run: cargo build --release --bin clonamic
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: plugins/clonamic-ppt/package-lock.json
+      - run: rustup toolchain install 1.85.1 --profile minimal --component rustfmt,clippy
+      - run: npm ci --prefix plugins/clonamic-ppt
+      - run: npm audit --omit=dev --prefix plugins/clonamic-ppt
+      - run: cargo fetch --locked
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python -c "import json,os,pathlib; expected='v'+json.loads(pathlib.Path('plugin.json').read_text(encoding='utf-8'))['version']; actual=os.environ['RELEASE_TAG']; assert actual == expected, f'{actual} != {expected}'"
+      - name: Validate runner architecture
+        env:
+          EXPECTED_ARCHITECTURE: ${{ matrix.architecture }}
+        run: python -c "import os,platform; actual=platform.machine().casefold(); expected=os.environ['EXPECTED_ARCHITECTURE']; aliases={'x86_64':{'x86_64','amd64'},'arm64':{'arm64','aarch64'},'amd64':{'amd64','x86_64'}}; assert actual in aliases[expected], f'{actual} not in {aliases[expected]}'"
+      - run: python scripts/validate-public.py
+      - run: cargo build --locked --release --bin clonamic
       - name: Stage Unix binary
         if: runner.os != 'Windows'
         run: cp target/release/clonamic "${{ matrix.asset }}"
@@ -30,6 +56,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: Copy-Item target/release/clonamic.exe "${{ matrix.asset }}"
+      - name: Smoke-test staged binary
+        env:
+          STAGED_ASSET: ${{ matrix.asset }}
+        run: python -c "import os,pathlib,subprocess; binary=pathlib.Path(os.environ['STAGED_ASSET']).resolve(); result=subprocess.run([str(binary),'doctor','.'],text=True,capture_output=True,timeout=30); print(result.stdout,end=''); print(result.stderr,end=''); assert result.returncode == 0"
       - name: Checksum Unix binary
         if: runner.os != 'Windows'
         run: shasum -a 256 "${{ matrix.asset }}" > "${{ matrix.asset }}.sha256"

@@ -1671,7 +1671,7 @@ fn resolve_paths(
 }
 
 #[test]
-fn plugin_resolution_without_config_preserves_backward_compatibility() {
+fn plugin_resolution_without_runtime_evidence_fails_closed_for_runtime_packages() {
     for invalid in [
         "Invalid Platform",
         ".",
@@ -1720,7 +1720,48 @@ fn plugin_resolution_without_config_preserves_backward_compatibility() {
             .iter()
             .all(|plugin| plugin.platform_supported)
     );
-    assert!(portable.plugins.iter().all(|plugin| plugin.effective));
+    assert!(
+        portable
+            .plugins
+            .iter()
+            .filter(|plugin| plugin.name != "clonamic-ppt")
+            .all(|plugin| plugin.effective)
+    );
+    let ppt = portable.plugin("clonamic-ppt").unwrap();
+    assert!(!ppt.runtime_ready);
+    assert!(!ppt.effective);
+    assert_eq!(ppt.reason, "enabled_but_unavailable");
+}
+
+#[cfg(unix)]
+#[test]
+fn plugin_resolution_rejects_symlinked_manifest_outside_root() {
+    use std::os::unix::fs::symlink;
+
+    let dir = tempdir().unwrap();
+    let root = dir.path().join("root");
+    fs::create_dir_all(root.join("plugins/child")).unwrap();
+    fs::write(root.join("plugin.json"), r#"{"name":"root"}"#).unwrap();
+    let outside = dir.path().join("outside.json");
+    fs::write(&outside, r#"{"name":"escaped"}"#).unwrap();
+    symlink(&outside, root.join("plugins/child/plugin.json")).unwrap();
+    fs::write(
+        root.join("catalog.json"),
+        r#"{"plugins":[{"manifest":"plugin.json","required":true,"category":"core","platforms":["codex"],"dependencies":[]},{"manifest":"plugins/child/plugin.json","required":false,"category":"test","platforms":["codex"],"dependencies":[]}]}"#,
+    )
+    .unwrap();
+    let result = resolve_plugins(
+        &ResolvePaths {
+            catalog: root.join("catalog.json"),
+            manifest_root: root,
+            default_config: None,
+            user_config: None,
+            project_config: None,
+        },
+        "codex",
+        &BTreeSet::new(),
+    );
+    assert!(result.is_err());
 }
 
 #[test]
@@ -1940,10 +1981,43 @@ fn resolve_plugins_cli_is_reproducible_and_reports_each_dimension() {
         "platform_supported",
         "dependencies",
         "dependencies_ready",
+        "runtime_ready",
         "effective",
         "reason",
         "manifest",
     ] {
         assert!(row.get(field).is_some(), "missing {field}");
     }
+    let ppt = payload["plugins"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|plugin| plugin["name"] == "clonamic-ppt")
+        .unwrap();
+    assert_eq!(ppt["runtime_ready"], false);
+    assert_eq!(ppt["effective"], false);
+
+    fs::write(
+        &installed,
+        serde_json::to_vec(&serde_json::json!({
+            "installed": all_installed(),
+            "runtime_ready": all_installed(),
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    let ready = Command::new(env!("CARGO_BIN_EXE_clonamic"))
+        .args(&args)
+        .output()
+        .unwrap();
+    assert!(ready.status.success());
+    let ready_payload: Value = serde_json::from_slice(&ready.stdout).unwrap();
+    let ready_ppt = ready_payload["plugins"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|plugin| plugin["name"] == "clonamic-ppt")
+        .unwrap();
+    assert_eq!(ready_ppt["runtime_ready"], true);
+    assert_eq!(ready_ppt["effective"], true);
 }

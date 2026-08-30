@@ -9,6 +9,9 @@ permissions:
 
 jobs:
   test:
+    timeout-minutes: 30
+    env:
+      CLONAMIC_TEST_TIMEOUT_SECONDS: "600"
     strategy:
       fail-fast: false
       matrix:

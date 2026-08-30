@@ -4,7 +4,7 @@ use clonamic_core::automation::{
 };
 use clonamic_core::completion::{CompletionManifest, verify_completion};
 use clonamic_core::installation::{InstallRequest, install_router, uninstall_router};
-use clonamic_core::plugin_config::{ResolvePaths, resolve_plugins};
+use clonamic_core::plugin_config::{ResolvePaths, resolve_plugins_with_runtime};
 use clonamic_core::provenance::{
     HostSource, PromptEnvelope, ScopeAuthority, authorize_automation, classify_prompt,
     parse_envelope,
@@ -37,7 +37,7 @@ fn run(args: Vec<String>) -> Result<()> {
             installed,
         ] if command == "resolve-plugins" => {
             let installed: InstalledDocument = serde_json::from_slice(&fs::read(installed)?)?;
-            let resolution = resolve_plugins(
+            let resolution = resolve_plugins_with_runtime(
                 &ResolvePaths {
                     catalog: PathBuf::from(catalog),
                     manifest_root: PathBuf::from(manifest_root),
@@ -47,6 +47,7 @@ fn run(args: Vec<String>) -> Result<()> {
                 },
                 platform,
                 &installed.installed,
+                &installed.runtime_ready,
             )?;
             println!("{}", serde_json::to_string(&resolution)?);
         }
@@ -210,6 +211,8 @@ struct PromptContext {
 #[serde(deny_unknown_fields)]
 struct InstalledDocument {
     installed: BTreeSet<String>,
+    #[serde(default)]
+    runtime_ready: BTreeSet<String>,
 }
 
 fn optional_path(value: &str) -> Option<PathBuf> {

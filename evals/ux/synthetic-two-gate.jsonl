@@ -1,0 +1,13 @@
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":1,"type":"request_received","data":{"source":"user","prompt_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","capture_kind":"synthetic_schema_fixture","host":"schema-fixture"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":2,"type":"assistant_message","data":{"kind":"work_specification","digest":"work-digest"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":3,"type":"approval_wait","data":{"packet_id":"work","code":"ABC123","specification_kind":"work_specification"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":4,"type":"approval_result","data":{"packet_id":"work","code":"ABC123","status":"activated"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":5,"type":"assistant_message","data":{"kind":"development_specification","digest":"development-digest"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":6,"type":"approval_wait","data":{"packet_id":"development","code":"DEF456","specification_kind":"development_specification"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":7,"type":"approval_result","data":{"packet_id":"development","code":"DEF456","status":"activated"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":8,"type":"team_selected","data":{"intended_mode":"native","actual_team":false,"execution":"direct"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":9,"type":"write","data":{"target":"src/example.py","authorization_id":"packet:development:DEF456"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":10,"type":"verification","data":{"id":"target-test","status":"passed","required":true,"evidence":"1 passed"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":11,"type":"verdict","data":{"status":"complete","evidence":"target-test passed after write"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":12,"type":"assistant_message","data":{"kind":"completion_report","digest":"report-digest"}}
+{"schema_version":1,"run_id":"synthetic-two-gate","seq":13,"type":"final","data":{"status":"complete"}}

@@ -52,27 +52,31 @@ EXECUTOR_PROVIDERS = {
     "clonamic-gpt": {
         "executor": "clonamic-gpt",
         "executable": "codex",
-        "arguments": ["exec", "--ephemeral", "--sandbox", "read-only", "{cli_args}", "{prompt}"],
+        "prompt_transport": "stdin",
+        "arguments": ["exec", "--ephemeral", "--sandbox", "read-only", "{cli_args}", "-"],
     },
     "clonamic-grok": {
         "executor": "clonamic-grok",
         "executable": "grok",
+        "prompt_transport": "file",
         "arguments": [
             "--permission-mode", "plan", "--disable-web-search", "--no-subagents",
-            "--tools", "", "{cli_args}", "-p", "{prompt}",
+            "--tools", "", "{cli_args}", "--prompt-file", "{prompt_file}",
         ],
     },
     "clonamic-claude": {
         "executor": "clonamic-claude",
         "executable": "claude",
+        "prompt_transport": "stdin",
         "arguments": [
             "-p", "--no-session-persistence", "--permission-mode", "plan", "--tools", "",
-            "{cli_args}", "{prompt}",
+            "{cli_args}",
         ],
     },
     "clonamic-hermes": {
         "executor": "clonamic-hermes",
         "executable": "hermes",
+        "prompt_transport": "argv",
         "arguments": ["{cli_args}", "--ignore-rules", "-z", "{prompt}", "-t", ""],
     },
 }
@@ -146,6 +150,9 @@ def load_inventory():
             "category",
             "platforms",
             "dependencies",
+        } and set(entry) != {
+            "manifest", "required", "category", "platforms", "dependencies",
+            "runtime_ready_required",
         }:
             raise CatalogError("catalog entry fields are invalid")
         relative = entry["manifest"]
@@ -167,6 +174,8 @@ def load_inventory():
             isinstance(value, str) for value in dependencies
         ):
             raise CatalogError(f"invalid dependencies for {relative}")
+        if "runtime_ready_required" in entry and not isinstance(entry["runtime_ready_required"], bool):
+            raise CatalogError(f"invalid runtime readiness flag for {relative}")
         path = package_path(relative)
         if not path.is_file():
             raise CatalogError(f"missing manifest: {relative}")
@@ -340,6 +349,7 @@ def descriptor(platform, rows):
             "name": manifest["name"],
             "description": manifest.get("description", ""),
             "required": entry["required"],
+            "runtimeReadyRequired": entry.get("runtime_ready_required", False),
         }
         if "version" in manifest:
             row["version"] = manifest["version"]
@@ -379,6 +389,28 @@ def expected_outputs():
     return outputs
 
 
+def managed_output_paths(root=ROOT):
+    root = Path(root)
+    outputs = set()
+    outputs.update((root / ".agents/plugins").glob("*.json"))
+    outputs.update((root / ".claude-plugin").glob("*.json"))
+    outputs.update((root / ".grok-plugin").glob("*.json"))
+    outputs.update((root / NAMESPACE).glob("*.json"))
+    for package in (root, *sorted((root / "plugins").glob("*"))):
+        for directory in NATIVE_DIRS.values():
+            manifest = package / directory / "plugin.json"
+            if manifest.is_file():
+                outputs.add(manifest)
+    for path in (root / "plugins").glob("*/skills/*/scripts/call.py"):
+        try:
+            source = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if "PROVIDER = json.loads(r'''" in source:
+            outputs.add(path)
+    return outputs
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate client adapters from catalog manifests.")
     parser.add_argument("--check", action="store_true", help="Fail if generated files drift.")
@@ -389,11 +421,14 @@ def main():
         print(f"catalog error: {error}", file=sys.stderr)
         return 2
     if args.check:
+        expected_paths = set(outputs)
         drift = [
             path.relative_to(ROOT)
             for path, expected in outputs.items()
             if not path.is_file() or path.read_text(encoding="utf-8") != expected
         ]
+        drift.extend(path.relative_to(ROOT) for path in managed_output_paths() - expected_paths)
+        drift = sorted(set(drift))
         if drift:
             for path in drift:
                 print(f"DRIFT {path}")
