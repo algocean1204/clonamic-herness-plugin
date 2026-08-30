@@ -132,9 +132,10 @@ class ValidationRunnerTest(unittest.TestCase):
             ROOT / "target/debug" / expected_name,
             VALIDATOR.test_binary_path({}),
         )
+        isolated = Path(tempfile.gettempdir()) / "clonamic-target"
         self.assertEqual(
-            Path("/tmp/clonamic-target/debug") / expected_name,
-            VALIDATOR.test_binary_path({"CARGO_TARGET_DIR": "/tmp/clonamic-target"}),
+            isolated / "debug" / expected_name,
+            VALIDATOR.test_binary_path({"CARGO_TARGET_DIR": str(isolated)}),
         )
 
     def test_capture_timeout_terminates_the_owned_process_group(self):
