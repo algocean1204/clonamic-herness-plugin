@@ -86,11 +86,11 @@ While any DoD item is unmet: NEVER emit "이어서 할까요?", "계속할까요
 ## 5. Wiring
 
 - `intent-lock.py` (Claude UserPromptSubmit hook) resolves only this SID's core via `session_intent_paths.py` and injects it each turn; if core is absent but SID is valid, prints the exact core path hint (create on first prompt). The Codex UserPromptSubmit adapter uses the same resolver and emits the same bounded core through `hookSpecificOutput.additionalContext`. This skill owns writing the file; hooks only read it.
-- `session-intent-archive.sh` (Claude SessionEnd hook) archives the core into forgetforge as `session-intent-<session_id>` with `--node-type session --session-id <session_id> --expire-days 90` — recall/hot-invisible, session graph-recallable, TTL-swept by prune. Archives only a validated full-UUID SID (never `unknown`). Keeps the on-disk file for ordinary resume; does not promote/move to a shared seed or delete. **Retention choice:** archived UUID directories stay as small recovery state because resume may reuse the SID — no automatic age deletion/GC without a proven archive-success ownership signal (do not add a SessionStart/Stop GC hook for this). Codex has no SessionEnd hook, so do not misuse its turn-level Stop event for archival. A completed task stays as one compact `closed` snapshot until a new task overwrites it.
+- A host may preserve a closed snapshot only through an explicit memory operation. The portable package performs no implicit archive, recall, promotion, TTL sweep, or session-end database write. A completed task stays as one compact `closed` snapshot until a new task overwrites it.
 - `precompact-guard.sh` (existing PreCompact hook) parses hook JSON and includes only this SID's lean core in the MUST-KEEP block — no new hook.
 - `config-doctor.py` warns if any **full-UUID** active core exceeds its ~2.5 KB injection budget; cwd-keyed, legacy detail files, and `_legacy*` dirs are recovery-only and untouched.
 - Evidence discipline: `verification-before-completion`. Report form: `clonamic-report`.
 
 ## 6. Hard bans (do not add)
 
-No index, DB, locks/stamps, new SessionStart/Stop hook for intent, auto legacy attribution, mtime mapping, seed inheritance, archive deletion, or GC daemon.
+No implicit index or DB write, locks/stamps, new SessionStart/Stop hook for intent, auto legacy attribution, mtime mapping, seed inheritance, archive deletion, or GC daemon.

@@ -93,6 +93,24 @@ class AssetPolicyTest(unittest.TestCase):
                 findings.append(str(path.relative_to(ROOT)))
         self.assertEqual([], findings)
 
+    def test_portable_runtime_has_no_implicit_legacy_memory_backend(self):
+        findings = []
+        for path in ROOT.rglob("*"):
+            if (
+                not path.is_file()
+                or {".git", "target", "node_modules", "__pycache__"} & set(path.parts)
+                or path.name == "migration.md"
+                or "tests" in path.parts
+            ):
+                continue
+            try:
+                text = path.read_text(encoding="utf-8").casefold()
+            except UnicodeDecodeError:
+                continue
+            if "forgetforge" in text:
+                findings.append(str(path.relative_to(ROOT)))
+        self.assertEqual([], findings)
+
 
 if __name__ == "__main__":
     unittest.main()

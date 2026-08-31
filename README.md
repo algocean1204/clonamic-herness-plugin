@@ -233,4 +233,4 @@ See [Compatibility](docs/COMPATIBILITY.md) for the measured-versus-fallback matr
 
 ## Status
 
-Version 0.1.0 is an early public release. A release is ready only when the core, every included child, generated adapters, public-data scan, and rollback checks pass together.
+Version 1.0.0 is the stable integration baseline. A release is ready only when the core, every included child, generated adapters, public-data scan, host discovery, and rollback checks pass together.

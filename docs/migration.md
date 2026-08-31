@@ -10,8 +10,23 @@
 6. Compare direct reads, a small write without team activation, intent-drift rejection, a justified worker/verifier run, reviewer rejection and rework, one approved correction loop, completion rejection, and uninstall behavior.
 7. Remove superseded rules only after equivalent behavior is measured.
 
+## v1 consolidation decisions
+
+Version 1.0.0 keeps portable, explicit, bounded behavior and does not recreate every historical host runtime.
+
+- Korean document preservation, terminology, links, facts, and consistency checks are retained.
+- Design source commits, digests, licenses, and bundled-runtime hashes are retained.
+- PPT uses the validated direct runtime; legacy dispatchers, fixed model selectors, previews, and draft material are retired.
+- Memory stays explicit. Automatic prompt injection, retention scoring, cold archives, soft forget/unforget, and background pruning are retired.
+- Preprocessing keeps normalization, clarification, crash-safe queueing, and explicit bounded loops. Automatic compression, browser automation, local serving, and resource daemons are retired.
+- Supercoder and Ultracode use the native bounded contracts. Historical external-model fan-out, private journals, resume loops, and recursive delegation are retired.
+- External executor plugins remain one bounded named call. Historical write-capable, resumable, completion-marker, and session-GC wrappers are retired.
+- Owner configuration, model registry, backups, and machine trust-root hooks remain private infrastructure and are not copied into the public package.
+
+Retired source history is recoverable from verified private archives. Retirement is deliberate and must not be reported as byte-for-byte parity.
+
 ## Rollback
 
 Remove children independently, disable their adapter entries, and uninstall the core router last. The router block contains one reference to the canonical root guidance, not a policy copy. `clonamic uninstall-router` restores its recorded pre-image only when unrelated user edits can be preserved.
 
-The historical `v0.1.0` tag remains immutable even though current package manifests also use version `0.1.0`. Reverting a published change uses a normal Git revert and push; no forced history or tag rewrite is required.
+The historical `v0.1.0` and stable `v1.0.0` tags are immutable. Reverting a published change uses a normal Git revert and push; no forced history or tag rewrite is required.

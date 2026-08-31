@@ -10,7 +10,7 @@
       "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
       "required": true,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-code-plugin/plugin.json",
@@ -18,7 +18,7 @@
       "description": "Proportional coding workflows, safe patching, modular design, and explicit bounded adversarial review.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-writing-plugin/plugin.json",
@@ -26,7 +26,7 @@
       "description": "Optional publication writing, Korean clarity, and deterministic final prose cleanup.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-design-plugin/plugin.json",
@@ -34,7 +34,7 @@
       "description": "Optional design, browser QA, visual systems, and media-art skills.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-data-plugin/plugin.json",
@@ -42,7 +42,7 @@
       "description": "Optional dataset and Hugging Face workflow guidance.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-documents-plugin/plugin.json",
@@ -50,7 +50,7 @@
       "description": "Optional HWPX and document-specialist workflows.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-ppt/plugin.json",
@@ -58,7 +58,7 @@
       "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
       "required": false,
       "runtimeReadyRequired": true,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-preprocessing/plugin.json",
@@ -66,7 +66,7 @@
       "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-memory/plugin.json",
@@ -74,7 +74,7 @@
       "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-grok/plugin.json",
@@ -82,7 +82,7 @@
       "description": "One bounded call through the installed Grok CLI.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-gpt/plugin.json",
@@ -90,7 +90,7 @@
       "description": "One bounded call through the installed Codex CLI.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     },
     {
       "manifest": "../plugins/clonamic-claude/plugin.json",
@@ -98,7 +98,7 @@
       "description": "One bounded call through the installed Claude CLI.",
       "required": false,
       "runtimeReadyRequired": false,
-      "version": "0.1.0"
+      "version": "1.0.0"
     }
   ]
 }

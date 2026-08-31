@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "clonamic-data-plugin",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Optional dataset and Hugging Face workflow guidance.",
   "license": "MIT",
   "author": {"name": "Clonamic"},

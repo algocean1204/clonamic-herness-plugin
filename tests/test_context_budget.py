@@ -42,7 +42,7 @@ class ContextBudgetTest(unittest.TestCase):
         paths.append(ROOT_GUIDANCE)
         self.assertLessEqual(sum(len(path.read_bytes()) for path in paths), 4_500)
 
-    def test_every_canonical_package_and_citation_use_version_0_1_0(self):
+    def test_every_canonical_package_and_citation_use_version_1_0_0(self):
         catalog = json.loads((ROOT / "catalog" / "plugins.json").read_text(encoding="utf-8"))
         versions = {}
         for entry in catalog["plugins"]:
@@ -50,16 +50,16 @@ class ContextBudgetTest(unittest.TestCase):
             versions[str(path.relative_to(ROOT))] = json.loads(
                 path.read_text(encoding="utf-8")
             )["version"]
-        self.assertEqual({"0.1.0"}, set(versions.values()), versions)
+        self.assertEqual({"1.0.0"}, set(versions.values()), versions)
         citation = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
-        self.assertRegex(citation, r"(?m)^version: 0\.1\.0$")
+        self.assertRegex(citation, r"(?m)^version: 1\.0\.0$")
 
         generated = sorted(ROOT.glob("**/.codex-plugin/plugin.json"))
         generated += sorted(ROOT.glob("**/.claude-plugin/plugin.json"))
         generated += sorted(ROOT.glob("**/.grok-plugin/plugin.json"))
         self.assertEqual(39, len(generated))
         self.assertEqual(
-            {"0.1.0"},
+            {"1.0.0"},
             {json.loads(path.read_text(encoding="utf-8"))["version"] for path in generated},
         )
         descriptors = sorted((ROOT / "io.github.algocean1204.clonamic").glob("*.json"))
@@ -69,13 +69,13 @@ class ContextBudgetTest(unittest.TestCase):
             for path in descriptors
             for row in json.loads(path.read_text(encoding="utf-8"))["plugins"]
         }
-        self.assertEqual({"0.1.0"}, descriptor_versions)
+        self.assertEqual({"1.0.0"}, descriptor_versions)
         for relative in (
             ".claude-plugin/marketplace.json",
             ".grok-plugin/marketplace.json",
         ):
             rows = json.loads((ROOT / relative).read_text(encoding="utf-8"))["plugins"]
-            self.assertEqual({"0.1.0"}, {row["version"] for row in rows})
+            self.assertEqual({"1.0.0"}, {row["version"] for row in rows})
 
 
 if __name__ == "__main__":

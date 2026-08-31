@@ -475,7 +475,7 @@ fn root_manifest_uses_the_agent_plugins_1_0_contract() {
         object["$schema"],
         "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
     );
-    assert_eq!(object["version"], "0.1.0");
+    assert_eq!(object["version"], "1.0.0");
 }
 
 #[test]

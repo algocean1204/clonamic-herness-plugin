@@ -5,7 +5,7 @@ user-invocable: true
 argument-hint: "[craft|shape|audit|critique|polish|layout|typeset|colorize|animate|adapt|clarify|harden|optimize] [target]"
 license: Apache 2.0; see LICENSE.txt and NOTICE.txt.
 metadata:
-  version: "0.1.0"
+  version: "1.0.0"
 ---
 
 # Clonamic Impeccable

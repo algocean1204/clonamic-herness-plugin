@@ -8,7 +8,7 @@
     {
       "name": "clonamic-herness-plugin",
       "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./",
       "category": "core",
       "tags": [
@@ -22,7 +22,7 @@
     {
       "name": "clonamic-code-plugin",
       "description": "Proportional coding workflows, safe patching, modular design, and explicit bounded adversarial review.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-code-plugin",
       "category": "development",
       "tags": [
@@ -35,7 +35,7 @@
     {
       "name": "clonamic-writing-plugin",
       "description": "Optional publication writing, Korean clarity, and deterministic final prose cleanup.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-writing-plugin",
       "category": "writing",
       "tags": [
@@ -48,7 +48,7 @@
     {
       "name": "clonamic-design-plugin",
       "description": "Optional design, browser QA, visual systems, and media-art skills.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-design-plugin",
       "category": "design",
       "tags": [
@@ -61,7 +61,7 @@
     {
       "name": "clonamic-data-plugin",
       "description": "Optional dataset and Hugging Face workflow guidance.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-data-plugin",
       "category": "data",
       "tags": [
@@ -73,7 +73,7 @@
     {
       "name": "clonamic-documents-plugin",
       "description": "Optional HWPX and document-specialist workflows.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-documents-plugin",
       "category": "documents",
       "tags": [
@@ -85,7 +85,7 @@
     {
       "name": "clonamic-ppt",
       "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-ppt",
       "category": "presentation",
       "tags": [
@@ -99,7 +99,7 @@
     {
       "name": "clonamic-preprocessing",
       "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-preprocessing",
       "category": "workflow",
       "tags": [
@@ -112,7 +112,7 @@
     {
       "name": "clonamic-memory",
       "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-memory",
       "category": "memory",
       "tags": [
@@ -125,7 +125,7 @@
     {
       "name": "clonamic-grok",
       "description": "One bounded call through the installed Grok CLI.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-grok",
       "category": "executor",
       "tags": [
@@ -137,7 +137,7 @@
     {
       "name": "clonamic-gpt",
       "description": "One bounded call through the installed Codex CLI.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-gpt",
       "category": "executor",
       "tags": [
@@ -149,7 +149,7 @@
     {
       "name": "clonamic-hermes",
       "description": "One bounded call through the installed Hermes CLI.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "source": "./plugins/clonamic-hermes",
       "category": "executor",
       "tags": [

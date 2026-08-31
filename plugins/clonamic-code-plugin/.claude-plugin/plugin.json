@@ -1,6 +1,6 @@
 {
   "name": "clonamic-code-plugin",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Proportional coding workflows, safe patching, modular design, and explicit bounded adversarial review.",
   "author": {
     "name": "Clonamic"

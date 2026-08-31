@@ -1,6 +1,6 @@
 {
   "name": "clonamic-ppt",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Renderer runtime for the clonamic-ppt plugin",
   "type": "commonjs",

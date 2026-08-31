@@ -64,6 +64,19 @@ class PackageTests(unittest.TestCase):
                 result = scope.assess(path, "검증 결과", "document")
                 self.assertFalse(result["applicable"], result)
 
+    def test_preservation_contract_keeps_high_risk_spans_and_consistency(self) -> None:
+        contract = (SKILL / "references" / "preservation.md").read_text(encoding="utf-8")
+        for phrase in (
+            "link fragments",
+            "masked personal data",
+            "conflict markers",
+            "legal, medical, and financial duties",
+            "Do not convert units",
+            "Lost citations or links invalidate",
+            "Contradictions between headings, prose, tables, diagrams, or counts",
+        ):
+            self.assertIn(phrase, contract)
+
 
 if __name__ == "__main__":
     unittest.main()
