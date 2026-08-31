@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PATH = ROOT / "catalog" / "plugins.json"
 PLUGIN_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
 NAMESPACE = "io.github.algocean1204.clonamic"
-PLATFORMS = ("codex", "claude", "grok", "hermes")
+PLATFORMS = ("codex", "claude", "grok", "hermes", "cursor")
 CATALOG_PLATFORMS = {*PLATFORMS, "agent-plugins"}
 MANIFEST_FIELDS = {
     "$schema",
@@ -29,9 +29,9 @@ MANIFEST_FIELDS = {
 DESCRIPTOR_ROOT = ROOT / NAMESPACE
 MARKETPLACE_PATHS = {
     platform: DESCRIPTOR_ROOT / "marketplaces" / f"{platform}.json"
-    for platform in ("codex", "claude", "grok")
+    for platform in ("codex", "claude", "grok", "cursor")
 }
-NATIVE_PLATFORMS = ("codex", "claude", "grok")
+NATIVE_PLATFORMS = ("codex", "claude", "grok", "cursor")
 NATIVE_METADATA_FIELDS = (
     "name",
     "version",
@@ -321,6 +321,45 @@ def grok_marketplace(rows):
     return payload
 
 
+def cursor_manifest(entry, manifest):
+    payload = native_metadata(manifest)
+    payload["skills"] = "./skills/"
+    if entry["required"]:
+        payload["rules"] = "./rules/"
+    return payload
+
+
+def cursor_marketplace(rows):
+    return {
+        "name": "clonamic",
+        "owner": {"name": "Clonamic"},
+        "metadata": {
+            "description": "Portable Clonamic plugins for Cursor",
+            "version": "1.0.0",
+        },
+        "plugins": [
+            {
+                **native_metadata(manifest),
+                "source": f"plugins/{manifest['name']}",
+                "category": entry["category"],
+            }
+            for entry, manifest in rows
+            if "cursor" in entry["platforms"]
+        ],
+    }
+
+
+def cursor_rule():
+    guidance = (ROOT / "clonamic-herness-plugin.md").read_text(encoding="utf-8").rstrip()
+    return (
+        "---\n"
+        "description: Clonamic operating contract for Cursor Agent\n"
+        "alwaysApply: true\n"
+        "---\n\n"
+        f"{guidance}\n"
+    )
+
+
 def descriptor(platform, rows):
     marketplace = f"marketplaces/{platform}.json" if platform in NATIVE_PLATFORMS else None
     payload = {
@@ -360,6 +399,8 @@ def expected_outputs():
         MARKETPLACE_PATHS["codex"]: render(codex_marketplace(rows)),
         MARKETPLACE_PATHS["claude"]: render(claude_marketplace(rows)),
         MARKETPLACE_PATHS["grok"]: render(grok_marketplace(rows)),
+        MARKETPLACE_PATHS["cursor"]: render(cursor_marketplace(rows)),
+        DESCRIPTOR_ROOT / "cursor" / "rules" / "clonamic-operating-contract.mdc": cursor_rule(),
     }
     for platform in PLATFORMS:
         outputs[DESCRIPTOR_ROOT / f"{platform}.json"] = render(descriptor(platform, rows))
@@ -371,6 +412,9 @@ def expected_outputs():
             outputs[native_manifest_path(entry["manifest"], platform)] = render(
                 minimal_native_manifest(manifest)
             )
+        outputs[native_manifest_path(entry["manifest"], "cursor")] = render(
+            cursor_manifest(entry, manifest)
+        )
     template = EXECUTOR_TEMPLATE.read_text(encoding="utf-8")
     for name, provider in EXECUTOR_PROVIDERS.items():
         payload = json.dumps(provider, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -386,10 +430,11 @@ def managed_output_paths(root=ROOT):
     outputs.update((root / ".agents/plugins").glob("*.json"))
     outputs.update((root / ".claude-plugin").glob("*.json"))
     outputs.update((root / ".grok-plugin").glob("*.json"))
+    outputs.update((root / ".cursor-plugin").glob("*.json"))
     outputs.update((root / NAMESPACE).glob("*.json"))
     outputs.update((root / NAMESPACE / "marketplaces").glob("*.json"))
     for package in (root, *sorted((root / "plugins").glob("*"))):
-        for directory in (".codex-plugin", ".claude-plugin", ".grok-plugin"):
+        for directory in (".codex-plugin", ".claude-plugin", ".grok-plugin", ".cursor-plugin"):
             manifest = package / directory / "plugin.json"
             if manifest.is_file():
                 outputs.add(manifest)
@@ -397,6 +442,9 @@ def managed_output_paths(root=ROOT):
             manifest = package / NAMESPACE / platform / "plugin.json"
             if manifest.is_file():
                 outputs.add(manifest)
+    cursor_rules = root / NAMESPACE / "cursor" / "rules"
+    if cursor_rules.is_dir():
+        outputs.update(cursor_rules.glob("*.mdc"))
     for path in (root / "plugins").glob("*/skills/*/scripts/call.py"):
         try:
             source = path.read_text(encoding="utf-8")

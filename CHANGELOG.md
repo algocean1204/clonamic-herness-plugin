@@ -7,6 +7,7 @@
 - Pin design-source revisions, digests, bundle hashes, and licenses for reproducible refreshes.
 - Record deliberate retirement of implicit memory injection, recursive executor loops, browser automation, and legacy host-specific runtimes.
 - Refresh Codex, Claude Code, and Grok Build from one public source while keeping owner configuration private.
+- Add Cursor 3.18-compatible marketplace generation, config-aware local installation, persistent Core routing, drift checks, and verified rollback.
 
 ## 0.1.0
 

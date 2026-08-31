@@ -88,12 +88,12 @@ flowchart TB
 
 ## Install and selection
 
-Clone the immutable v1 source, then materialize the stock host's native layout
+Clone the current v1 source, then materialize the stock host's native layout
 outside the canonical checkout. This keeps the published Agent Plugins roots
 standard-conformant while giving each current CLI the dotted files it expects:
 
 ```bash
-git clone --branch v1.0.0 --depth 1 https://github.com/algocean1204/clonamic-herness-plugin.git
+git clone --branch main --depth 1 https://github.com/algocean1204/clonamic-herness-plugin.git
 cd clonamic-herness-plugin
 
 # Codex
@@ -109,12 +109,31 @@ claude plugin install clonamic-herness-plugin@clonamic
 # Grok Build
 python3 io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py grok ../clonamic-grok-marketplace
 grok plugin install ../clonamic-grok-marketplace --trust
+
+# Cursor — user-scoped, reversible, and controlled by clonamic.json
+python3 io.github.algocean1204.clonamic/adapters/install-cursor.py install
+# Reload Cursor with Developer: Reload Window, or restart it.
 ```
 
 Each staging destination must be new and outside the source checkout. Review the
 staged source before using `--trust`. Codex and Claude install an optional child
 by its catalog name. Grok installs the staged child path, such as
 `../clonamic-grok-marketplace/plugins/clonamic-code-plugin`.
+Cursor installs each effective package under `~/.cursor/plugins/local/`. Core is
+a Cursor Plugin so its generated `alwaysApply` rule is persistent; children are
+independent Cursor Plugins. An overlay can turn optional packages off without
+editing the shipped default:
+
+```bash
+python3 io.github.algocean1204.clonamic/adapters/install-cursor.py install --config /path/to/clonamic.local.json
+python3 io.github.algocean1204.clonamic/adapters/install-cursor.py doctor
+python3 io.github.algocean1204.clonamic/adapters/install-cursor.py uninstall
+```
+
+The installer refuses modified managed packages, preserves a pre-existing
+same-name directory, rolls back failed updates, and restores the pre-image on
+uninstall. It does not change Cursor settings, extensions, authentication, or
+account User Rules.
 
 Hermes remote installation of this monorepo is currently unavailable: its community-plugin scanner evaluates optional packages and bundled assets together and rejects the root as dangerous. Clonamic does not recommend disabling or bypassing that scanner. The generated Hermes descriptor remains repository-checked compatibility output, not an installation claim.
 
@@ -127,6 +146,7 @@ io.github.algocean1204.clonamic/
   codex/
   claude/
   grok/
+  cursor/
 ```
 
 The reverse-domain namespace holds client-specific metadata as required by the

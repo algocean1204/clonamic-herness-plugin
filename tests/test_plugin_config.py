@@ -77,11 +77,11 @@ class PluginConfigContractTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        for platform in ("codex", "claude", "grok", "hermes"):
+        for platform in ("codex", "claude", "grok", "hermes", "cursor"):
             descriptor = load(ROOT / "io.github.algocean1204.clonamic" / f"{platform}.json")
             self.assertEqual("../clonamic.json", descriptor["configuration"])
             self.assertTrue(all(isinstance(row["required"], bool) for row in descriptor["plugins"]))
-        for platform in ("codex", "claude", "grok"):
+        for platform in ("codex", "claude", "grok", "cursor"):
             path = (
                 ROOT
                 / "io.github.algocean1204.clonamic"

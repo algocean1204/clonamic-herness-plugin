@@ -10,6 +10,11 @@
 6. Compare direct reads, a small write without team activation, intent-drift rejection, a justified worker/verifier run, reviewer rejection and rework, one approved correction loop, completion rejection, and uninstall behavior.
 7. Remove superseded rules only after equivalent behavior is measured.
 
+For Cursor, run `install-cursor.py install` after the isolated staging check.
+The installer treats `clonamic.json` plus each `--config` overlay as an ordered
+selection layer. Run `doctor` after reloading Cursor. Do not copy rules into
+project repositories or edit account User Rules for this integration.
+
 ## v1 consolidation decisions
 
 Version 1.0.0 keeps portable, explicit, bounded behavior and does not recreate every historical host runtime.
@@ -28,5 +33,11 @@ Retired source history is recoverable from verified private archives. Retirement
 ## Rollback
 
 Remove children independently, disable their adapter entries, and uninstall the core router last. The router block contains one reference to the canonical root guidance, not a policy copy. `clonamic uninstall-router` restores its recorded pre-image only when unrelated user edits can be preserved.
+
+Cursor uses `install-cursor.py uninstall`. It first verifies every managed
+package hash, removes only installer-owned directories, and restores any
+same-name pre-install directory. A modified managed package blocks removal so
+user edits are not discarded. A failed install or update restores the full
+transaction snapshot automatically.
 
 The historical `v0.1.0` and stable `v1.0.0` tags are immutable. Reverting a published change uses a normal Git revert and push; no forced history or tag rewrite is required.

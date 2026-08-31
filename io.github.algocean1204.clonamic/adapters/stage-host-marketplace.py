@@ -18,6 +18,7 @@ PLATFORM_LAYOUT = {
     "codex": (Path(".agents/plugins/marketplace.json"), ".codex-plugin"),
     "claude": (Path(".claude-plugin/marketplace.json"), ".claude-plugin"),
     "grok": (Path(".grok-plugin/marketplace.json"), ".grok-plugin"),
+    "cursor": (Path(".cursor-plugin/marketplace.json"), ".cursor-plugin"),
 }
 ROOT_FILES = (
     "plugin.json",
@@ -175,12 +176,13 @@ def materialize(platform: str, destination: Path) -> int:
 
     inventory = tracked_inventory()
     destination.mkdir(parents=True)
-    for name in ROOT_FILES:
-        source = ROOT / name
-        if source.is_file():
-            copy_tracked_file(source, destination / name, inventory)
-    for name in ROOT_DIRECTORIES:
-        copy_tree(ROOT / name, destination / name, inventory)
+    if platform != "cursor":
+        for name in ROOT_FILES:
+            source = ROOT / name
+            if source.is_file():
+                copy_tracked_file(source, destination / name, inventory)
+        for name in ROOT_DIRECTORIES:
+            copy_tree(ROOT / name, destination / name, inventory)
 
     staged = 0
     for entry in entries:
@@ -190,15 +192,34 @@ def materialize(platform: str, destination: Path) -> int:
             continue
         source_package = package_root(entry["manifest"])
         relative_package = source_package.relative_to(ROOT)
-        staged_package = destination if relative_package == Path(".") else destination / relative_package
-        if relative_package != Path("."):
-            copy_tree(source_package, staged_package, inventory)
+        if platform == "cursor":
+            manifest = load_json(source_package / "plugin.json")
+            staged_package = destination / "plugins" / manifest["name"]
+            if relative_package == Path("."):
+                for name in ROOT_FILES:
+                    source = ROOT / name
+                    if source.is_file() and name != "plugin.json":
+                        copy_tracked_file(source, staged_package / name, inventory)
+                for name in ROOT_DIRECTORIES:
+                    copy_tree(ROOT / name, staged_package / name, inventory)
+            else:
+                copy_tree(source_package, staged_package, inventory)
+                (staged_package / "plugin.json").unlink()
+        else:
+            staged_package = (
+                destination if relative_package == Path(".") else destination / relative_package
+            )
+            if relative_package != Path("."):
+                copy_tree(source_package, staged_package, inventory)
         native = source_package / NAMESPACE / platform / "plugin.json"
         if not native.is_file():
             raise StageError(f"missing generated {platform} manifest: {native}")
         native_target = staged_package / native_directory / "plugin.json"
         native_target.parent.mkdir(parents=True, exist_ok=True)
         copy_tracked_file(native, native_target, inventory)
+        cursor_rules = source_package / NAMESPACE / "cursor" / "rules"
+        if platform == "cursor" and cursor_rules.is_dir():
+            copy_tree(cursor_rules, staged_package / "rules", inventory)
         if not (staged_package / "skills").is_dir():
             raise StageError(f"staged skills missing: {staged_package}")
         staged += 1

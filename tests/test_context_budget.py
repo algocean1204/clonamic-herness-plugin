@@ -58,13 +58,14 @@ class ContextBudgetTest(unittest.TestCase):
         generated = sorted(ROOT.glob(f"**/{namespace}/codex/plugin.json"))
         generated += sorted(ROOT.glob(f"**/{namespace}/claude/plugin.json"))
         generated += sorted(ROOT.glob(f"**/{namespace}/grok/plugin.json"))
-        self.assertEqual(39, len(generated))
+        generated += sorted(ROOT.glob(f"**/{namespace}/cursor/plugin.json"))
+        self.assertEqual(52, len(generated))
         self.assertEqual(
             {"1.0.0"},
             {json.loads(path.read_text(encoding="utf-8"))["version"] for path in generated},
         )
         descriptors = sorted((ROOT / "io.github.algocean1204.clonamic").glob("*.json"))
-        self.assertEqual(4, len(descriptors))
+        self.assertEqual(5, len(descriptors))
         descriptor_versions = {
             row["version"]
             for path in descriptors
@@ -73,6 +74,7 @@ class ContextBudgetTest(unittest.TestCase):
         self.assertEqual({"1.0.0"}, descriptor_versions)
         for relative in (
             f"{namespace}/marketplaces/claude.json",
+            f"{namespace}/marketplaces/cursor.json",
             f"{namespace}/marketplaces/grok.json",
         ):
             rows = json.loads((ROOT / relative).read_text(encoding="utf-8"))["plugins"]

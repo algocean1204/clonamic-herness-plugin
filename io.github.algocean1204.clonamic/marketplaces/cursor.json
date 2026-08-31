@@ -1,0 +1,231 @@
+{
+  "name": "clonamic",
+  "owner": {
+    "name": "Clonamic"
+  },
+  "metadata": {
+    "description": "Portable Clonamic plugins for Cursor",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "clonamic-herness-plugin",
+      "version": "1.0.0",
+      "description": "Portable intent control, proportional team routing, write approval, completion verification, and concise reporting for AI coding agents.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "homepage": "https://github.com/algocean1204/clonamic-herness-plugin",
+      "repository": "https://github.com/algocean1204/clonamic-herness-plugin",
+      "license": "MIT",
+      "keywords": [
+        "ai-harness",
+        "coding-agent",
+        "approval",
+        "verification",
+        "agents-md"
+      ],
+      "source": "plugins/clonamic-herness-plugin",
+      "category": "core"
+    },
+    {
+      "name": "clonamic-code-plugin",
+      "version": "1.0.0",
+      "description": "Proportional coding workflows, safe patching, modular design, and explicit bounded adversarial review.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "coding",
+        "architecture",
+        "debugging",
+        "verification"
+      ],
+      "source": "plugins/clonamic-code-plugin",
+      "category": "development"
+    },
+    {
+      "name": "clonamic-writing-plugin",
+      "version": "1.0.0",
+      "description": "Optional publication writing, Korean clarity, and deterministic final prose cleanup.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "writing",
+        "korean",
+        "clarity",
+        "publication"
+      ],
+      "source": "plugins/clonamic-writing-plugin",
+      "category": "writing"
+    },
+    {
+      "name": "clonamic-design-plugin",
+      "version": "1.0.0",
+      "description": "Optional design, browser QA, visual systems, and media-art skills.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT AND Apache-2.0 AND CC-BY-4.0 AND LGPL-2.1-only",
+      "keywords": [
+        "design",
+        "frontend",
+        "figma",
+        "visual-qa"
+      ],
+      "source": "plugins/clonamic-design-plugin",
+      "category": "design"
+    },
+    {
+      "name": "clonamic-data-plugin",
+      "version": "1.0.0",
+      "description": "Optional dataset and Hugging Face workflow guidance.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "datasets",
+        "hugging-face",
+        "training-data"
+      ],
+      "source": "plugins/clonamic-data-plugin",
+      "category": "data"
+    },
+    {
+      "name": "clonamic-documents-plugin",
+      "version": "1.0.0",
+      "description": "Optional HWPX and document-specialist workflows.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "documents",
+        "hwpx",
+        "hancom"
+      ],
+      "source": "plugins/clonamic-documents-plugin",
+      "category": "documents"
+    },
+    {
+      "name": "clonamic-ppt",
+      "version": "1.0.0",
+      "description": "Create editable widescreen presentations through a deterministic layout and QA engine.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "presentation",
+        "pptx",
+        "slides",
+        "layout",
+        "qa"
+      ],
+      "source": "plugins/clonamic-ppt",
+      "category": "presentation"
+    },
+    {
+      "name": "clonamic-preprocessing",
+      "version": "1.0.0",
+      "description": "Deterministic input normalization, clarification packets, priority queues, and explicit loop_auto.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "input",
+        "clarification",
+        "queue",
+        "loop-auto"
+      ],
+      "source": "plugins/clonamic-preprocessing",
+      "category": "workflow"
+    },
+    {
+      "name": "clonamic-memory",
+      "version": "1.0.0",
+      "description": "Explicit local store, recall, forget, link, and bounded graph operations.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "memory",
+        "recall",
+        "forget",
+        "graph"
+      ],
+      "source": "plugins/clonamic-memory",
+      "category": "memory"
+    },
+    {
+      "name": "clonamic-grok",
+      "version": "1.0.0",
+      "description": "One bounded call through the installed Grok CLI.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "grok",
+        "executor",
+        "bounded-call"
+      ],
+      "source": "plugins/clonamic-grok",
+      "category": "executor"
+    },
+    {
+      "name": "clonamic-gpt",
+      "version": "1.0.0",
+      "description": "One bounded call through the installed Codex CLI.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "gpt",
+        "executor",
+        "bounded-call"
+      ],
+      "source": "plugins/clonamic-gpt",
+      "category": "executor"
+    },
+    {
+      "name": "clonamic-claude",
+      "version": "1.0.0",
+      "description": "One bounded call through the installed Claude CLI.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "claude",
+        "executor",
+        "bounded-call"
+      ],
+      "source": "plugins/clonamic-claude",
+      "category": "executor"
+    },
+    {
+      "name": "clonamic-hermes",
+      "version": "1.0.0",
+      "description": "One bounded call through the installed Hermes CLI.",
+      "author": {
+        "name": "Clonamic"
+      },
+      "license": "MIT",
+      "keywords": [
+        "hermes",
+        "executor",
+        "bounded-call"
+      ],
+      "source": "plugins/clonamic-hermes",
+      "category": "executor"
+    }
+  ]
+}

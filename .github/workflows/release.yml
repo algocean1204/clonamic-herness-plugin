@@ -36,9 +36,11 @@ jobs:
           python io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py codex /tmp/clonamic-codex-marketplace
           python io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py claude /tmp/clonamic-claude-marketplace
           python io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py grok /tmp/clonamic-grok-marketplace
+          python io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py cursor /tmp/clonamic-cursor-marketplace
           tar -czf release-packages/clonamic-codex-marketplace-v1.0.0.tar.gz -C /tmp clonamic-codex-marketplace
           tar -czf release-packages/clonamic-claude-marketplace-v1.0.0.tar.gz -C /tmp clonamic-claude-marketplace
           tar -czf release-packages/clonamic-grok-marketplace-v1.0.0.tar.gz -C /tmp clonamic-grok-marketplace
+          tar -czf release-packages/clonamic-cursor-marketplace-v1.0.0.tar.gz -C /tmp clonamic-cursor-marketplace
           cd release-packages
           sha256sum *.tar.gz > SHA256SUMS
       - name: Upload package assets

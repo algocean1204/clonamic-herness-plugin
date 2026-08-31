@@ -150,7 +150,7 @@ Optimization and UX evaluation use a separate on-demand contract. A goal declare
 
 The shipped `clonamic.json` is complete and versioned. User and project configs are closed partial overlays. Resolution merges shipped default → user → project through caller-supplied paths; there is no home-directory discovery. Any invalid present layer produces a Core-only result. A true toggle cannot install, enable, or grant authority, and a false toggle can only reduce an existing automation scope.
 
-`agent-plugins` is the portable platform identifier for a vendor-neutral or special-purpose Agent Plugins client. Host-specific identifiers remain available for Codex, Claude, Grok, and Hermes adapters. Platform identifiers are validated as bounded lowercase IDs rather than compiled into a closed provider list; actual support still comes from the catalog.
+`agent-plugins` is the portable platform identifier for a vendor-neutral or special-purpose Agent Plugins client. Host-specific identifiers remain available for Codex, Claude, Grok, Hermes, and Cursor adapters. Platform identifiers are validated as bounded lowercase IDs rather than compiled into a closed provider list; actual support still comes from the catalog.
 
 ## Code package
 
@@ -180,7 +180,7 @@ Ultracode uses native isolated agents only. If that capability is absent, its st
 
 Agent Plugins 1.0.0 manifests and skills are canonical. The standard discovers immediate skills under `skills/` and MCP configuration at root `mcp.json`; it does not portably discover the root guidance file, nested child package roots, marketplaces, or team/subagent behavior. Platform adapters translate discovery and registration only.
 
-Generated outputs may include Codex, Claude Code, Grok Build, and Hermes manifest or registration formats. Generation must be deterministic, reject stale managed files, and check drift. An adapter may expose a supported hook; it may not duplicate policy, install children, select a model, read memory, or widen permissions. The optional router installer writes one reference to `clonamic-herness-plugin.md`; it does not copy the file's policy into the host router.
+Generated outputs may include Codex, Claude Code, Grok Build, Hermes, and Cursor manifest or registration formats. Generation must be deterministic, reject stale managed files, and check drift. An adapter may expose a supported hook; it may not select a model, read memory, or widen permissions. Cursor's persistent Core rule is generated from the canonical operating contract and guarded by a byte-equality test; it is never hand-authored. The optional router installer writes one reference to `clonamic-herness-plugin.md`; it does not copy the file's policy into the host router.
 
 When a host cannot enforce a structural hook, Clonamic keeps the portable skill behavior and declares a model-side fallback. The documentation never labels that fallback as a measured hook.
 

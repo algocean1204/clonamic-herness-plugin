@@ -14,9 +14,16 @@ Compatibility claims use three labels:
 | Codex | Generated Codex marketplace and manifest outputs | Artifact shape and core contracts | No blanket live-install claim | Model-side skill contract when a structural hook is unavailable |
 | Claude Code | Generated Claude marketplace and plugin outputs | Artifact shape and core contracts | No blanket live-install claim | Skills remain usable without claiming hook enforcement |
 | Grok Build | Generated Grok marketplace and plugin outputs | Artifact shape only unless a release record says otherwise | No Grok validation success is claimed | Skills remain usable; missing commands or hooks are reported unavailable |
+| Cursor | Generated Cursor marketplace, per-package manifests, and Core rule | Artifact shape, config-aware install, drift rejection, rollback, and uninstall | Cursor 3.18.9 on macOS: local package discovery and Cursor Agents Window Core-contract behavior | Direct Agent Plugin skills remain available if persistent plugin rules are disabled by an administrator |
 | Hermes | Generated registration output | Registration and package contracts can be checked locally | Remote monorepo install was blocked by the community-plugin scanner; no files installed | Direct review and skill loading only when the host permits it; never bypass the scanner |
 
 Generated files are compatibility outputs. Their presence does not prove that a host installed, enabled, or executed them.
+
+Cursor supports portable Agent Plugins for skills and MCP servers. Core uses a
+generated Cursor Plugin derivative only because persistent `.mdc` rules are a
+Cursor-specific component. The installer keeps the portable package source
+unchanged, materializes the derivative from reviewed Git blobs, and leaves
+Cursor account settings and extensions untouched.
 
 Agent Plugins 1.0.0 does not automatically load arbitrary root Markdown, recursively discover nested skills or plugin roots, define marketplaces, or define team/subagent execution. Installing a marketplace therefore proves discovery, not automatic invocation. On a host with automatic skill selection, `clonamic-router` reaches `clonamic-herness-plugin.md` for non-trivial mutation, deployment, publication, team decisions, and changed-work completion. Guaranteed always-on routing requires the reversible structural router installer. See the [Agent Plugins 1.0.0 specification](https://agent-plugins.org/specification).
 

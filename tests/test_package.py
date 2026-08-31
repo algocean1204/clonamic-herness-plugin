@@ -51,22 +51,23 @@ EXPECTED_PACKAGES = {
     "clonamic-claude",
     "clonamic-hermes",
 }
-PLATFORMS = {"codex", "claude", "grok", "hermes"}
+PLATFORMS = {"codex", "claude", "grok", "hermes", "cursor"}
 CATALOG_PLATFORMS = {*PLATFORMS, "agent-plugins"}
 NAMESPACE = "io.github.algocean1204.clonamic"
 MARKETPLACES = {
     platform: ROOT / NAMESPACE / "marketplaces" / f"{platform}.json"
-    for platform in ("codex", "claude", "grok")
+    for platform in ("codex", "claude", "grok", "cursor")
 }
 DESCRIPTORS = {
     platform: ROOT / NAMESPACE / f"{platform}.json"
     for platform in PLATFORMS
 }
-NATIVE_PLATFORMS = {"codex", "claude", "grok"}
+NATIVE_PLATFORMS = {"codex", "claude", "grok", "cursor"}
 STAGED_NATIVE_DIRS = {
     "codex": ".codex-plugin",
     "claude": ".claude-plugin",
     "grok": ".grok-plugin",
+    "cursor": ".cursor-plugin",
 }
 
 
@@ -175,7 +176,13 @@ class PackageContractTest(unittest.TestCase):
         for _, manifest_path, _ in rows:
             package = manifest_path.parent
             with self.subTest(package=package.relative_to(ROOT)):
-                for forbidden in (".codex-plugin", ".claude-plugin", ".grok-plugin", ".agents"):
+                for forbidden in (
+                    ".codex-plugin",
+                    ".claude-plugin",
+                    ".grok-plugin",
+                    ".cursor-plugin",
+                    ".agents",
+                ):
                     self.assertFalse((package / forbidden).exists())
                 for platform in NATIVE_PLATFORMS:
                     self.assertTrue((package / NAMESPACE / platform / "plugin.json").is_file())
@@ -353,7 +360,7 @@ class PackageContractTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertIn("50/50", result.stdout)
+        self.assertIn("66/66", result.stdout)
         generator = load_generator()
         self.assertEqual(
             set(generator.expected_outputs()),
@@ -374,8 +381,11 @@ class PackageContractTest(unittest.TestCase):
                 }
                 expected_sources = []
                 for entry, _ in platform_rows:
-                    parent = PurePosixPath(entry["manifest"]).parent.as_posix()
-                    expected_sources.append("./" if parent == "." else f"./{parent}")
+                    if platform == "cursor":
+                        expected_sources.append(f"plugins/{load_json(ROOT / entry['manifest'])['name']}")
+                    else:
+                        parent = PurePosixPath(entry["manifest"]).parent.as_posix()
+                        expected_sources.append("./" if parent == "." else f"./{parent}")
                 payload = load_json(path)
                 self.assertEqual(expected_names, [row["name"] for row in payload["plugins"]])
                 actual_sources = []
@@ -437,8 +447,32 @@ class PackageContractTest(unittest.TestCase):
                             entry["category"].replace("-", " ").title(),
                             native["interface"]["category"],
                         )
+                    elif platform == "cursor":
+                        for key, value in expected_minimal.items():
+                            self.assertEqual(value, native[key])
+                        self.assertEqual("./skills/", native["skills"])
+                        if entry["required"]:
+                            self.assertEqual("./rules/", native["rules"])
+                        else:
+                            self.assertNotIn("rules", native)
                     else:
                         self.assertEqual(expected_minimal, native)
+
+    def test_cursor_rule_is_generated_from_the_canonical_contract(self):
+        canonical = (ROOT / "clonamic-herness-plugin.md").read_text(encoding="utf-8").rstrip()
+        rule = (
+            ROOT
+            / NAMESPACE
+            / "cursor/rules/clonamic-operating-contract.mdc"
+        ).read_text(encoding="utf-8")
+        self.assertEqual(
+            "---\n"
+            "description: Clonamic operating contract for Cursor Agent\n"
+            "alwaysApply: true\n"
+            "---\n\n"
+            f"{canonical}\n",
+            rule,
+        )
 
     def test_native_manifest_and_direct_skills_share_one_package_boundary(self):
         _, rows = load_inventory()
@@ -486,6 +520,7 @@ class PackageContractTest(unittest.TestCase):
                         "codex": Path(".agents/plugins/marketplace.json"),
                         "claude": Path(".claude-plugin/marketplace.json"),
                         "grok": Path(".grok-plugin/marketplace.json"),
+                        "cursor": Path(".cursor-plugin/marketplace.json"),
                     }[platform]
                     marketplace = load_json(output / marketplace_relative)
                     for row in marketplace["plugins"]:
@@ -495,6 +530,12 @@ class PackageContractTest(unittest.TestCase):
                         self.assertTrue(package.is_relative_to(output.resolve()))
                         self.assertTrue((package / native_directory / "plugin.json").is_file())
                         self.assertTrue((package / "skills").is_dir())
+                        if platform == "cursor":
+                            self.assertFalse((package / "plugin.json").exists())
+                            if row["name"] == "clonamic-herness-plugin":
+                                self.assertTrue(
+                                    (package / "rules/clonamic-operating-contract.mdc").is_file()
+                                )
 
                 occupied = temporary_path / "occupied"
                 occupied.mkdir()
@@ -590,7 +631,8 @@ class PackageContractTest(unittest.TestCase):
         }
         for platform, descriptor in DESCRIPTORS.items():
             names = {row["name"] for row in load_json(descriptor)["plugins"]}
-            self.assertNotIn(self_targets[platform], names)
+            if platform in self_targets:
+                self.assertNotIn(self_targets[platform], names)
 
     def test_ci_uses_the_offline_local_validation_entrypoint(self):
         workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
@@ -613,6 +655,7 @@ class PackageContractTest(unittest.TestCase):
         self.assertIn("stage-host-marketplace.py codex", release)
         self.assertIn("stage-host-marketplace.py claude", release)
         self.assertIn("stage-host-marketplace.py grok", release)
+        self.assertIn("stage-host-marketplace.py cursor", release)
         self.assertIn("Smoke-test staged binary", release)
         self.assertIn("timeout-minutes:", release)
         for network_client in ("curl ", "wget ", "requests.", "urllib."):
