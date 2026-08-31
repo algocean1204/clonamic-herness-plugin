@@ -13,13 +13,14 @@ Every package has one public responsibility and one independent removal boundary
 | Documents | HWPX and document-specialist workflows | General artifact runtimes |
 | PPT | Presentation specification, rendering, QA | General writing policy, external execution |
 | Memory | Explicit store, recall, forget, graph, ontology provenance, TTL, backup and restore | Automatic injection, implicit state, automatic prompt capture, raw prompt bodies in provenance, authority |
+| My Language | Explicit slash-payload capture, per-sample style analysis, derived checkpoints, portable checkpoint export | Automatic capture, general memory, background profiling, assistant or tool text storage, implicit application |
 | Executor children | One bounded call to one named provider | Automatic selection, provider substitution, completion claims |
 
 Cross-package wiring belongs to the core router or the generated adapter layer. A child never imports another child. Shared policy is not copied into adapters.
 
 `clonamic.json` controls optional routing eligibility. Core has no toggle. Configuration never substitutes for installation, and an unavailable optional package stays visible with its failed installation, platform, or dependency dimension.
 
-`clonamic-intent-guard` owns scope drift, unnecessary work, and over-engineering rejection. `clonamic-team-control` prospectively chooses native, paired, or `main → lead → specialists` execution; defects and evidence failures never create a team retroactively. A pair runs worker then reviewer, isolated pairs alone may run in parallel, and same-file work is serialized. A lead neither executes nor integrates; one specialist integrates, and review waits for every result plus fresh evidence. Without subagents, `actual_team` is false and a local sequential second pass is not independent review. `clonamic-completion-check` remains the final evidence gate. These are core responsibilities, not new child packages; the package count remains one core plus twelve children.
+`clonamic-intent-guard` owns scope drift, unnecessary work, and over-engineering rejection. `clonamic-team-control` prospectively chooses native, paired, or `main → lead → specialists` execution; defects and evidence failures never create a team retroactively. A pair runs worker then reviewer, isolated pairs alone may run in parallel, and same-file work is serialized. A lead neither executes nor integrates; one specialist integrates, and review waits for every result plus fresh evidence. Without subagents, `actual_team` is false and a local sequential second pass is not independent review. `clonamic-completion-check` remains the final evidence gate. These are core responsibilities, not new child packages; the package count remains one core plus thirteen children.
 
 Agent evaluation remains an on-demand team-control contract, not another package. It consumes observed host events and returns goals, evidence, user impact, regressions, feedback, and bounded next experiments. Deterministic fixture metadata cannot substitute for that evidence.
 

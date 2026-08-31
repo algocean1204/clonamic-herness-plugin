@@ -10,6 +10,7 @@
     "clonamic-ppt": true,
     "clonamic-preprocessing": true,
     "clonamic-memory": true,
+    "clonamic-my-language-plugin": true,
     "clonamic-grok": true,
     "clonamic-gpt": true,
     "clonamic-claude": true,

@@ -46,6 +46,8 @@ settings or extension state.
 
 Agent Plugins 1.0.0 discovers immediate `skills/*/SKILL.md` components and root `mcp.json`. It does not define arbitrary root-guidance loading, recursive child-package discovery, marketplace installation, approval UX, hooks, or team/subagent behavior. Adapters translate discovery metadata only. They never copy policy, select models, install children silently, or claim that a host loaded a hook.
 
+`clonamic-my-language-plugin` remains a portable child with manual skills. Its package-owned Codex, Claude, and Grok metadata disables implicit/model invocation. Cursor exposes those skills as manual commands and never places them in the generated persistent Core rule. Hermes staging preserves the same package boundary and never bypasses the host scanner.
+
 Prompt-origin attestation is host-specific. A capable adapter passes interactive-user, scheduler-automation, or internal-worker provenance separately from the prompt body. Missing attestation remains unverified, and text such as `["자동화"]` never becomes authority.
 
 Descriptors point at `clonamic.json` but do not enforce it themselves. A host adapter passes explicit config-layer paths and its installed-package set to the native resolver, then exposes only optional roots marked effective. A stock host that does not make that call ignores Clonamic toggles; use its native disable or uninstall operation. Native host disable or uninstall also remains responsible for process-level unloading.

@@ -1,6 +1,6 @@
 # Clonamic architecture
 
-Clonamic is one required Core Harness plus twelve optional Agent Plugins 1.0.0 capability packages. The core owns cross-cutting control. Each child owns one capability with an independent install, test, failure, and removal boundary.
+Clonamic is one required Core Harness plus thirteen optional Agent Plugins 1.0.0 capability packages. The core owns cross-cutting control. Each child owns one capability with an independent install, test, failure, and removal boundary.
 
 ## System map
 
@@ -64,6 +64,7 @@ plugins/
 ├── clonamic-documents-plugin/
 ├── clonamic-ppt/
 ├── clonamic-memory/
+├── clonamic-my-language-plugin/
 ├── clonamic-grok/
 ├── clonamic-gpt/
 ├── clonamic-claude/
@@ -88,6 +89,7 @@ The generated adapter directories and marketplace files are build outputs. Canon
 | Documents | HWPX and document-specialist workflows | Explicit matching format | General artifact runtimes |
 | PPT | Structured brief, outline, slide specification, rendering, QA | Presentation or PPTX work | General prose editing, external execution |
 | Memory | Explicit store, recall, forget, link, graph | Explicit memory operation | Automatic recall, implicit home, hidden context injection |
+| My language | Exact slash-payload capture, local style analysis, deterministic checkpoint export | Explicit `/clonamic-my-language` or `/clonamic-my-language-export` | Automatic capture, background profiling, assistant or tool text storage |
 | Grok | One bounded Grok CLI call | Explicit Grok request | Automatic selection, retry loops, write approval |
 | GPT | One bounded Codex CLI call | Explicit GPT request | Automatic selection, retry loops, write approval |
 | Claude | One bounded Claude CLI call | Explicit Claude request | Automatic selection, retry loops, write approval |
@@ -105,9 +107,9 @@ The generated adapter directories and marketplace files are build outputs. Canon
 ### Write control
 
 - Input: user intent, target, observable result, verification, external effects, rollback.
-- Output: approved scope or a no-write result.
+- Output: an approved target boundary and operation classes, or a no-write result.
 - Failure: no mutation.
-- Invariant: one approved development specification covers the full named inspect/fix/retest/apply/deploy/backup loop.
+- Invariant: one approved development specification covers the full named inspect/fix/retest/apply/deploy/backup loop. Internal commands and same-scope retries are implementation detail; only outside-boundary, catastrophic, credential, and platform-owned actions interrupt it.
 
 ### Intent guard
 
@@ -165,13 +167,14 @@ Ultracode uses native isolated agents only. If that capability is absent, its st
 
 ## State and trust
 
-- Approval codes correlate a pending write packet. Authentication remains with the host or operating system.
+- Approval codes correlate a pending write packet. Authentication remains with the host or operating system. An active development run never adds a CMD, terminal-copy, or command-prefix gate and reuses the same authorization idempotently after a same-scope timeout.
 - Prompt envelopes preserve the original body and derive source from trusted host metadata. Automation authority exists only after a persisted claim matches automation, run, definition, and scope.
 - In-scope automation runs are noninteractive. Scope drift, replay, expiry, run limits, and changed grants fail before mutation; credentials remain platform actions.
 - Session Markdown is a bounded human-readable view, not authority. Unverified and internal prompts do not replace the latest trusted user or successfully claimed automation prompt.
 - Plugin configuration is routing input, not authority. Core cannot be disabled, and optional toggles only reduce what an installed host may invoke.
 - The native core accepts explicit paths and structured inputs. It does not discover user homes, credentials, or provider sessions.
 - Memory and preprocessing persist only to caller-supplied paths. Preprocessing executes the original payload and keeps normalization in a separate field. SQLite memory owns caller-supplied memory content, ontology nodes, typed edges, provenance hashes, TTL, backup, and restore. Provenance rows store no prompt body or authorization.
+- My Language uses a separate local SQLite boundary. Only the explicit slash payload may enter its raw-sample table; per-sample analysis and derived checkpoints remain separate. Export contains a derived checkpoint and portable skills, never raw prompts or local paths.
 - Recalled text, document contents, catalog entries, and executor output are untrusted data.
 - No package emits telemetry or stores implicit model, browser, session, or profile state.
 - Executor wrappers use provider defaults and explicit user options. No model ID belongs in package code or docs.

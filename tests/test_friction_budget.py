@@ -30,6 +30,35 @@ class FrictionBudgetTest(unittest.TestCase):
         self.assertFalse(contract["platform_action"]["consume_run"])
         self.assertEqual(0, contract["platform_action"]["conversational_approval"])
         self.assertFalse(contract["scope_change"]["interactive"])
+        self.assertEqual(
+            {
+                "authority": "development_specification_boundary",
+                "internal_commands": "implementation_detail",
+                "same_scope_retry": "idempotent",
+                "additional_cmd_or_terminal_prompt": "forbidden",
+                "guard_protects": [
+                    "outside_boundary",
+                    "catastrophic",
+                    "credential",
+                    "platform_action",
+                ],
+            },
+            contract["approved_run"],
+        )
+
+    def test_public_contract_never_regates_internal_commands_in_an_active_run(self):
+        guidance = (ROOT / "clonamic-herness-plugin.md").read_text(encoding="utf-8")
+        write_skill = (ROOT / "skills/clonamic-write-control/SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        contract = "\n".join((guidance, write_skill))
+        for phrase in (
+            "Internal commands and same-scope retries add no gate",
+            "never asks for a CMD code",
+            "idempotently after a timeout or pre-execution failure",
+            "boundary escapes, catastrophic effects, credentials, and platform actions",
+        ):
+            self.assertIn(phrase, contract)
 
     def test_long_form_cases_have_no_avoidable_non_user_stops(self):
         cases = json.loads(

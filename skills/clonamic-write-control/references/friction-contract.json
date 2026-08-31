@@ -16,5 +16,12 @@
   "scope_change": {
     "interactive": false,
     "status": "needs_authorization"
+  },
+  "approved_run": {
+    "authority": "development_specification_boundary",
+    "internal_commands": "implementation_detail",
+    "same_scope_retry": "idempotent",
+    "additional_cmd_or_terminal_prompt": "forbidden",
+    "guard_protects": ["outside_boundary", "catastrophic", "credential", "platform_action"]
   }
 }

@@ -65,6 +65,13 @@
       "dependencies": []
     },
     {
+      "manifest": "plugins/clonamic-my-language-plugin/plugin.json",
+      "required": false,
+      "category": "personalization",
+      "platforms": ["agent-plugins", "codex", "claude", "grok", "hermes", "cursor"],
+      "dependencies": []
+    },
+    {
       "manifest": "plugins/clonamic-grok/plugin.json",
       "required": false,
       "category": "executor",

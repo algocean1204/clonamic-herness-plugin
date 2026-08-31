@@ -34,7 +34,7 @@ class CursorAdapterTest(unittest.TestCase):
             (collision / "sentinel.txt").write_text("original\n", encoding="utf-8")
 
             installed = installer.install(target, state, [ROOT / "clonamic.json"])
-            self.assertEqual(13, len(installed["plugins"]))
+            self.assertEqual(14, len(installed["plugins"]))
             self.assertFalse((target / "clonamic-memory/sentinel.txt").exists())
             core = target / "clonamic-herness-plugin"
             self.assertTrue((core / ".cursor-plugin/plugin.json").is_file())
@@ -60,7 +60,7 @@ class CursorAdapterTest(unittest.TestCase):
 
             installer.install(target, state, [ROOT / "clonamic.json"])
             removed = installer.uninstall(target, state)
-            self.assertEqual(13, len(removed["plugins"]))
+            self.assertEqual(14, len(removed["plugins"]))
             self.assertFalse(state.exists())
             self.assertEqual(
                 "original\n",

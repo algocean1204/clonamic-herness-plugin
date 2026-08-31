@@ -3,7 +3,7 @@
 [![CI](https://github.com/algocean1204/clonamic-herness-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/algocean1204/clonamic-herness-plugin/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Clonamic keeps read-only and small precise work on the native path, bounds non-trivial work against user intent, creates a worker-and-verifier team only when its value exceeds its coordination cost, puts one proportional gate in front of persistent writes, and verifies required outcomes before reporting completion. The repository ships one required Core Harness package and twelve optional Agent Plugins 1.0.0 capability packages.
+Clonamic keeps read-only and small precise work on the native path, bounds non-trivial work against user intent, creates a worker-and-verifier team only when its value exceeds its coordination cost, puts one proportional gate in front of persistent writes, and verifies required outcomes before reporting completion. The repository ships one required Core Harness package and thirteen optional Agent Plugins 1.0.0 capability packages.
 
 한국어 요약: 질문과 읽기는 바로 처리합니다. 실제 쓰기는 범위에 맞는 승인 한 번만 받고, 승인된 수정·검증 루프는 필요한 결과가 나올 때까지 자율적으로 이어갑니다. 완료 보고는 결과와 증거를 먼저 보여 주는 평면 목록입니다.
 
@@ -20,6 +20,7 @@ Clonamic keeps read-only and small precise work on the native path, bounds non-t
 | `clonamic-documents-plugin` | Optional HWPX and document-specialist workflows | General artifact runtimes |
 | `clonamic-ppt` | Editable presentation rendering and QA | General document editing, external execution |
 | `clonamic-memory` | Explicit local store, recall, forget, link, and graph operations | Automatic context injection, hidden storage |
+| `clonamic-my-language-plugin` | Explicit local prompt capture, style analysis, and portable checkpoint export | Automatic capture, background profiling, storing assistant or tool text |
 | `clonamic-grok` | One explicit bounded Grok CLI call | Automatic routing, retries, completion claims |
 | `clonamic-gpt` | One explicit bounded Codex CLI call | Automatic routing, retries, completion claims |
 | `clonamic-claude` | One explicit bounded Claude CLI call | Automatic routing, retries, completion claims |
@@ -36,14 +37,14 @@ Every child has its own root `plugin.json`, skill directory, package license, te
 | Non-trivial mutation or real team decision | Load the canonical root guidance once, bound intent, then choose native or team execution. |
 | Clear persistent write | One compact development specification and one approval. |
 | Materially ambiguous persistent write | Work specification to lock intent, then one development specification before mutation. |
-| Approved inspect/fix/retest/apply/deploy/backup loop | Continue autonomously inside the approved scope. |
+| Approved inspect/fix/retest/apply/deploy/backup loop | Continue autonomously inside the approved boundary; internal commands and same-scope retries add no gate. |
 | Completion claim | Compare every required item with current artifacts and fresh evidence. |
 | Team execution | Choose the topology before execution; then require delivered results and fresh evidence before a verdict. |
 | Optional capability lookup | Market selects the narrowest matching package. Installation remains a platform action. |
 | External executor | Only the executor explicitly named by the user. No substitution. |
 | Trusted automation | Use its preapproved grant without conversational approval; scope drift returns noninteractive `needs_authorization`. |
 
-Approval codes correlate a decision with its write packet. They are not passwords or authentication factors. Plain `승인` selects the sole pending packet; when several packets are pending, `승인:ABC123` selects one. Backticks, whitespace, a fullwidth colon, and lowercase codes are accepted. Password, OAuth, biometric, operating-system, and platform prompts remain outside Clonamic.
+Approval codes correlate a decision with its write packet. They are not passwords or authentication factors. Plain `승인` selects the sole pending packet; when several packets are pending, `승인:ABC123` selects one. Backticks, whitespace, a fullwidth colon, and lowercase codes are accepted. The approved boundary, operation classes, effects, checks, and rollback authorize the run; internal executable names and command counts do not. An active run never asks for a CMD code or copied terminal command and reuses the same authorization after a same-scope timeout. Password, OAuth, biometric, operating-system, and platform prompts remain outside Clonamic.
 
 Team selection is prospective. A later worker defect, missing evidence, or false completion rejects the result but never retroactively creates a team. Within each pair, the worker finishes before its reviewer starts; only two or more isolated pairs may run in parallel, and same-file work is serialized. A second tier is `main → lead → specialists`: the lead assigns and reviews but neither executes nor integrates, one assigned specialist owns integration, and the verdict waits for every specialist result plus fresh evidence. Without native subagents, `actual_team` remains false and the host may perform only a disclosed local sequential second pass, not independent review.
 
@@ -166,6 +167,7 @@ plugins/clonamic-data-plugin/
 plugins/clonamic-documents-plugin/
 plugins/clonamic-ppt/
 plugins/clonamic-memory/
+plugins/clonamic-my-language-plugin/
 plugins/clonamic-grok/
 plugins/clonamic-gpt/
 plugins/clonamic-claude/
@@ -174,7 +176,7 @@ plugins/clonamic-hermes/
 
 The root market can identify the package that matches a request. Agent Plugins 1.0.0 does not define portable child-plugin installation, so the host or user still installs and enables each selected child.
 
-`clonamic.json` is the configuration input for hosts that integrate the Clonamic resolver. The shipped file has `schema_version: 1` and lists all twelve optional packages. Callers pass the shipped default, user overlay, and project overlay as explicit paths. The resolver merges them in that order, so project values win. User and project files may contain only the toggles they change. An invalid present layer fails closed to Core-only operation.
+`clonamic.json` is the configuration input for hosts that integrate the Clonamic resolver. The shipped file has `schema_version: 1` and lists all thirteen optional packages. Callers pass the shipped default, user overlay, and project overlay as explicit paths. The resolver merges them in that order, so project values win. User and project files may contain only the toggles they change. An invalid present layer fails closed to Core-only operation.
 
 The resolver reports `configured`, `installed`, `platform_supported`, `dependencies_ready`, `runtime_ready`, `effective`, and `reason` for every package. An optional package becomes effective only when every required dimension permits it. `enabled_but_unavailable` means the toggle is on but installation, platform support, package dependency, or declared runtime readiness prevents use. A vendor-neutral or special-purpose host uses the `agent-plugins` platform identifier, keeps Core active, passes its installed-package set, measured runtime-ready set, and configuration layers to `clonamic resolve-plugins`, then exposes only optional roots whose `effective` value is true.
 
@@ -234,7 +236,9 @@ Clonamic has no telemetry. It does not copy credentials, user profiles, provider
 
 Memory and preprocessing state always use caller-supplied paths. Preprocessing keeps the exact original payload for execution and stores normalization only as a separate comparison/display field. Recalled text and executor output are untrusted data, not instructions. Generated adapters translate discovery formats; they do not contain policy.
 
-Session Markdown stores one bounded view of the latest trusted user or successfully claimed automation prompt with its derived source and SHA-256. Unverified and internal prompts cannot replace it. SQLite remains optional and owned by `clonamic-memory`: it is created lazily at an explicit data path and needs no Docker, vector database, uv, or virtual environment. Provenance rows store hashes and byte counts rather than prompt bodies or authority. Explicit memory rows store the caller-supplied `content`, which may be sensitive and should use a protected path.
+Session Markdown stores one bounded view of the latest trusted user or successfully claimed automation prompt with its derived source and SHA-256. Unverified and internal prompts cannot replace it. SQLite memory remains optional and owned by `clonamic-memory`: it is created lazily at an explicit data path and needs no Docker, vector database, uv, or virtual environment. Provenance rows store hashes and byte counts rather than prompt bodies or authority. Explicit memory rows store the caller-supplied `content`, which may be sensitive and should use a protected path.
+
+`clonamic-my-language-plugin` owns a separate local SQLite database and runs only through `/clonamic-my-language` or `/clonamic-my-language-export`. The first command stores only its user-supplied payload, keeps per-sample analysis separate, and refreshes a derived style checkpoint after the configured number of new unique samples. The export command creates a deterministic Agent Plugin from the selected checkpoint. Raw samples, the database, session data, and local paths never enter that export. Cursor exposes the same two manual skill commands; no generated adapter turns them into an automatic rule.
 
 The PPT child measures reference-deck colors, fonts, geometry, and word density from bounded OOXML, extracts semantic template contracts, renders an editable PPTX, and writes a dependency-free SVG QA view for every slide. Run `python3 plugins/clonamic-ppt/skills/clonamic-ppt/scripts/doctor.py --package-root plugins/clonamic-ppt` after `npm ci --ignore-scripts --prefix plugins/clonamic-ppt`; the resolver keeps PPT ineffective until that readiness is supplied. Template inspection is extraction-only; the blank-canvas renderer does not apply or preserve a supplied master. Third-party method sources and pinned MIT revisions are listed in [PPT third-party notices](plugins/clonamic-ppt/THIRD_PARTY_NOTICES.md). On macOS, automatic LibreOffice rendering is disabled unless `CLONAMIC_ALLOW_MACOS_SOFFICE=1`; unavailable raster rendering is reported explicitly and never substituted with an SVG visual-pass claim.
 

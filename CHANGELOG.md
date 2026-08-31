@@ -8,6 +8,8 @@
 - Record deliberate retirement of implicit memory injection, recursive executor loops, browser automation, and legacy host-specific runtimes.
 - Refresh Codex, Claude Code, and Grok Build from one public source while keeping owner configuration private.
 - Add Cursor 3.18-compatible marketplace generation, config-aware local installation, persistent Core routing, drift checks, and verified rollback.
+- Add the optional `clonamic-my-language-plugin` 0.1.0 for explicit local prompt capture, derived style checkpoints, and private-data-free portable export.
+- Bind development approval to the declared change boundary so internal commands and same-scope retries never create a third gate.
 
 ## 0.1.0
 

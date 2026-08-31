@@ -10,7 +10,7 @@ No public model-quality score is published yet. Measured validation runtime is r
 |---|---|---|
 | Native baseline | None | Measure the host without Clonamic |
 | Core only | `clonamic-herness-plugin` | Measure routing, one write gate, completion checks, reporting, install, and rollback |
-| Full package | Core plus all twelve children | Measure optional routing, coding gates, explicit state, specialist work, and bounded executor wrappers |
+| Full package | Core plus all thirteen children | Measure optional routing, coding gates, explicit state, specialist work, and bounded executor wrappers |
 
 The full profile does not automatically call an external provider. Executor scenarios run only when the scenario explicitly names that executor. Offline contract benchmarks use fake local CLIs.
 
@@ -34,6 +34,8 @@ Run every profile in a clean temporary repository and isolated host home:
 14. Merge complete defaults with partial user and project toggles, reject an invalid layer to Core-only, and distinguish configured, installed, platform-supported, dependency-ready, and effective states.
 15. Process hostile reference/template archives, compare every SVG and editable PPTX slide, and report unavailable raster QA without a false pass.
 16. Grade a normalized host event log against blind read/write, approval, automation, team fallback, verification, rollback, blocker, and final-report budgets.
+17. Capture one explicit multilingual style payload, refresh a checkpoint, export it twice, and compare package hashes while confirming no raw prompt enters either export.
+18. Apply a multi-command manifest, retry after a pre-mutation timeout, and confirm the active development authorization adds no CMD, terminal-copy, or approval stop.
 
 ## Measurements
 

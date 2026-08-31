@@ -150,6 +150,23 @@
       ]
     },
     {
+      "name": "clonamic-my-language-plugin",
+      "description": "Explicit local prompt capture, observable style profiling, and portable profile export.",
+      "version": "0.1.0",
+      "source": {
+        "type": "local",
+        "path": "./plugins/clonamic-my-language-plugin"
+      },
+      "category": "personalization",
+      "tags": [
+        "language",
+        "style",
+        "sqlite",
+        "explicit",
+        "local"
+      ]
+    },
+    {
       "name": "clonamic-gpt",
       "description": "One bounded call through the installed Codex CLI.",
       "version": "1.0.0",

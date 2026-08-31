@@ -1649,6 +1649,7 @@ fn all_installed() -> BTreeSet<String> {
         "clonamic-ppt",
         "clonamic-preprocessing",
         "clonamic-memory",
+        "clonamic-my-language-plugin",
         "clonamic-grok",
         "clonamic-gpt",
         "clonamic-claude",

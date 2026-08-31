@@ -20,6 +20,7 @@
         "clonamic-ppt": {"type": "boolean"},
         "clonamic-preprocessing": {"type": "boolean"},
         "clonamic-memory": {"type": "boolean"},
+        "clonamic-my-language-plugin": {"type": "boolean"},
         "clonamic-grok": {"type": "boolean"},
         "clonamic-gpt": {"type": "boolean"},
         "clonamic-claude": {"type": "boolean"},

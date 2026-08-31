@@ -45,7 +45,7 @@ class ContextBudgetTest(unittest.TestCase):
         )
         self.assertLessEqual(logical_bytes, 4_500)
 
-    def test_every_canonical_package_and_citation_use_version_1_0_0(self):
+    def test_canonical_package_versions_match_the_stable_root_and_new_child(self):
         catalog = json.loads((ROOT / "catalog" / "plugins.json").read_text(encoding="utf-8"))
         versions = {}
         for entry in catalog["plugins"]:
@@ -53,6 +53,7 @@ class ContextBudgetTest(unittest.TestCase):
             versions[str(path.relative_to(ROOT))] = json.loads(
                 path.read_text(encoding="utf-8")
             )["version"]
+        self.assertEqual("0.1.0", versions.pop("plugins/clonamic-my-language-plugin/plugin.json"))
         self.assertEqual({"1.0.0"}, set(versions.values()), versions)
         citation = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
         self.assertRegex(citation, r"(?m)^version: 1\.0\.0$")
@@ -62,9 +63,9 @@ class ContextBudgetTest(unittest.TestCase):
         generated += sorted(ROOT.glob(f"**/{namespace}/claude/plugin.json"))
         generated += sorted(ROOT.glob(f"**/{namespace}/grok/plugin.json"))
         generated += sorted(ROOT.glob(f"**/{namespace}/cursor/plugin.json"))
-        self.assertEqual(52, len(generated))
+        self.assertEqual(56, len(generated))
         self.assertEqual(
-            {"1.0.0"},
+            {"0.1.0", "1.0.0"},
             {json.loads(path.read_text(encoding="utf-8"))["version"] for path in generated},
         )
         descriptors = sorted((ROOT / "io.github.algocean1204.clonamic").glob("*.json"))
@@ -74,14 +75,14 @@ class ContextBudgetTest(unittest.TestCase):
             for path in descriptors
             for row in json.loads(path.read_text(encoding="utf-8"))["plugins"]
         }
-        self.assertEqual({"1.0.0"}, descriptor_versions)
+        self.assertEqual({"0.1.0", "1.0.0"}, descriptor_versions)
         for relative in (
             f"{namespace}/marketplaces/claude.json",
             f"{namespace}/marketplaces/cursor.json",
             f"{namespace}/marketplaces/grok.json",
         ):
             rows = json.loads((ROOT / relative).read_text(encoding="utf-8"))["plugins"]
-            self.assertEqual({"1.0.0"}, {row["version"] for row in rows})
+            self.assertEqual({"0.1.0", "1.0.0"}, {row["version"] for row in rows})
 
 
 if __name__ == "__main__":

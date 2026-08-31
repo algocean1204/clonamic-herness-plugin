@@ -35,6 +35,8 @@ SKILL_FRONTMATTER_FIELDS = {
     "compatibility",
     "metadata",
     "allowed-tools",
+    "disable-model-invocation",
+    "user-invocable",
 }
 EXPECTED_PACKAGES = {
     "clonamic-herness-plugin",
@@ -46,6 +48,7 @@ EXPECTED_PACKAGES = {
     "clonamic-ppt",
     "clonamic-preprocessing",
     "clonamic-memory",
+    "clonamic-my-language-plugin",
     "clonamic-grok",
     "clonamic-gpt",
     "clonamic-claude",
@@ -146,7 +149,7 @@ class PackageContractTest(unittest.TestCase):
 
     def test_all_manifests_are_closed_agent_plugins_1_0_packages(self):
         _, rows = load_inventory()
-        self.assertEqual(13, len(rows))
+        self.assertEqual(14, len(rows))
         self.assertEqual(EXPECTED_PACKAGES, {manifest["name"] for _, _, manifest in rows})
         for _, path, manifest in rows:
             with self.subTest(path=path.relative_to(ROOT)):
@@ -190,7 +193,7 @@ class PackageContractTest(unittest.TestCase):
     def test_catalog_is_contained_unique_and_acyclic(self):
         catalog, rows = load_inventory()
         self.assertEqual({"plugins"}, set(catalog))
-        self.assertEqual(13, len(catalog["plugins"]))
+        self.assertEqual(14, len(catalog["plugins"]))
         root = ROOT.resolve()
         manifests = set()
         names = set()
@@ -360,7 +363,7 @@ class PackageContractTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertIn("66/66", result.stdout)
+        self.assertIn("70/70", result.stdout)
         generator = load_generator()
         self.assertEqual(
             set(generator.expected_outputs()),

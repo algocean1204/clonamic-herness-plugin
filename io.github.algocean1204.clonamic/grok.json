@@ -86,6 +86,15 @@
       "nativeManifest": "../plugins/clonamic-memory/io.github.algocean1204.clonamic/grok/plugin.json"
     },
     {
+      "manifest": "../plugins/clonamic-my-language-plugin/plugin.json",
+      "name": "clonamic-my-language-plugin",
+      "description": "Explicit local prompt capture, observable style profiling, and portable profile export.",
+      "required": false,
+      "runtimeReadyRequired": false,
+      "version": "0.1.0",
+      "nativeManifest": "../plugins/clonamic-my-language-plugin/io.github.algocean1204.clonamic/grok/plugin.json"
+    },
+    {
       "manifest": "../plugins/clonamic-gpt/plugin.json",
       "name": "clonamic-gpt",
       "description": "One bounded call through the installed Codex CLI.",

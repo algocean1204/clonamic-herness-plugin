@@ -29,7 +29,7 @@ Agent Plugins 1.0.0 does not automatically load arbitrary root Markdown, recursi
 
 ## Core and child installation
 
-The root package is the portable core. Twelve child packages are independent roots. `clonamic-market` can select a matching child from `catalog/plugins.json`, but Agent Plugins 1.0.0 does not define portable cross-plugin installation. The host or user installs and enables the selected child.
+The root package is the portable core. Thirteen child packages are independent roots. `clonamic-market` can select a matching child from `catalog/plugins.json`, but Agent Plugins 1.0.0 does not define portable cross-plugin installation. The host or user installs and enables the selected child.
 
 Removing one child does not remove the core or another child. Missing children return unavailable; the core does not substitute a neighboring capability.
 
@@ -46,6 +46,8 @@ Prompt provenance and automation authority require a host adapter that can attes
 Agent UX evaluation is host-neutral only after the host exports normalized redacted JSONL events. Repository fixtures cannot observe chat waits, duplicate specifications, reports, or tool calls and are never presented as model-quality evidence.
 
 The optional memory child uses Python's standard `sqlite3` at a caller-supplied path. It creates and migrates state lazily and does not require a server, Docker, vector extension, uv, or a virtual environment. FTS5 is opportunistic; the scan fallback preserves results when FTS5 is unavailable.
+
+The optional My Language child uses Python's standard `sqlite3` in its explicit local data root. Agent Plugins clients discover its two manual skills portably. Codex, Claude Code, Grok Build, and Cursor metadata must keep model-initiated invocation disabled; Hermes receives the portable skill package only when its scanner accepts the staged package. No adapter bypasses that scanner or turns capture into an always-on rule.
 
 The HWPX child uses standard-library XML parsing and never compiles or loads a temporary native shim. LibreOffice conversion requires an installed `soffice`; a blocked socket environment is reported unavailable rather than bypassed with `LD_PRELOAD`.
 

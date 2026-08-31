@@ -18,7 +18,7 @@ a new `CARGO_TARGET_DIR` each time. All runs exited zero with identical command 
 | Warm, 8 workers | 4.460 s | 4.480 s | 4.500 s | 4.480 s |
 | Cold, 8 workers | 13.150 s | 11.720 s | 11.480 s | 11.720 s |
 
-Eight workers remain the default. The improvement comes from overlapping independent Python,
+Eight workers remain the default. The 28-command table is the last published measured baseline; the My Language child adds one independently scheduled package-test command, so the current plan contains 29 commands and needs a fresh timed release run before publishing a replacement median. The improvement comes from overlapping independent Python,
 package, PPT, and rustfmt checks; removing copy-only package tests and the POSIX supervisor process;
 and retaining Cargo clippy/test as ordered post-gates. No fixture sleep, timeout assertion, test,
 manifest check, security check, or command identity was removed.

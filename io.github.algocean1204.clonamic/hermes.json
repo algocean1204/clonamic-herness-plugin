@@ -77,6 +77,14 @@
       "version": "1.0.0"
     },
     {
+      "manifest": "../plugins/clonamic-my-language-plugin/plugin.json",
+      "name": "clonamic-my-language-plugin",
+      "description": "Explicit local prompt capture, observable style profiling, and portable profile export.",
+      "required": false,
+      "runtimeReadyRequired": false,
+      "version": "0.1.0"
+    },
+    {
       "manifest": "../plugins/clonamic-grok/plugin.json",
       "name": "clonamic-grok",
       "description": "One bounded call through the installed Grok CLI.",

@@ -18,6 +18,7 @@ ACTIVE = {
     "clonamic-hermes",
 }
 SELECTIVE = {
+    "clonamic-my-language-plugin",
     "clonamic-writing-plugin",
     "clonamic-ppt",
     "clonamic-design-plugin",
@@ -69,6 +70,29 @@ class AssetPolicyTest(unittest.TestCase):
         ).casefold()
         for forbidden in ("sessionstart", "telemetry", "subagent-driven-development"):
             self.assertNotIn(forbidden, production)
+
+    def test_my_language_child_is_optional_versioned_and_explicit_only(self):
+        package = ROOT / "plugins/clonamic-my-language-plugin"
+        manifest = json.loads((package / "plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual("clonamic-my-language-plugin", manifest["name"])
+        self.assertEqual("0.1.0", manifest["version"])
+        skills = {
+            "clonamic-my-language",
+            "clonamic-my-language-export",
+            "clonamic-my-language-review",
+        }
+        self.assertEqual(
+            skills,
+            {path.parent.name for path in (package / "skills").glob("*/SKILL.md")},
+        )
+        for name in skills:
+            skill = (package / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            metadata = (package / "skills" / name / "agents/openai.yaml").read_text(
+                encoding="utf-8"
+            )
+            with self.subTest(skill=name):
+                self.assertIn("disable-model-invocation: true", skill)
+                self.assertIn("allow_implicit_invocation: false", metadata)
 
     def test_public_identifiers_are_clonamic_without_legacy_branding(self):
         forbidden = re.compile(
