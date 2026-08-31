@@ -39,10 +39,15 @@ use `~/.cursor/plugins/local/<name>`, matching Cursor's documented community
 guidance for [local plugin discovery](https://forum.cursor.com/t/local-plugin-is-not-being-picked-up-by-cursor/156549/3).
 
 `install-cursor.py` installs the staged packages into a user-supplied target or
-the stock `~/.cursor/plugins/local` directory. It applies `clonamic.json` and
-optional overlay files before installation, records hashes, preserves
-same-name pre-images, and supports verified uninstall. It never writes Cursor
-settings or extension state.
+the stock `~/.cursor/plugins/local` directory. Before copying, it reads Claude
+Code's installed/enabled plugin registry because Cursor natively imports those
+packages. A package already supplied there is recorded as provider-owned and is
+not copied again. When Core comes from Claude, the adapter installs the one
+generated operating-contract rule under `~/.cursor/rules/`; a Cursor-only host
+keeps the self-contained local Core package instead. It applies `clonamic.json`
+and optional overlays, records hashes and pre-images, and supports verified
+uninstall without changing Cursor settings, extensions, authentication, or
+account state.
 
 Agent Plugins 1.0.0 discovers immediate `skills/*/SKILL.md` components and root `mcp.json`. It does not define arbitrary root-guidance loading, recursive child-package discovery, marketplace installation, approval UX, hooks, or team/subagent behavior. Adapters translate discovery metadata only. They never copy policy, select models, install children silently, or claim that a host loaded a hook.
 

@@ -35,9 +35,10 @@ Retired source history is recoverable from verified private archives. Retirement
 Remove children independently, disable their adapter entries, and uninstall the core router last. The router block contains one reference to the canonical root guidance, not a policy copy. `clonamic uninstall-router` restores its recorded pre-image only when unrelated user edits can be preserved.
 
 Cursor uses `install-cursor.py uninstall`. It first verifies every managed
-package hash, removes only installer-owned directories, and restores any
-same-name pre-install directory. A modified managed package blocks removal so
-user edits are not discarded. A failed install or update restores the full
-transaction snapshot automatically.
+package and global-rule hash, removes only installer-owned content, and
+restores any same-name pre-install content. Claude-provided packages are only
+referenced in state and are never removed. A modified managed asset blocks
+removal so user edits are not discarded. A failed install or update restores
+the full transaction snapshot automatically.
 
 The historical `v0.1.0` and stable `v1.0.0` tags are immutable. Reverting a published change uses a normal Git revert and push; no forced history or tag rewrite is required.

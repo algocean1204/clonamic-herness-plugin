@@ -23,6 +23,21 @@ def load_installer():
 
 
 class CursorAdapterTest(unittest.TestCase):
+    def host_paths(self, root):
+        return (
+            root / ".claude/plugins/installed_plugins.json",
+            root / ".claude/settings.json",
+            root / ".cursor/rules/clonamic-operating-contract.mdc",
+        )
+
+    def install(self, installer, target, state, configs, root):
+        registry, settings, rule = self.host_paths(root)
+        return installer.install(target, state, configs, registry, settings, rule)
+
+    def doctor(self, installer, target, state, root):
+        registry, settings, _rule = self.host_paths(root)
+        return installer.doctor(target, state, registry, settings)
+
     def test_install_toggle_doctor_uninstall_and_preimage_restore(self):
         installer = load_installer()
         with tempfile.TemporaryDirectory(prefix="clonamic-cursor-install-") as temporary:
@@ -33,24 +48,26 @@ class CursorAdapterTest(unittest.TestCase):
             collision.mkdir(parents=True)
             (collision / "sentinel.txt").write_text("original\n", encoding="utf-8")
 
-            installed = installer.install(target, state, [ROOT / "clonamic.json"])
+            installed = self.install(installer, target, state, [ROOT / "clonamic.json"], root)
             self.assertEqual(14, len(installed["plugins"]))
             self.assertFalse((target / "clonamic-memory/sentinel.txt").exists())
             core = target / "clonamic-herness-plugin"
             self.assertTrue((core / ".cursor-plugin/plugin.json").is_file())
             self.assertTrue((core / "rules/clonamic-operating-contract.mdc").is_file())
             self.assertFalse((core / "plugin.json").exists())
-            self.assertEqual("verified", installer.doctor(target, state)["action"])
+            self.assertEqual("verified", self.doctor(installer, target, state, root)["action"])
 
             overlay = root / "disable-memory.json"
             overlay.write_text(
                 json.dumps({"plugins": {"clonamic-memory": False}}),
                 encoding="utf-8",
             )
-            disabled = installer.install(
+            disabled = self.install(
+                installer,
                 target,
                 state,
                 [ROOT / "clonamic.json", overlay],
+                root,
             )
             self.assertNotIn("clonamic-memory", disabled["plugins"])
             self.assertEqual(
@@ -58,8 +75,8 @@ class CursorAdapterTest(unittest.TestCase):
                 (target / "clonamic-memory/sentinel.txt").read_text(encoding="utf-8"),
             )
 
-            installer.install(target, state, [ROOT / "clonamic.json"])
-            removed = installer.uninstall(target, state)
+            self.install(installer, target, state, [ROOT / "clonamic.json"], root)
+            removed = installer.uninstall(target, state, self.host_paths(root)[2])
             self.assertEqual(14, len(removed["plugins"]))
             self.assertFalse(state.exists())
             self.assertEqual(
@@ -77,15 +94,15 @@ class CursorAdapterTest(unittest.TestCase):
             root = Path(temporary)
             target = root / "plugins/local"
             state = root / "state/install-state.json"
-            installer.install(target, state, [ROOT / "clonamic.json"])
+            self.install(installer, target, state, [ROOT / "clonamic.json"], root)
             changed = target / "clonamic-herness-plugin/clonamic-herness-plugin.md"
             changed.write_text(changed.read_text(encoding="utf-8") + "drift\n", encoding="utf-8")
             with self.assertRaises(installer.InstallError):
-                installer.doctor(target, state)
+                self.doctor(installer, target, state, root)
             with self.assertRaises(installer.InstallError):
-                installer.install(target, state, [ROOT / "clonamic.json"])
+                self.install(installer, target, state, [ROOT / "clonamic.json"], root)
             with self.assertRaises(installer.InstallError):
-                installer.uninstall(target, state)
+                installer.uninstall(target, state, self.host_paths(root)[2])
 
     def test_failed_update_restores_previous_installation(self):
         installer = load_installer()
@@ -99,10 +116,12 @@ class CursorAdapterTest(unittest.TestCase):
                 json.dumps({"plugins": {name: False for name in optional}}),
                 encoding="utf-8",
             )
-            installer.install(
+            self.install(
+                installer,
                 target,
                 state,
                 [ROOT / "clonamic.json", only_core],
+                root,
             )
             before_state = state.read_bytes()
             before_digest = installer.tree_digest(target / "clonamic-herness-plugin")
@@ -115,7 +134,7 @@ class CursorAdapterTest(unittest.TestCase):
 
             with mock.patch.object(installer, "copy_directory", side_effect=fail_on_memory):
                 with self.assertRaises(OSError):
-                    installer.install(target, state, [ROOT / "clonamic.json"])
+                    self.install(installer, target, state, [ROOT / "clonamic.json"], root)
 
             self.assertEqual(before_state, state.read_bytes())
             self.assertEqual(
@@ -123,7 +142,59 @@ class CursorAdapterTest(unittest.TestCase):
                 installer.tree_digest(target / "clonamic-herness-plugin"),
             )
             self.assertFalse((target / "clonamic-memory").exists())
-            self.assertEqual("verified", installer.doctor(target, state)["action"])
+            self.assertEqual("verified", self.doctor(installer, target, state, root)["action"])
+
+    def test_claude_provider_removes_duplicate_local_plugins_and_keeps_global_rule(self):
+        installer = load_installer()
+        with tempfile.TemporaryDirectory(prefix="clonamic-cursor-provider-") as temporary:
+            root = Path(temporary)
+            target = root / ".cursor/plugins/local"
+            state = root / ".cursor/clonamic/install-state.json"
+            registry, settings, rule = self.host_paths(root)
+            cache = root / ".claude/cache"
+            cache.mkdir(parents=True)
+            names = ("clonamic-herness-plugin", "clonamic-memory")
+            registry.parent.mkdir(parents=True)
+            registry.write_text(
+                json.dumps(
+                    {
+                        "plugins": {
+                            f"{name}@clonamic": [
+                                {"scope": "user", "installPath": str(cache)}
+                            ]
+                            for name in names
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            settings.parent.mkdir(parents=True, exist_ok=True)
+            settings.write_text(
+                json.dumps({"enabledPlugins": {f"{name}@clonamic": True for name in names}}),
+                encoding="utf-8",
+            )
+
+            installed = installer.install(
+                target, state, [ROOT / "clonamic.json"], registry, settings, rule
+            )
+
+            self.assertEqual(list(names), installed["provider_plugins"])
+            self.assertNotIn("clonamic-herness-plugin", installed["plugins"])
+            self.assertNotIn("clonamic-memory", installed["plugins"])
+            self.assertTrue(rule.is_file())
+            self.assertEqual("verified", installer.doctor(target, state, registry, settings)["action"])
+            with self.assertRaises(installer.InstallError):
+                installer.install(
+                    target,
+                    state,
+                    [ROOT / "clonamic.json"],
+                    registry,
+                    settings,
+                    root / ".cursor/rules/other.mdc",
+                )
+            removed = installer.uninstall(target, state, rule)
+            self.assertEqual(list(names), removed["provider_plugins"])
+            self.assertFalse(rule.exists())
 
 
 if __name__ == "__main__":

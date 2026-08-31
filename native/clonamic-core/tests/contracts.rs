@@ -72,6 +72,9 @@ fn approval_input_accepts_human_format_variants() {
     ] {
         assert_eq!(normalize_approval(input).unwrap(), "6F0FF3");
     }
+    for input in ["승인", "명시적 승인", "명시적 허용.", "그냥 진행해"] {
+        assert_eq!(normalize_approval(input).unwrap(), "NATURAL");
+    }
 }
 
 #[test]

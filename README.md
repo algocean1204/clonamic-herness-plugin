@@ -44,7 +44,7 @@ Every child has its own root `plugin.json`, skill directory, package license, te
 | External executor | Only the executor explicitly named by the user. No substitution. |
 | Trusted automation | Use its preapproved grant without conversational approval; scope drift returns noninteractive `needs_authorization`. |
 
-Approval codes correlate a decision with its write packet. They are not passwords or authentication factors. Plain `승인` selects the sole pending packet; when several packets are pending, `승인:ABC123` selects one. Backticks, whitespace, a fullwidth colon, and lowercase codes are accepted. The approved boundary, operation classes, effects, checks, and rollback authorize the run; internal executable names and command counts do not. An active run never asks for a CMD code or copied terminal command and reuses the same authorization after a same-scope timeout. Password, OAuth, biometric, operating-system, and platform prompts remain outside Clonamic.
+Approval codes correlate a decision with its write packet. They are not passwords or authentication factors. In a chat gate, natural approval authorizes the latest current-session specification and supersedes stale pending packets; a code is only a compatibility selector. The packet API accepts natural approval when exactly one packet is pending and uses `승인:ABC123` only to disambiguate several packets. Backticks, whitespace, a fullwidth colon, lowercase codes, `명시적 승인`, `명시적 허용`, and `그냥 진행해` are accepted. The approved boundary, operation classes, effects, checks, and rollback authorize the run; internal executable names and command counts do not. An active run never asks for a CMD code or copied terminal command and reuses the same authorization after a same-scope timeout. Password, OAuth, biometric, operating-system, and platform prompts remain outside Clonamic.
 
 Team selection is prospective. A later worker defect, missing evidence, or false completion rejects the result but never retroactively creates a team. Within each pair, the worker finishes before its reviewer starts; only two or more isolated pairs may run in parallel, and same-file work is serialized. A second tier is `main → lead → specialists`: the lead assigns and reviews but neither executes nor integrates, one assigned specialist owns integration, and the verdict waits for every specialist result plus fresh evidence. Without native subagents, `actual_team` remains false and the host may perform only a disclosed local sequential second pass, not independent review.
 
@@ -120,10 +120,12 @@ Each staging destination must be new and outside the source checkout. Review the
 staged source before using `--trust`. Codex and Claude install an optional child
 by its catalog name. Grok installs the staged child path, such as
 `../clonamic-grok-marketplace/plugins/clonamic-code-plugin`.
-Cursor installs each effective package under `~/.cursor/plugins/local/`. Core is
-a Cursor Plugin so its generated `alwaysApply` rule is persistent; children are
-independent Cursor Plugins. An overlay can turn optional packages off without
-editing the shipped default:
+Cursor installs each effective package under `~/.cursor/plugins/local/` on a
+Cursor-only host. When Cursor already imports an enabled Clonamic package from
+Claude Code, the adapter reuses that provider instead of installing a second
+same-name local copy. In that mode it installs only the generated Core
+`alwaysApply` rule under `~/.cursor/rules/` and any package missing from Claude.
+An overlay can turn optional packages off without editing the shipped default:
 
 ```bash
 python3 io.github.algocean1204.clonamic/adapters/install-cursor.py install --config /path/to/clonamic.local.json
@@ -131,10 +133,10 @@ python3 io.github.algocean1204.clonamic/adapters/install-cursor.py doctor
 python3 io.github.algocean1204.clonamic/adapters/install-cursor.py uninstall
 ```
 
-The installer refuses modified managed packages, preserves a pre-existing
-same-name directory, rolls back failed updates, and restores the pre-image on
-uninstall. It does not change Cursor settings, extensions, authentication, or
-account User Rules.
+The installer records local and Claude-provided packages separately, refuses
+modified managed files, preserves pre-existing same-name content, rolls back
+failed updates, and restores each pre-image on uninstall. It does not change
+Cursor settings, extensions, authentication, or account state.
 
 Hermes remote installation of this monorepo is currently unavailable: its community-plugin scanner evaluates optional packages and bundled assets together and rejects the root as dangerous. Clonamic does not recommend disabling or bypassing that scanner. The generated Hermes descriptor remains repository-checked compatibility output, not an installation claim.
 

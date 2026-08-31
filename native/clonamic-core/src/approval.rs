@@ -34,19 +34,14 @@ pub enum ApprovalDecision {
 }
 
 pub fn normalize_approval(input: &str) -> Result<String> {
-    let mut value = input.trim();
-    if value.starts_with('`') && value.ends_with('`') && value.len() >= 2 {
-        value = value[1..value.len() - 1].trim();
+    let compact = compact_approval(input);
+    if natural_approval_compact(&compact) {
+        return Ok("NATURAL".into());
     }
-    let compact: String = value
-        .replace('：', ":")
-        .chars()
-        .filter(|character| !character.is_whitespace())
-        .collect();
     let code = compact
         .strip_prefix("승인:")
         .or_else(|| compact.strip_prefix("APPROVE:"))
-        .ok_or_else(|| Error::Invalid("approval must use 승인:CODE".into()))?
+        .ok_or_else(|| Error::Invalid("approval must be natural approval or use 승인:CODE".into()))?
         .to_ascii_uppercase();
     if code.len() != 6 || !code.bytes().all(|byte| byte.is_ascii_hexdigit()) {
         return Err(Error::Invalid(
@@ -161,6 +156,10 @@ fn pending_count(set_root: &Path, session_id: &str, now: u64) -> Result<usize> {
 }
 
 fn plain_approval(input: &str) -> bool {
+    natural_approval_compact(&compact_approval(input))
+}
+
+fn compact_approval(input: &str) -> String {
     let mut value = input.trim();
     if value.starts_with('`') && value.ends_with('`') && value.len() >= 2 {
         value = value[1..value.len() - 1].trim();
@@ -170,7 +169,26 @@ fn plain_approval(input: &str) -> bool {
         .chars()
         .filter(|character| !character.is_whitespace())
         .collect::<String>()
-        == "승인"
+}
+
+fn natural_approval_compact(value: &str) -> bool {
+    matches!(
+        value.trim_end_matches(['.', '!']),
+        "승인"
+            | "승인합니다"
+            | "승인할게"
+            | "승인할께"
+            | "명시적승인"
+            | "명시적허용"
+            | "진행해"
+            | "진행하세요"
+            | "그냥진행해"
+            | "좋아,진행해"
+            | "좋아，진행해"
+            | "좋아.진행해"
+            | "APPROVE"
+            | "approve"
+    )
 }
 
 fn validate_request(request: &ApprovalRequest) -> Result<()> {
@@ -200,6 +218,22 @@ mod tests {
     use super::*;
     use std::os::unix::fs::{PermissionsExt, symlink};
     use tempfile::tempdir;
+
+    #[test]
+    fn normalization_accepts_natural_and_code_approval_forms() {
+        for value in [
+            "승인",
+            "`승인`",
+            "명시적 승인.",
+            "명시적 허용",
+            "그냥 진행해",
+            "좋아, 진행해!",
+        ] {
+            assert_eq!(normalize_approval(value).unwrap(), "NATURAL", "{value}");
+        }
+        assert_eq!(normalize_approval("`승인：a1b2c3`").unwrap(), "A1B2C3");
+        assert!(normalize_approval("문서 안의 승인 문구").is_err());
+    }
 
     #[test]
     fn lock_cleanup_preserves_a_replacement_it_did_not_create() {
