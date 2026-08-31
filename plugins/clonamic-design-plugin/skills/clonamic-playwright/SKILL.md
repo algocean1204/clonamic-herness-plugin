@@ -11,41 +11,38 @@ Treat this skill as CLI-first automation. Do not pivot to `@playwright/test` unl
 
 ## Prerequisite check (required)
 
-Before proposing commands, check whether `npx` is available (the wrapper depends on it):
+Before proposing commands, verify an existing runtime. The wrapper never downloads one:
 
 ```bash
-command -v npx >/dev/null 2>&1
+command -v playwright-cli >/dev/null 2>&1 || test -x ./node_modules/.bin/playwright-cli
 ```
 
-If it is not available, pause and ask the user to install Node.js/npm (which provides `npx`). Provide these steps verbatim:
+If neither check succeeds, report the missing runtime. Only when the user explicitly requests setup,
+choose and record an exact package version before installing it:
 
 ```bash
-# Verify Node/npm are installed
 node --version
 npm --version
-
-# If missing, install Node.js/npm, then:
-npm install -g @playwright/cli@latest
+npm install --save-dev @playwright/cli@<approved-version>
 playwright-cli --help
 ```
 
-Once `npx` is present, proceed with the wrapper script. A global install of `playwright-cli` is optional.
+Once an existing runtime is verified, proceed with the wrapper script.
 
 ## Skill path (set once)
 
+Resolve the directory containing this loaded `SKILL.md` through the host's skill interface. Do not scan
+vendor-specific home directories or assume where a host installs plugins.
+
 ```bash
-PWCLI=""
-for f in \
-  "$HOME"/.claude/skills/clonamic-playwright/scripts/playwright_cli.sh \
-  "$HOME"/.codex/skills/clonamic-playwright/scripts/playwright_cli.sh \
-  "$HOME"/.codex/skills-disabled/clonamic-playwright/scripts/playwright_cli.sh
-do
-  [ -x "$f" ] && PWCLI="$f" && break
-done
+PLAYWRIGHT_SKILL_ROOT="<host-resolved directory containing this SKILL.md>"
+PWCLI="$PLAYWRIGHT_SKILL_ROOT/scripts/playwright_cli.sh"
+test -x "$PWCLI"
 export PWCLI
 ```
 
-Resolves Claude active, Codex active, then Codex `skills-disabled` (intentionally disabled local copy).
+If the host does not expose a filesystem path, use an already installed `playwright-cli`. Report a
+missing runtime if neither path exists; do not install software unless the user requested setup.
 
 ## Quick start
 
@@ -60,10 +57,10 @@ Use the wrapper script:
 "$PWCLI" screenshot
 ```
 
-If the user prefers a global install, this is also valid:
+If the user explicitly requests a global install, pin the approved version:
 
 ```bash
-npm install -g @playwright/cli@latest
+npm install -g @playwright/cli@<approved-version>
 playwright-cli --help
 ```
 
@@ -128,7 +125,7 @@ Refs can go stale. When a command fails due to a missing ref, snapshot again.
 
 ## Wrapper script
 
-The wrapper script uses `npx --package @playwright/cli playwright-cli` so the CLI can run without a global install:
+The wrapper uses an existing global or project-local `playwright-cli` and fails closed otherwise:
 
 ```bash
 "$PWCLI" --help

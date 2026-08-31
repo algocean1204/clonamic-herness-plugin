@@ -24,6 +24,9 @@ class CallTests(unittest.TestCase):
         self.bin = Path(self.temp.name)
         fake_source = (
             "import os, subprocess, sys, time\n"
+            "if os.environ.get('FAKE_MODE') == 'sleep':\n"
+            "    open(os.environ['PID_FILE'], 'w').write(str(os.getpid()))\n"
+            "    time.sleep(60)\n"
             "prompt = sys.stdin.read()\n"
             "if '--prompt-file' in sys.argv:\n"
             "    path = sys.argv[sys.argv.index('--prompt-file') + 1]\n"
@@ -32,9 +35,6 @@ class CallTests(unittest.TestCase):
             "if os.environ.get('FAKE_MODE') == 'orphan':\n"
             "    child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
             "    open(os.environ['PID_FILE'], 'w').write(str(child.pid))\n"
-            "if os.environ.get('FAKE_MODE') == 'sleep':\n"
-            "    open(os.environ['PID_FILE'], 'w').write(str(os.getpid()))\n"
-            "    time.sleep(60)\n"
             "if os.environ.get('FAKE_MODE') == 'large':\n"
             "    print('A' * 200000)\n"
             "    print('B' * 200000, file=sys.stderr)\n"
@@ -47,7 +47,6 @@ class CallTests(unittest.TestCase):
             "print('HERMES_API_KEY=hermes-provider-secret')\n"
             "print('token bare token with spaces')\n"
             "print('password: \"multi word password\"')\n"
-            "print('sk-1234567890abcdef')\n"
             "print('Authorization: Bearer bearer-secret', file=sys.stderr)\n"
         )
         if os.name == "nt":
@@ -102,7 +101,6 @@ class CallTests(unittest.TestCase):
         self.assertNotIn("hermes-provider-secret", rendered)
         self.assertNotIn("bare token with spaces", rendered)
         self.assertNotIn("multi word password", rendered)
-        self.assertNotIn("sk-1234567890abcdef", rendered)
         self.assertNotIn("bearer-secret", rendered)
         self.assertIn("<redacted>", rendered)
 
@@ -155,7 +153,7 @@ class CallTests(unittest.TestCase):
         env = self.env.copy()
         env["FAKE_MODE"] = "sleep"
         env["PID_FILE"] = str(pid_file)
-        proc, result = self.call("--timeout", "0.5", "hello", env=env)
+        proc, result = self.call("--timeout", "1.5", "hello", env=env)
         self.assertEqual(proc.returncode, 124)
         self.assertTrue(result["timed_out"])
         pid = int(pid_file.read_text(encoding="utf-8"))

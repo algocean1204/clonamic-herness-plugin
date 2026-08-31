@@ -1,16 +1,22 @@
 ---
 name: clonamic-figma-workflow
-description: "ClaudeTalkToFigma MCP procedure — channel join, claude_page conventions, faithful-reproduction rules (no vertical text wrap, no overlapping elements), export-and-verify loop. Use for any Figma design creation or editing via MCP (피그마 작업, 레퍼런스 재현)."
+description: "Host-native Figma workflow for faithful creation and editing — connection check, document inspection, no vertical text wrap or overlap, and an export-and-verify loop. Use only when a Figma tool is already connected or the user asks how to connect one."
 ---
 
-# Figma Workflow (ClaudeTalkToFigma MCP)
+# Figma Workflow
 
 ## 1. Session setup
 
-- Keep ClaudeTalkToFigma on demand, never user-wide, project-wide, or Codex-wide. Start a dedicated Claude session with `claude --mcp-config ~/.claude/figma-mcp.json --strict-mcp-config`. The non-`.mcp.json` filename is deliberate: Claude must not auto-discover it as project config when running inside `~/.claude`. If the tools are absent in the current session, request that one relaunch; never register the server globally or start raw `npx` in the background.
-- Channel ID is provided by the user **each session** — ask for it if missing, never guess. `join_channel` first; nothing works before this.
-- Work on the `claude_page` page unless the user names another; `get_pages` → `set_current_page` (create it if absent).
-- `get_document_info` before creating anything — reuse existing frames/styles when present.
+- Use the Figma capability already connected to the current host. Never launch Claude, Codex,
+  Grok, Hermes, or another executor from this skill. An external executor is eligible only after
+  its explicit slash command in the current user request.
+- Inspect the available tool contract before acting. If it requires a channel or document key,
+  use the exact user- or host-supplied value; never guess it.
+- Use the user's named page. Otherwise inspect the current page and reuse it unless isolation is
+  required for a new artifact.
+- Read document structure before creating anything and reuse existing frames and styles.
+- If no Figma capability is connected, state the missing connection. Do not install a server,
+  register global configuration, or start a background process as a fallback.
 
 ## 2. Faithful reproduction rules (hard requirements from past feedback)
 
@@ -36,6 +42,6 @@ Meaningful node names, logical grouping, delete scratch nodes. Report the page +
 
 ## Offline and source boundary
 
-The reproduction rules and local export checks work offline once the source artifact is available. Live Figma inspection or editing requires an explicitly connected Figma/ClaudeTalkToFigma MCP session and is never silently replaced with guessed values. Do not install the MCP server, register global configuration, or fetch a remote Figma file without the user's request and the exact connection details.
+The reproduction rules and local export checks work offline once the source artifact is available. Live Figma inspection or editing requires an explicitly connected Figma session and is never silently replaced with guessed values. Do not install an MCP server, register global configuration, or fetch a remote Figma file without the user's request and exact connection details.
 
 OpenAI's current Figma agent integration lives in the official `openai/plugins` repository and is governed by Figma's developer terms; it is a runtime reference, not vendored public content in this skill.

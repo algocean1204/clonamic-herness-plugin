@@ -7,8 +7,8 @@ These tools read PPTX OOXML directly with the Python standard library. They neve
 Run both measurements against approved reference decks:
 
 ```bash
-python3 scripts/extract_design_dna.py reference-1.pptx reference-2.pptx --out design_dna.json
-python3 scripts/measure_word_budget.py reference-1.pptx reference-2.pptx --out word_budget.json
+python3 "$PPT_SKILL_ROOT/scripts/extract_design_dna.py" reference-1.pptx reference-2.pptx --out design_dna.json
+python3 "$PPT_SKILL_ROOT/scripts/measure_word_budget.py" reference-1.pptx reference-2.pptx --out word_budget.json
 ```
 
 `design_dna.json` separates colors and fonts used on actual slides from theme declarations and reports measured geometry rhythm. `word_budget.json` counts text boxes, tables, and linked charts. Its rounded-up median is the ceiling; split a slide above it instead of reducing font size.
@@ -16,7 +16,7 @@ python3 scripts/measure_word_budget.py reference-1.pptx reference-2.pptx --out w
 ## Templates
 
 ```bash
-python3 scripts/template_contract.py template.pptx --out template_contract.json
+python3 "$PPT_SKILL_ROOT/scripts/template_contract.py" template.pptx --out template_contract.json
 ```
 
 The contract records masters, layouts, semantic placeholder keys, protected master regions, and exemplar geometry. It is extraction-only: the current blank-canvas renderer does not apply a template or claim to preserve its master. Use the contract as measured design input, match placeholders by semantic key or name, and never select a shape by its position in a shape list.

@@ -66,7 +66,11 @@ class PluginConfigContractTest(unittest.TestCase):
 
     def test_descriptors_add_required_and_configuration_but_marketplaces_do_not(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/generate-adapters.py"), "--check"],
+            [
+                sys.executable,
+                str(ROOT / "io.github.algocean1204.clonamic/adapters/generate.py"),
+                "--check",
+            ],
             cwd=ROOT,
             text=True,
             capture_output=True,
@@ -77,11 +81,13 @@ class PluginConfigContractTest(unittest.TestCase):
             descriptor = load(ROOT / "io.github.algocean1204.clonamic" / f"{platform}.json")
             self.assertEqual("../clonamic.json", descriptor["configuration"])
             self.assertTrue(all(isinstance(row["required"], bool) for row in descriptor["plugins"]))
-        for path in (
-            ROOT / ".agents/plugins/marketplace.json",
-            ROOT / ".claude-plugin/marketplace.json",
-            ROOT / ".grok-plugin/marketplace.json",
-        ):
+        for platform in ("codex", "claude", "grok"):
+            path = (
+                ROOT
+                / "io.github.algocean1204.clonamic"
+                / "marketplaces"
+                / f"{platform}.json"
+            )
             for row in load(path)["plugins"]:
                 self.assertNotIn("required", row)
                 self.assertNotIn("configuration", row)

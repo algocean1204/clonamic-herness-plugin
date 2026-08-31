@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if ! command -v npx >/dev/null 2>&1; then
-  echo "Error: npx is required but not found on PATH." >&2
+if command -v playwright-cli >/dev/null 2>&1; then
+  runtime=("$(command -v playwright-cli)")
+elif [[ -x "./node_modules/.bin/playwright-cli" ]]; then
+  runtime=("./node_modules/.bin/playwright-cli")
+else
+  echo "Error: playwright-cli is not already installed on PATH or in ./node_modules/.bin." >&2
+  echo "Installation is a separate setup action; this wrapper never downloads packages." >&2
   exit 1
 fi
 
@@ -16,7 +21,7 @@ for arg in "$@"; do
   esac
 done
 
-cmd=(npx --yes --package @playwright/cli playwright-cli)
+cmd=("${runtime[@]}")
 if [[ "${has_session_flag}" != "true" && -n "${PLAYWRIGHT_CLI_SESSION:-}" ]]; then
   cmd+=(--session "${PLAYWRIGHT_CLI_SESSION}")
 fi

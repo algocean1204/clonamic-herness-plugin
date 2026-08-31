@@ -10,7 +10,7 @@ metadata:
   date_added: "2026-08-02"
   author: artemnovitckii
   license_source: "https://github.com/artemnovitckii/content-skills/blob/master/LICENSE"
-  local_changes: "upstream ships a build README with no SKILL.md; this wraps it as a skill, moves the generated profile to the private owner tree, and adds the never-publish rule"
+  local_changes: "upstream ships a build README with no SKILL.md; this wraps it as a portable skill, requires an explicit private profile target, and adds the never-publish rule"
 ---
 
 # Voice-DNA
@@ -32,21 +32,25 @@ override a mandated format.
 The profile is a fingerprint of how one specific person writes. It belongs with owner context,
 not with shareable config:
 
-- **Lives at** `~/.agents/user/voice-dna.md` (private tree, mirrored only to the private backup).
-- **Never** goes to `~/.claude/skills/voice-dna/`, never to the public distro, never into a repo
+- **Lives only at** an explicit private profile path supplied by the caller, or in a measured host
+  personal-profile interface the user already configured.
+- **Never** goes into a global skill/plugin install directory, the public distribution, or a project repo
   the owner does not control. The public package ships this skill and the build prompt only.
 - Do not paste the profile, or writing samples used to build it, into an external service.
 
-Read it with the Read tool when a piece needs the owner's voice. Treat the profile as unavailable
-when the file is missing or its first nonblank line starts with `TEMPLATE-UNFILLED`; skip voice
+Read it only through the supplied path or interface when a piece needs the owner's voice. Treat the
+profile as unavailable when no target was supplied, the target is missing, or its first nonblank
+line starts with `TEMPLATE-UNFILLED`; skip voice
 matching and do not invent a voice. Offer to build the profile only when the user explicitly asks
-to establish or capture their personal voice.
+to establish or capture their personal voice. For a one-off voice pass, the user may provide the
+profile in the current conversation; do not persist it automatically.
 
 ## Build it (once, ~2 minutes of the user's time)
 
 The user supplies 10–20 pieces of their own writing (20 is better; spoken transcripts of their own
-videos beat captions, because they show how the person actually talks). Then run this analysis and
-write the result to `~/.agents/user/voice-dna.md`:
+videos beat captions, because they show how the person actually talks). Then run this analysis.
+Persist the result only when the user explicitly supplied or approved a private target; otherwise
+return it in the current conversation without creating a file:
 
 1. **Analyze — how, not what.** Do not summarize the topics. Extract:
    - **톤** — the overall stance (e.g. blunt but warm).

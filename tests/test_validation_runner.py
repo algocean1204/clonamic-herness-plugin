@@ -71,7 +71,10 @@ def assert_process_exits(test, pid, timeout=3):
 class ValidationRunnerTest(unittest.TestCase):
     def test_plan_keeps_only_independent_package_tests_parallel(self):
         plan = VALIDATOR.build_plan()
-        self.assertEqual("scripts/generate-adapters.py", plan["before"][0][1])
+        self.assertEqual(
+            "io.github.algocean1204.clonamic/adapters/generate.py",
+            plan["before"][0][1],
+        )
         self.assertEqual(2, len(plan["before"]))
         self.assertEqual(["cargo", "build"], [plan["before"][1][0], plan["before"][1][1]])
         root_modules = [f"tests.{path.stem}" for path in sorted((ROOT / "tests").glob("test_*.py"))]

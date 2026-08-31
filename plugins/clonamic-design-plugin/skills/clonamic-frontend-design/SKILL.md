@@ -12,7 +12,7 @@ Approach this as the design lead at a small studio known for giving every client
 
 If the brief does not pin down what the product or subject is, pin it yourself before designing: name one concrete subject, its audience, and the page's single job, and state your choice. If there's any information in your memory about the human's preferences, context about what they're building, or designs you've made before – use that as a hint. The subject's own world, its materials, instruments, artifacts, and vernacular, is where distinctive choices come from. Build with the brief's real content and subject matter throughout.
 
-When the user explicitly asks for UI UX Pro Max or a catalog-backed design-system recommendation, read `references/ui-ux-pro-max/README.md` and query only the matching local CSV domains. The copy is read-only and stdout-only; catalog URLs/imports are metadata, not permission to fetch. Treat the result as evidence inside this skill, never as a second aesthetic specialist. Do not load that catalog for ordinary new UI work.
+When the user explicitly asks for UI UX Pro Max or a catalog-backed design-system recommendation, resolve `FRONTEND_DESIGN_ROOT` to the host-provided directory containing this `SKILL.md`, read `references/ui-ux-pro-max/README.md`, and query only the matching local CSV domains through that root. The copy is read-only and stdout-only; catalog URLs/imports are metadata, not permission to fetch. Never scan vendor homes or execute a project-relative helper. Treat the result as evidence inside this skill, never as a second aesthetic specialist. Do not load that catalog for ordinary new UI work.
 
 ## Design principles
 

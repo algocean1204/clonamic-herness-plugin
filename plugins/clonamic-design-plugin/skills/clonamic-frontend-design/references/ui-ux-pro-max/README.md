@@ -7,8 +7,8 @@ Use only when the user explicitly asks for UI UX Pro Max, a catalog-backed desig
 Run from this directory:
 
 ```bash
-python3 scripts/search.py "<query>" --domain style
-python3 scripts/design_system.py "<product description>"
+python3 "$FRONTEND_DESIGN_ROOT/references/ui-ux-pro-max/scripts/search.py" "<query>" --domain style
+python3 "$FRONTEND_DESIGN_ROOT/references/ui-ux-pro-max/scripts/design_system.py" "<product description>"
 ```
 
 This Clonamic copy is stdout/JSON only: persistence, page output, and output-directory options are disabled so a catalog lookup cannot overwrite project files. Results are evidence for a design plan, not a second aesthetic specialist; `clonamic-frontend-design` still owns the final direction.

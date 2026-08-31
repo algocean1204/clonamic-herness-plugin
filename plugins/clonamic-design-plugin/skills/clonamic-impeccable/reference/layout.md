@@ -158,4 +158,4 @@ For variants whose topology genuinely changes (stacked vs. side-by-side, grid vs
 ]}
 ```
 
-See `reference/live.md` for the full params contract.
+When parameters are supplied by the host, keep them bounded to the current task and do not persist them implicitly.

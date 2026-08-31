@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import importlib.util
+import hashlib
+import os
 import re
 import shutil
 import subprocess
@@ -26,6 +28,14 @@ MANIFEST_FIELDS = {
     "keywords",
     "extensions",
 }
+SKILL_FRONTMATTER_FIELDS = {
+    "name",
+    "description",
+    "license",
+    "compatibility",
+    "metadata",
+    "allowed-tools",
+}
 EXPECTED_PACKAGES = {
     "clonamic-herness-plugin",
     "clonamic-code-plugin",
@@ -43,16 +53,17 @@ EXPECTED_PACKAGES = {
 }
 PLATFORMS = {"codex", "claude", "grok", "hermes"}
 CATALOG_PLATFORMS = {*PLATFORMS, "agent-plugins"}
+NAMESPACE = "io.github.algocean1204.clonamic"
 MARKETPLACES = {
-    "codex": ROOT / ".agents" / "plugins" / "marketplace.json",
-    "claude": ROOT / ".claude-plugin" / "marketplace.json",
-    "grok": ROOT / ".grok-plugin" / "marketplace.json",
+    platform: ROOT / NAMESPACE / "marketplaces" / f"{platform}.json"
+    for platform in ("codex", "claude", "grok")
 }
 DESCRIPTORS = {
-    platform: ROOT / "io.github.algocean1204.clonamic" / f"{platform}.json"
+    platform: ROOT / NAMESPACE / f"{platform}.json"
     for platform in PLATFORMS
 }
-NATIVE_DIRS = {
+NATIVE_PLATFORMS = {"codex", "claude", "grok"}
+STAGED_NATIVE_DIRS = {
     "codex": ".codex-plugin",
     "claude": ".claude-plugin",
     "grok": ".grok-plugin",
@@ -64,8 +75,17 @@ def load_json(path: Path):
 
 
 def load_generator():
-    path = ROOT / "scripts/generate-adapters.py"
+    path = ROOT / NAMESPACE / "adapters/generate.py"
     spec = importlib.util.spec_from_file_location("clonamic_generate_adapters", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_stager():
+    path = ROOT / NAMESPACE / "adapters/stage-host-marketplace.py"
+    spec = importlib.util.spec_from_file_location("clonamic_stage_host", path)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
@@ -79,6 +99,31 @@ def load_inventory():
         manifest_path = ROOT / PurePosixPath(entry["manifest"])
         rows.append((entry, manifest_path, load_json(manifest_path)))
     return catalog, rows
+
+
+def top_level_frontmatter_fields(path: Path) -> set[str]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0] != "---":
+        raise AssertionError(f"missing frontmatter: {path}")
+    fields: set[str] = set()
+    for line in lines[1:]:
+        if line == "---":
+            return fields
+        if line and not line[0].isspace() and ":" in line:
+            fields.add(line.split(":", 1)[0])
+    raise AssertionError(f"unterminated frontmatter: {path}")
+
+
+def canonical_digest() -> str:
+    digest = hashlib.sha256()
+    paths = [ROOT / "plugin.json", *sorted((ROOT / "skills").rglob("*"))]
+    paths.extend(sorted((ROOT / "plugins").glob("*/plugin.json")))
+    paths.extend(sorted((ROOT / "plugins").glob(f"*/{NAMESPACE}/**/plugin.json")))
+    for path in paths:
+        if path.is_file():
+            digest.update(path.relative_to(ROOT).as_posix().encode())
+            digest.update(path.read_bytes())
+    return digest.hexdigest()
 
 
 class PackageContractTest(unittest.TestCase):
@@ -124,6 +169,16 @@ class PackageContractTest(unittest.TestCase):
                     self.assertTrue(
                         all(isinstance(value, dict) for value in manifest["extensions"].values())
                     )
+
+    def test_client_files_are_namespaced_in_canonical_packages(self):
+        _, rows = load_inventory()
+        for _, manifest_path, _ in rows:
+            package = manifest_path.parent
+            with self.subTest(package=package.relative_to(ROOT)):
+                for forbidden in (".codex-plugin", ".claude-plugin", ".grok-plugin", ".agents"):
+                    self.assertFalse((package / forbidden).exists())
+                for platform in NATIVE_PLATFORMS:
+                    self.assertTrue((package / NAMESPACE / platform / "plugin.json").is_file())
 
     def test_catalog_is_contained_unique_and_acyclic(self):
         catalog, rows = load_inventory()
@@ -198,6 +253,34 @@ class PackageContractTest(unittest.TestCase):
                     all(path.resolve().is_relative_to(boundary) for path in direct)
                 )
 
+    def test_all_skill_frontmatter_uses_agent_skills_fields_only(self):
+        _, rows = load_inventory()
+        for _, manifest_path, _ in rows:
+            for skill_path in sorted((manifest_path.parent / "skills").glob("*/SKILL.md")):
+                with self.subTest(skill=skill_path.parent.name):
+                    fields = top_level_frontmatter_fields(skill_path)
+                    self.assertLessEqual(fields, SKILL_FRONTMATTER_FIELDS)
+                    self.assertTrue({"name", "description"}.issubset(fields))
+
+    def test_router_activation_contract_distinguishes_discovery_from_enforcement(self):
+        router = (ROOT / "skills/clonamic-router/SKILL.md").read_text(encoding="utf-8")
+        description = re.search(r"(?m)^description: (.+)$", router)
+        self.assertIsNotNone(description)
+        for capability in (
+            "persistent writes",
+            "deployment",
+            "publication",
+            "team decisions",
+            "changed-work completion",
+        ):
+            self.assertIn(capability, description.group(1))
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        compatibility = (ROOT / "docs/COMPATIBILITY.md").read_text(encoding="utf-8")
+        for document in (readme, compatibility):
+            self.assertIn("proves discovery, not automatic invocation", document)
+            self.assertIn("Guaranteed always-on routing requires", document)
+
     def test_executor_handoff_is_complete_and_legacy_wrapper_is_absent(self):
         self.assertFalse((ROOT / "plugins" / "clonamic-herness-plugin").exists())
         for name in ("clonamic-grok", "clonamic-gpt", "clonamic-claude", "clonamic-hermes"):
@@ -253,12 +336,17 @@ class PackageContractTest(unittest.TestCase):
                 path.relative_to(ROOT),
             )
             for marker in private_markers:
+                if (
+                    marker == ("auth" + ".json")
+                    and path == ROOT / NAMESPACE / "adapters/stage-host-marketplace.py"
+                ):
+                    continue
                 self.assertNotIn(marker.casefold(), text, f"{marker} in {path.relative_to(ROOT)}")
             self.assertIsNone(model_id.search(text), path.relative_to(ROOT))
 
     def test_generated_adapters_match_catalog_and_canonical_manifests(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / "generate-adapters.py"), "--check"],
+            [sys.executable, str(ROOT / NAMESPACE / "adapters/generate.py"), "--check"],
             cwd=ROOT,
             text=True,
             capture_output=True,
@@ -312,7 +400,7 @@ class PackageContractTest(unittest.TestCase):
                 self.assertEqual(platform, payload["platform"])
                 self.assertEqual(expected_names, [row["name"] for row in payload["plugins"]])
                 for row in payload["plugins"]:
-                    if platform in NATIVE_DIRS:
+                    if platform in NATIVE_PLATFORMS:
                         native = (path.parent / row["nativeManifest"]).resolve()
                         self.assertTrue(native.is_file(), native)
                     else:
@@ -335,9 +423,9 @@ class PackageContractTest(unittest.TestCase):
             expected_minimal = {
                 key: canonical[key] for key in minimal_fields if key in canonical
             }
-            for platform, directory in NATIVE_DIRS.items():
+            for platform in sorted(NATIVE_PLATFORMS):
                 with self.subTest(package=canonical["name"], platform=platform):
-                    native_path = package / directory / "plugin.json"
+                    native_path = package / NAMESPACE / platform / "plugin.json"
                     self.assertTrue(native_path.is_file(), native_path)
                     native = load_json(native_path)
                     self.assertNotIn("$schema", native)
@@ -360,9 +448,9 @@ class PackageContractTest(unittest.TestCase):
             expected_skills = [
                 path.parent.name for path in sorted((package / "skills").glob("*/SKILL.md"))
             ]
-            for platform, directory in NATIVE_DIRS.items():
+            for platform in sorted(NATIVE_PLATFORMS):
                 with self.subTest(package=canonical["name"], platform=platform):
-                    native_path = package / directory / "plugin.json"
+                    native_path = package / NAMESPACE / platform / "plugin.json"
                     self.assertTrue(native_path.resolve().is_relative_to(boundary))
                     self.assertTrue((package / "skills").resolve().is_relative_to(boundary))
                     native = load_json(native_path)
@@ -372,6 +460,126 @@ class PackageContractTest(unittest.TestCase):
                     ]
                     self.assertEqual(canonical["name"], native["name"])
                     self.assertEqual(expected_skills, discovered)
+
+    def test_host_staging_is_atomic_contained_and_does_not_mutate_sources(self):
+        script = ROOT / NAMESPACE / "adapters/stage-host-marketplace.py"
+        before = canonical_digest()
+        untracked_secret = ROOT / "plugins/clonamic-data-plugin/.env"
+        self.assertFalse(untracked_secret.exists())
+        untracked_secret.write_text("TOKEN=must-not-stage\n", encoding="utf-8")
+        try:
+            with tempfile.TemporaryDirectory(prefix="clonamic-host-stage-") as temporary:
+                temporary_path = Path(temporary)
+                for platform, native_directory in STAGED_NATIVE_DIRS.items():
+                    output = temporary_path / platform
+                    result = subprocess.run(
+                        [sys.executable, str(script), platform, str(output)],
+                        cwd=ROOT,
+                        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                        text=True,
+                        capture_output=True,
+                        check=False,
+                    )
+                    self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                    self.assertFalse(any(path.name == ".env" for path in output.rglob("*")))
+                    marketplace_relative = {
+                        "codex": Path(".agents/plugins/marketplace.json"),
+                        "claude": Path(".claude-plugin/marketplace.json"),
+                        "grok": Path(".grok-plugin/marketplace.json"),
+                    }[platform]
+                    marketplace = load_json(output / marketplace_relative)
+                    for row in marketplace["plugins"]:
+                        source = row["source"]
+                        relative = source["path"] if isinstance(source, dict) else source
+                        package = (output / relative).resolve()
+                        self.assertTrue(package.is_relative_to(output.resolve()))
+                        self.assertTrue((package / native_directory / "plugin.json").is_file())
+                        self.assertTrue((package / "skills").is_dir())
+
+                occupied = temporary_path / "occupied"
+                occupied.mkdir()
+                (occupied / "sentinel").write_text("keep", encoding="utf-8")
+                result = subprocess.run(
+                    [sys.executable, str(script), "codex", str(occupied)],
+                    cwd=ROOT,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+                self.assertEqual(2, result.returncode)
+                self.assertEqual("keep", (occupied / "sentinel").read_text(encoding="utf-8"))
+                self.assertEqual([], list(temporary_path.glob(".occupied.tmp-*")))
+
+            in_repo = ROOT / ".forbidden-host-stage"
+            result = subprocess.run(
+                [sys.executable, str(script), "codex", str(in_repo)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(2, result.returncode)
+            self.assertFalse(in_repo.exists())
+        finally:
+            untracked_secret.unlink(missing_ok=True)
+        self.assertEqual(before, canonical_digest())
+
+    def test_stager_rejects_private_files_and_symlinks(self):
+        stager = load_stager()
+        with tempfile.TemporaryDirectory(prefix="clonamic-stage-safety-") as temporary:
+            root = Path(temporary)
+            (root / ".env").write_text("TOKEN=secret\n", encoding="utf-8")
+            with self.assertRaises(stager.StageError):
+                stager.scan_private_payload(root)
+            (root / ".env").unlink()
+            outside = root / "outside"
+            outside.write_text("private", encoding="utf-8")
+            source_root = root / "source"
+            source_root.mkdir()
+            link = source_root / "leak"
+            link.symlink_to(outside)
+            original_root = stager.ROOT
+            stager.ROOT = source_root
+            try:
+                with self.assertRaises(stager.StageError):
+                    stager.copy_tracked_file(
+                        link,
+                        root / "copy",
+                        {Path("leak"): ("120000", "0" * 40)},
+                    )
+                outside_dir = root / "outside-dir"
+                outside_dir.mkdir()
+                (outside_dir / "file.txt").write_text("private", encoding="utf-8")
+                ancestor_link = source_root / "linked"
+                ancestor_link.symlink_to(outside_dir, target_is_directory=True)
+                with self.assertRaises(stager.StageError):
+                    stager.copy_tracked_file(
+                        ancestor_link / "file.txt",
+                        root / "copy-ancestor",
+                        {Path("linked/file.txt"): ("100644", "0" * 40)},
+                    )
+            finally:
+                stager.ROOT = original_root
+
+    def test_stager_copies_index_blob_not_dirty_worktree_bytes(self):
+        stager = load_stager()
+        with tempfile.TemporaryDirectory(prefix="clonamic-index-stage-") as temporary:
+            root = Path(temporary) / "source"
+            root.mkdir()
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            source = root / "payload.txt"
+            source.write_text("reviewed\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "payload.txt"], check=True)
+            source.write_text("ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ123456\n", encoding="utf-8")
+            original_root = stager.ROOT
+            stager.ROOT = root
+            try:
+                inventory = stager.tracked_inventory()
+                destination = Path(temporary) / "staged.txt"
+                stager.copy_tracked_file(source, destination, inventory)
+                self.assertEqual("reviewed\n", destination.read_text(encoding="utf-8"))
+            finally:
+                stager.ROOT = original_root
 
     def test_executor_packages_are_not_offered_to_their_own_host(self):
         self_targets = {
@@ -392,7 +600,7 @@ class PackageContractTest(unittest.TestCase):
         validator = (ROOT / "scripts" / "validate-public.py").read_text(encoding="utf-8")
         self.assertIn("python scripts/validate-public.py", workflow)
         self.assertIn("timeout-minutes:", workflow)
-        self.assertIn("generate-adapters.py", validator)
+        self.assertIn("io.github.algocean1204.clonamic/adapters/generate.py", validator)
         self.assertIn("cargo", validator)
         self.assertIn("unittest", validator)
         self.assertIn("CARGO_NET_OFFLINE", validator)
@@ -401,6 +609,10 @@ class PackageContractTest(unittest.TestCase):
         self.assertIn("Validate release tag", release)
         self.assertIn("Validate runner architecture", release)
         self.assertIn("python scripts/validate-public.py", release)
+        self.assertIn("clonamic-agent-plugins-v1.0.0.tar.gz", release)
+        self.assertIn("stage-host-marketplace.py codex", release)
+        self.assertIn("stage-host-marketplace.py claude", release)
+        self.assertIn("stage-host-marketplace.py grok", release)
         self.assertIn("Smoke-test staged binary", release)
         self.assertIn("timeout-minutes:", release)
         for network_client in ("curl ", "wget ", "requests.", "urllib."):

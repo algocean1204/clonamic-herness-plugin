@@ -21,13 +21,30 @@ https://github.com/facebook/astryx and https://astryx.atmeta.com.
 
 If the gate does not clearly hold, use the repository's existing system.
 
-## Quickstart (install + scaffold)
+## Runtime and setup boundary
+
+Normal use requires an existing project-local CLI:
 
 ```bash
-npm install @astryxdesign/core @astryxdesign/theme-neutral @astryxdesign/cli
-npx astryx init                 # non-interactive, safe for CI/agents
-npx astryx init --features agents   # generates AGENTS.md (root) for AI context
+test -x ./node_modules/.bin/astryx
+./node_modules/.bin/astryx manifest --json
 ```
+
+If it is missing, report the unavailable runtime. Installation and scaffolding are separate project
+mutations. Only after the user explicitly approves setup, select one exact compatible version and
+record the pre-change files, then run:
+
+```bash
+npm install --save-exact \
+  @astryxdesign/core@<approved-version> \
+  @astryxdesign/theme-neutral@<approved-version> \
+  @astryxdesign/cli@<approved-version>
+./node_modules/.bin/astryx init
+```
+
+Do not generate or replace root agent guidance as part of ordinary initialization. A separate
+explicit request may run `./node_modules/.bin/astryx init --features agents` only after backing up
+the affected guidance and declaring its rollback.
 
 Import base styles once in global CSS, then a theme:
 
@@ -46,9 +63,9 @@ The vendored files under `references/` are a dated snapshot (see each file's
 header) of a Beta product that changes fast. Before relying on any prop,
 command, or theme name:
 
-1. Run `npx astryx manifest --json` for the live, machine-readable contract.
-2. Run `astryx component <Name> --props --json` for current authoritative props.
-3. Check `astryx doctor` and astryx.atmeta.com/changelog for breaking changes.
+1. Run `./node_modules/.bin/astryx manifest --json` for the live, machine-readable contract.
+2. Run `./node_modules/.bin/astryx component <Name> --props --json` for current authoritative props.
+3. Check `./node_modules/.bin/astryx doctor` and astryx.atmeta.com/changelog for breaking changes.
 
 Useful commands: `astryx search <query>`, `astryx component --list`,
 `astryx docs tokens`, `astryx template --list`.

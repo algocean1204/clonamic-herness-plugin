@@ -14,8 +14,8 @@ Push an interface past conventional limits. This isn't just about visual effects
 This command has the highest potential to misfire. Do NOT jump straight into implementation. You MUST:
 
 1. **Think through 2-3 different directions**: consider different techniques, levels of ambition, and aesthetic approaches. For each direction, briefly describe what the result would look and feel like.
-2. **STOP and call the AskUserQuestion tool to clarify.** to present these directions and get the user's pick before writing any code. Explain trade-offs (browser support, performance cost, complexity).
-3. Only proceed with the direction the user confirms.
+2. When the directions represent materially different scope, present the smallest useful set through the host's existing intent gate. Otherwise select the strongest evidence-backed direction without another stop.
+3. Proceed within the direction and scope already authorized by the host.
 
 Skipping this step risks building something embarrassing that needs to be thrown away.
 

@@ -32,7 +32,7 @@ Every child has its own root `plugin.json`, skill directory, package license, te
 | Request | Route |
 |---|---|
 | Question, explanation, inspection, review, or status | Direct host response. No specification or approval. |
-| Small precise mutation | One-line write packet, one approval, then direct native execution. No team or root-guidance load. |
+| Small precise mutation | One-line write packet, one approval, then direct native execution. No team. |
 | Non-trivial mutation or real team decision | Load the canonical root guidance once, bound intent, then choose native or team execution. |
 | Clear persistent write | One compact development specification and one approval. |
 | Materially ambiguous persistent write | Work specification to lock intent, then one development specification before mutation. |
@@ -88,22 +88,33 @@ flowchart TB
 
 ## Install and selection
 
-Install the core marketplace or package with the current host CLI:
+Clone the immutable v1 source, then materialize the stock host's native layout
+outside the canonical checkout. This keeps the published Agent Plugins roots
+standard-conformant while giving each current CLI the dotted files it expects:
 
-```text
+```bash
+git clone --branch v1.0.0 --depth 1 https://github.com/algocean1204/clonamic-herness-plugin.git
+cd clonamic-herness-plugin
+
 # Codex
-codex plugin marketplace add algocean1204/clonamic-herness-plugin
+python3 io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py codex ../clonamic-codex-marketplace
+codex plugin marketplace add ../clonamic-codex-marketplace
 codex plugin add clonamic-herness-plugin@clonamic
 
 # Claude Code
-claude plugin marketplace add algocean1204/clonamic-herness-plugin
+python3 io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py claude ../clonamic-claude-marketplace
+claude plugin marketplace add ../clonamic-claude-marketplace
 claude plugin install clonamic-herness-plugin@clonamic
 
 # Grok Build
-grok plugin install algocean1204/clonamic-herness-plugin --trust
+python3 io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py grok ../clonamic-grok-marketplace
+grok plugin install ../clonamic-grok-marketplace --trust
 ```
 
-Review source before using `--trust`. Codex and Claude can install an optional child by its catalog name. Grok accepts a repository subdirectory selector such as `algocean1204/clonamic-herness-plugin#plugins/clonamic-code-plugin`.
+Each staging destination must be new and outside the source checkout. Review the
+staged source before using `--trust`. Codex and Claude install an optional child
+by its catalog name. Grok installs the staged child path, such as
+`../clonamic-grok-marketplace/plugins/clonamic-code-plugin`.
 
 Hermes remote installation of this monorepo is currently unavailable: its community-plugin scanner evaluates optional packages and bundled assets together and rejects the root as dangerous. Clonamic does not recommend disabling or bypassing that scanner. The generated Hermes descriptor remains repository-checked compatibility output, not an installation claim.
 
@@ -112,10 +123,17 @@ Agent Plugins 1.0.0 clients load the repository root for the core package:
 ```text
 plugin.json
 skills/
-native/
+io.github.algocean1204.clonamic/
+  codex/
+  claude/
+  grok/
 ```
 
-Agent Plugins 1.0.0 portably discovers only immediate `skills/*/SKILL.md` components and root `mcp.json`. It does not automatically load the root `clonamic-herness-plugin.md`, recursively discover the package roots under `plugins/`, or define marketplace installation and team/subagent behavior. The core router loads the canonical guidance only for non-trivial mutations or real team decisions; the optional router installer adds one reference to that file without copying its policy.
+The reverse-domain namespace holds client-specific metadata as required by the
+Agent Plugins extension rule. It is inert for clients that do not recognize
+those adapters.
+
+Agent Plugins 1.0.0 portably discovers only immediate `skills/*/SKILL.md` components and root `mcp.json`. It does not automatically load the root `clonamic-herness-plugin.md`, recursively discover the package roots under `plugins/`, or define marketplace installation and team/subagent behavior. Marketplace installation therefore proves discovery, not automatic invocation. On hosts with automatic skill selection, `clonamic-router` is the portable default and loads the canonical guidance for non-trivial mutations, deployment, publication, team decisions, and changed-work completion. Guaranteed always-on routing requires the reversible structural router installation below.
 
 Optional packages are separate roots under `plugins/`:
 
@@ -173,9 +191,13 @@ A portable special-purpose host can resolve the shipped defaults like this:
 
 The JSON output is the run manifest for that host. Load Core plus only rows with `effective: true`. Release builds use the binary names in `.github/workflows/release.yml`.
 
-Platform manifests and adapter files are generated compatibility outputs. Do not edit `.agents/`, `.claude-plugin/`, `.grok-plugin/`, or generated adapter files by hand. Canonical behavior lives in the root and child `plugin.json` files, skills, native contracts, and catalog.
+Platform manifests and adapter files are generated compatibility outputs under
+`io.github.algocean1204.clonamic/`. Native `.agents/`, `.claude-plugin/`, and
+`.grok-plugin/` directories exist only in an external staged marketplace; they
+are never canonical package content. Canonical behavior lives in root and child
+`plugin.json` files, skills, native contracts, and the catalog.
 
-Structural router installation is optional and reversible:
+Structural router installation is reversible. It is optional for skill-driven use and required when guaranteed always-on routing is the acceptance criterion:
 
 ```text
 clonamic install-router <AGENTS.md> <install-state.json> <plugin-root>

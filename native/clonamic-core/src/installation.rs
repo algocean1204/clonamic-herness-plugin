@@ -60,7 +60,7 @@ pub fn install_router(request: InstallRequest) -> Result<()> {
     let backup = request.state.with_extension("backup");
     atomic_write(&backup, &original)?;
     let block = format!(
-        "{BEGIN}\nFor non-trivial mutations or team decisions, read {}. Keep simple and read-only requests direct.\n{END}\n",
+        "{BEGIN}\nFor persistent writes, deployment, publication, team decisions, or changed-work completion, read {} once. Keep reads direct.\n{END}\n",
         guidance.display()
     );
     let separator = if original_text.is_empty() || original_text.ends_with('\n') {

@@ -7,9 +7,10 @@ Fetched: 2026-07-25
 CLI/core version at fetch time: 0.1.8 (Beta). Manifest capability first
 appeared at v0.0.15 per changelog.
 
-Treat every command/flag below as a starting point, not ground truth — run
-`npx astryx manifest --json` for the live, authoritative contract before an
-agent relies on exact flags or response shapes.
+Treat every command/flag below as a starting point, not ground truth. Resolve
+`ASTRYX_BIN` to an already installed project-local CLI and run
+`"$ASTRYX_BIN" manifest --json` before relying on exact flags or response
+shapes. Never use `npx` or install dependencies during normal use.
 
 ## Core commands
 

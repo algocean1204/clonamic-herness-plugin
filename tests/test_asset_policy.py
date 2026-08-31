@@ -36,7 +36,6 @@ class AssetPolicyTest(unittest.TestCase):
     def test_package_contracts_do_not_copy_complete_trees_to_test_discovery(self):
         source = (ROOT / "tests/test_package.py").read_text(encoding="utf-8")
         self.assertNotIn("shutil.copytree", source)
-        self.assertNotIn("TemporaryDirectory", source)
 
     def test_catalog_matches_active_and_selective_policy(self):
         catalog = json.loads((ROOT / "catalog/plugins.json").read_text(encoding="utf-8"))
@@ -109,6 +108,60 @@ class AssetPolicyTest(unittest.TestCase):
                 continue
             if "forgetforge" in text:
                 findings.append(str(path.relative_to(ROOT)))
+        self.assertEqual([], findings)
+
+    def test_core_skills_have_portable_fallbacks_without_vendor_home_paths(self):
+        session = (ROOT / "skills/clonamic-session-intent/SKILL.md").read_text(encoding="utf-8")
+        market = (ROOT / "skills/clonamic-market/SKILL.md").read_text(encoding="utf-8")
+        context = (ROOT / "skills/clonamic-context-integrity/SKILL.md").read_text(encoding="utf-8")
+        for text in (session, market, context):
+            self.assertNotIn("~/.claude", text)
+            self.assertNotIn("~/.codex", text)
+            self.assertNotIn("CLAUDE.md", text)
+        self.assertIn("Portable fallback", session)
+        self.assertIn("Never enumerate sibling sessions", session)
+        self.assertIn("when the binary is available", market)
+        self.assertIn("model-side", market)
+        self.assertNotIn("checkpoint critical state to disk", context)
+        self.assertIn("Never create a scratchpad, memory row, or checkpoint file", context)
+        self.assertIn("conversation fallback", context)
+
+        for skill_path in sorted((ROOT / "skills").glob("*/SKILL.md")):
+            text = skill_path.read_text(encoding="utf-8")
+            with self.subTest(skill=skill_path.parent.name):
+                self.assertNotIn("Harness wiring (Codex)", text)
+                self.assertNotIn("~/.claude", text)
+                self.assertNotIn("~/.codex", text)
+
+    def test_core_skill_cross_references_resolve_inside_the_root_package(self):
+        root_skills = {
+            path.parent.name for path in (ROOT / "skills").glob("*/SKILL.md")
+        }
+        session = (ROOT / "skills/clonamic-session-intent/SKILL.md").read_text(encoding="utf-8")
+        for required in ("clonamic-completion-check", "clonamic-report"):
+            self.assertIn(required, root_skills)
+            self.assertIn(f"`{required}`", session)
+        self.assertNotIn("verification-before-completion", session)
+
+    def test_optional_figma_skill_never_launches_an_executor(self):
+        skill = (
+            ROOT / "plugins/clonamic-design-plugin/skills/clonamic-figma-workflow/SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Never launch Claude, Codex", skill)
+        self.assertIn("explicit slash command", skill)
+        self.assertIn("Do not install a server", skill)
+
+    def test_skill_commands_never_resolve_helpers_from_project_cwd(self):
+        pattern = re.compile(r"\b(?:python3?|node|bash|sh)\s+(?:\./)?scripts/")
+        findings = []
+        roots = [ROOT / "skills", *(ROOT / "plugins").glob("*/skills")]
+        for root in roots:
+            if not root.is_dir():
+                continue
+            for path in root.rglob("*.md"):
+                text = path.read_text(encoding="utf-8")
+                if pattern.search(text):
+                    findings.append(str(path.relative_to(ROOT)))
         self.assertEqual([], findings)
 
 

@@ -85,7 +85,7 @@ def build_plan():
     package_commands.append(["cargo", "fmt", "--check"])
     return {
         "before": [
-            [sys.executable, "scripts/generate-adapters.py", "--check"],
+            [sys.executable, "io.github.algocean1204.clonamic/adapters/generate.py", "--check"],
             ["cargo", "build", "--quiet", "--bin", "clonamic"],
         ],
         "packages": package_commands,

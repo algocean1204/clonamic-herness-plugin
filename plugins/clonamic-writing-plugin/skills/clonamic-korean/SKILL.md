@@ -7,7 +7,7 @@ description: Review or minimally edit Korean prose documents for clarity while p
 
 Use directly on Korean prose; do not delegate or choose another runtime.
 
-For an uncertain file surface, run `python3 scripts/scope.py --kind <kind> <path>` and stop on `applicable=false`. Inline text must classify as `document`.
+Resolve `CLONAMIC_KOREAN_ROOT` to the host-provided directory containing this `SKILL.md`. For an uncertain file surface, run `python3 "$CLONAMIC_KOREAN_ROOT/scripts/scope.py" --kind <kind> <path>` and stop on `applicable=false`. Never scan vendor homes or execute a project-relative helper. Inline text must classify as `document`.
 
 ## Review or edit
 

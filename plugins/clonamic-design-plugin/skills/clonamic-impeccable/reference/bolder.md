@@ -28,7 +28,7 @@ Analyze what makes the design feel too safe or boring:
    - Who's the audience? (What will resonate?)
    - What are the constraints? (Brand guidelines, accessibility, performance)
 
-If any of these are unclear from the codebase, STOP and call the AskUserQuestion tool to clarify.
+If a material choice remains unclear after codebase inspection, use the host's existing intent gate once; otherwise choose the smallest conservative default.
 
 **CRITICAL**: "Bolder" doesn't mean chaotic or garish. It means distinctive, memorable, and confident. Think intentional drama, not random chaos.
 

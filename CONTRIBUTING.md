@@ -49,7 +49,7 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test --all-targets
 python3 scripts/validate-public.py
-python3 scripts/generate-adapters.py --check
+python3 io.github.algocean1204.clonamic/adapters/generate.py --check
 python3 -m unittest tests.test_plugin_config
 ```
 

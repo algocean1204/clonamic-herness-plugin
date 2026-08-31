@@ -30,7 +30,7 @@ Analyze the current state and identify opportunities:
    - **Wayfinding**: Helping users navigate and understand structure
    - **Delight**: Moments of visual interest and personality
 
-If any of these are unclear from the codebase, STOP and call the AskUserQuestion tool to clarify.
+If a material choice remains unclear after codebase inspection, use the host's existing intent gate once; otherwise choose the smallest conservative default.
 
 **CRITICAL**: More color ≠ better. Strategic color beats rainbow vomit every time. Every color should have a purpose.
 
@@ -149,7 +149,7 @@ When invoked from live mode, each variant MUST declare a `color-amount` param so
 {"id":"color-amount","kind":"range","min":0,"max":1,"step":0.05,"default":0.5,"label":"Color amount"}
 ```
 
-Layer 1-2 variant-specific params on top: palette selection (`steps` with named options), temperature warmth, or tint vs. true color. See `reference/live.md` for the full params contract.
+Layer 1-2 task-local params on top: palette selection (`steps` with named options), temperature warmth, or tint vs. true color. Do not create a durable parameter store implicitly.
 
 ---
 

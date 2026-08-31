@@ -54,9 +54,10 @@ class ContextBudgetTest(unittest.TestCase):
         citation = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
         self.assertRegex(citation, r"(?m)^version: 1\.0\.0$")
 
-        generated = sorted(ROOT.glob("**/.codex-plugin/plugin.json"))
-        generated += sorted(ROOT.glob("**/.claude-plugin/plugin.json"))
-        generated += sorted(ROOT.glob("**/.grok-plugin/plugin.json"))
+        namespace = "io.github.algocean1204.clonamic"
+        generated = sorted(ROOT.glob(f"**/{namespace}/codex/plugin.json"))
+        generated += sorted(ROOT.glob(f"**/{namespace}/claude/plugin.json"))
+        generated += sorted(ROOT.glob(f"**/{namespace}/grok/plugin.json"))
         self.assertEqual(39, len(generated))
         self.assertEqual(
             {"1.0.0"},
@@ -71,8 +72,8 @@ class ContextBudgetTest(unittest.TestCase):
         }
         self.assertEqual({"1.0.0"}, descriptor_versions)
         for relative in (
-            ".claude-plugin/marketplace.json",
-            ".grok-plugin/marketplace.json",
+            f"{namespace}/marketplaces/claude.json",
+            f"{namespace}/marketplaces/grok.json",
         ):
             rows = json.loads((ROOT / relative).read_text(encoding="utf-8"))["plugins"]
             self.assertEqual({"1.0.0"}, {row["version"] for row in rows})

@@ -18,7 +18,7 @@ Compatibility claims use three labels:
 
 Generated files are compatibility outputs. Their presence does not prove that a host installed, enabled, or executed them.
 
-Agent Plugins 1.0.0 does not automatically load arbitrary root Markdown, recursively discover nested skills or plugin roots, define marketplaces, or define team/subagent execution. `clonamic-herness-plugin.md` is therefore reached through `clonamic-router` for non-trivial mutation or team decisions, or through the optional reversible router installer. See the [Agent Plugins 1.0.0 specification](https://agent-plugins.org/specification).
+Agent Plugins 1.0.0 does not automatically load arbitrary root Markdown, recursively discover nested skills or plugin roots, define marketplaces, or define team/subagent execution. Installing a marketplace therefore proves discovery, not automatic invocation. On a host with automatic skill selection, `clonamic-router` reaches `clonamic-herness-plugin.md` for non-trivial mutation, deployment, publication, team decisions, and changed-work completion. Guaranteed always-on routing requires the reversible structural router installer. See the [Agent Plugins 1.0.0 specification](https://agent-plugins.org/specification).
 
 ## Core and child installation
 
@@ -30,7 +30,7 @@ Removing one child does not remove the core or another child. Missing children r
 
 ## Structural core
 
-The `clonamic` binary supplies deterministic approval, completion, and router install/rollback operations. The installed router block references the canonical root guidance once and does not duplicate it. Skills can preserve the behavioral contract without the binary, but that is a model-side fallback. Documentation and reports must say so when structural enforcement matters.
+The `clonamic` binary supplies deterministic approval, completion, and router install/rollback operations. The installed router block references the canonical root guidance once and does not duplicate it. Skills can preserve the behavioral contract without the binary only when the host actually selects them; that remains a model-side fallback. Documentation and reports must say so when structural enforcement matters.
 
 Team topology is selected prospectively; worker defects, missing evidence, and false completion do not create a team after execution. A pair always runs worker then reviewer, parallelism is only across isolated pairs, and same-file work is serialized. In `main → lead → specialists`, the lead neither executes nor integrates, one specialist owns integration, and no verdict precedes all results plus fresh evidence. Team control depends on native isolated-agent support: without it, `actual_team` is false and a disclosed local sequential second pass is not independent review.
 

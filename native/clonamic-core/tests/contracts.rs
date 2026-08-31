@@ -506,6 +506,10 @@ fn router_install_references_canonical_guidance_once_without_copying_policy() {
     let router = dir.path().join("AGENTS.md");
     let state = dir.path().join("install.json");
     let plugin_root = plugin_root_with_guidance(dir.path());
+    let expected_trigger = format!(
+        "For persistent writes, deployment, publication, team decisions, or changed-work completion, read {} once. Keep reads direct.",
+        plugin_root.join("clonamic-herness-plugin.md").display()
+    );
     fs::write(&router, b"existing user rules\n").unwrap();
     let original = fs::read(&router).unwrap();
 
@@ -518,7 +522,7 @@ fn router_install_references_canonical_guidance_once_without_copying_policy() {
 
     let installed = fs::read_to_string(&router).unwrap();
     assert_eq!(installed.matches("clonamic-herness-plugin.md").count(), 1);
-    assert!(!installed.contains("For persistent writes"));
+    assert!(installed.contains(&expected_trigger));
     assert!(!installed.contains("Before reporting completion"));
     assert!(!installed.contains("External AI executors"));
 

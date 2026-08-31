@@ -11,7 +11,7 @@
       "required": true,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../.codex-plugin/plugin.json"
+      "nativeManifest": "codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-code-plugin/plugin.json",
@@ -20,7 +20,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-code-plugin/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-code-plugin/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-writing-plugin/plugin.json",
@@ -29,7 +29,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-writing-plugin/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-writing-plugin/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-design-plugin/plugin.json",
@@ -38,7 +38,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-design-plugin/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-design-plugin/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-data-plugin/plugin.json",
@@ -47,7 +47,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-data-plugin/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-data-plugin/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-documents-plugin/plugin.json",
@@ -56,7 +56,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-documents-plugin/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-documents-plugin/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-ppt/plugin.json",
@@ -65,7 +65,7 @@
       "required": false,
       "runtimeReadyRequired": true,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-ppt/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-ppt/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-preprocessing/plugin.json",
@@ -74,7 +74,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-preprocessing/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-preprocessing/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-memory/plugin.json",
@@ -83,7 +83,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-memory/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-memory/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-grok/plugin.json",
@@ -92,7 +92,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-grok/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-grok/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-claude/plugin.json",
@@ -101,7 +101,7 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-claude/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-claude/io.github.algocean1204.clonamic/codex/plugin.json"
     },
     {
       "manifest": "../plugins/clonamic-hermes/plugin.json",
@@ -110,8 +110,8 @@
       "required": false,
       "runtimeReadyRequired": false,
       "version": "1.0.0",
-      "nativeManifest": "../plugins/clonamic-hermes/.codex-plugin/plugin.json"
+      "nativeManifest": "../plugins/clonamic-hermes/io.github.algocean1204.clonamic/codex/plugin.json"
     }
   ],
-  "marketplace": "../.agents/plugins/marketplace.json"
+  "marketplace": "marketplaces/codex.json"
 }

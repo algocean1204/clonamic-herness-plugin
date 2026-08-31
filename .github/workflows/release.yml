@@ -8,6 +8,44 @@ permissions:
   contents: write
 
 jobs:
+  packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: plugins/clonamic-ppt/package-lock.json
+      - run: rustup toolchain install 1.85.1 --profile minimal --component rustfmt,clippy
+      - run: npm ci --prefix plugins/clonamic-ppt
+      - run: cargo fetch --locked
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python -c "import json,os,pathlib; expected='v'+json.loads(pathlib.Path('plugin.json').read_text(encoding='utf-8'))['version']; actual=os.environ['RELEASE_TAG']; assert actual == expected, f'{actual} != {expected}'"
+      - run: python scripts/validate-public.py
+      - name: Stage portable and host-native packages
+        run: |
+          mkdir -p release-packages
+          git archive --format=tar.gz --prefix=clonamic-herness-plugin/ -o release-packages/clonamic-agent-plugins-v1.0.0.tar.gz HEAD
+          python io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py codex /tmp/clonamic-codex-marketplace
+          python io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py claude /tmp/clonamic-claude-marketplace
+          python io.github.algocean1204.clonamic/adapters/stage-host-marketplace.py grok /tmp/clonamic-grok-marketplace
+          tar -czf release-packages/clonamic-codex-marketplace-v1.0.0.tar.gz -C /tmp clonamic-codex-marketplace
+          tar -czf release-packages/clonamic-claude-marketplace-v1.0.0.tar.gz -C /tmp clonamic-claude-marketplace
+          tar -czf release-packages/clonamic-grok-marketplace-v1.0.0.tar.gz -C /tmp clonamic-grok-marketplace
+          cd release-packages
+          sha256sum *.tar.gz > SHA256SUMS
+      - name: Upload package assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" release-packages/* --clobber
+
   build:
     strategy:
       matrix:

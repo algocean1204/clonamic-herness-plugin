@@ -37,7 +37,7 @@ Identify where delight would enhance (not distract from) the experience:
    - **Helpful surprises**: Anticipating needs before users ask (productivity tools)
    - **Sensory richness**: Satisfying sounds, smooth animations (creative tools)
 
-If any of these are unclear from the codebase, STOP and call the AskUserQuestion tool to clarify.
+If a material choice remains unclear after codebase inspection, use the host's existing intent gate once; otherwise choose the smallest conservative default.
 
 **CRITICAL**: Delight should enhance usability, never obscure it. If users notice the delight more than accomplishing their goal, you've gone too far.
 

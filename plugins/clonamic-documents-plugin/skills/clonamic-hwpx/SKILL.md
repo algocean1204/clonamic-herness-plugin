@@ -1,9 +1,14 @@
 ---
 name: clonamic-hwpx
-description: "Comprehensive HWPX (Korean Hancom Office) document creation, editing, and analysis. When Codex needs to work with Korean word processor documents (.hwpx files) for: (1) Reading and extracting content, (2) Creating new documents, (3) Modifying or editing content, (4) Extracting tables to CSV, (5) Modifying tables or table cells, or any other HWPX document tasks. MANDATORY TRIGGERS: hwpx, hwp, 한글, 한컴, Hancom, Korean document"
+description: "Create, read, inspect, convert, or edit Korean HWPX documents, including text, tables, images, templates, and legacy HWP conversion. Use for HWPX, HWP, 한글, 한컴, or Hancom document tasks."
 ---
 
 # HWPX creation, editing, and analysis
+
+Resolve `HWPX_SKILL_ROOT` to the host-provided directory containing this
+`SKILL.md`. Every bundled Python helper must run from that root, even when the
+user's current directory is another project. Never scan vendor-specific home
+directories or execute a same-named project script.
 
 ## Overview
 
@@ -23,38 +28,43 @@ A .hwpx file is a ZIP archive containing XML files, based on the OWPML (Open Wor
 Legacy `.hwp` files must be converted before editing:
 
 ```bash
-# Using hwpxjs CLI (pure TypeScript, no external dependencies)
-npx hwpxjs convert:hwp document.hwp output.hwpx
+# Use only an existing project-local CLI
+test -x ./node_modules/.bin/hwpxjs
+./node_modules/.bin/hwpxjs convert:hwp document.hwp output.hwpx
 
-# Or using LibreOffice as fallback
-python scripts/office/soffice.py --headless --convert-to hwpx document.hwp
 ```
+
+Do not use LibreOffice as an HWP→HWPX fallback. Its legacy Hangul filter does
+not provide a reliable HWPX export path and may silently corrupt newer input.
 
 ### Reading Content
 
 ```bash
-# Text extraction via CLI
-npx hwpxjs txt document.hwpx
+# Text extraction via an existing project-local CLI
+./node_modules/.bin/hwpxjs txt document.hwpx
 
 # HTML conversion (includes images/styles)
-npx hwpxjs html document.hwpx > output.html
+./node_modules/.bin/hwpxjs html document.hwpx > output.html
 
 # Raw XML access
-python scripts/unpack.py document.hwpx unpacked/
+python "$HWPX_SKILL_ROOT/scripts/unpack.py" document.hwpx unpacked/
 ```
 
-### Converting to Images
+### Rendering
 
-```bash
-python scripts/office/soffice.py --headless --convert-to pdf document.hwpx
-pdftoppm -jpeg -r 150 document.pdf page
-```
+This package does not claim a portable HWPX→PDF or image renderer. Use only a
+renderer that the host has positively identified and validated on a disposable
+copy of the actual document. Otherwise report visual rendering unavailable and
+continue with structural validation.
 
 ---
 
 ## Creating New Documents
 
-Generate .hwpx files with JavaScript. Install: `npm install @ssabrojs/hwpxjs`
+Generate `.hwpx` files with an already installed project-local `@ssabrojs/hwpxjs`. If it is
+missing, report the unavailable runtime. Installation is a separate setup mutation: only after an
+explicit setup request, select and record an exact approved version, then run
+`npm install --save-exact @ssabrojs/hwpxjs@<approved-version>`.
 
 ### Setup
 ```javascript
@@ -80,7 +90,11 @@ const fs = require("fs");
 
 const reader = new HwpxReader();
 const fileBuffer = fs.readFileSync("document.hwpx");
-await reader.loadFromArrayBuffer(fileBuffer.buffer);
+const boundedBuffer = fileBuffer.buffer.slice(
+  fileBuffer.byteOffset,
+  fileBuffer.byteOffset + fileBuffer.byteLength,
+);
+await reader.loadFromArrayBuffer(boundedBuffer);
 
 // Extract text
 const text = await reader.extractText();
@@ -151,7 +165,7 @@ const result = html
 ### Critical Rules for hwpxjs
 
 - **createFromPlainText returns Buffer** - save with `fs.writeFileSync(path, buffer)`
-- **loadFromArrayBuffer for reading** - pass `fileBuffer.buffer` not `fileBuffer`
+- **loadFromArrayBuffer for reading** - pass the bounded slice from `byteOffset` through `byteLength`, never the raw pooled `fileBuffer.buffer`
 - **Text-only creation** - for tables/images, use XML editing approach below
 - **HwpConverter for HWP files** - pure TypeScript, no LibreOffice needed
 - **extractHtml for rich content** - includes styles, tables, images
@@ -164,7 +178,7 @@ const result = html
 
 ### Step 1: Unpack
 ```bash
-python scripts/unpack.py document.hwpx unpacked/
+python "$HWPX_SKILL_ROOT/scripts/unpack.py" document.hwpx unpacked/
 ```
 
 ### Step 2: Edit XML
@@ -198,7 +212,7 @@ Edit files in `unpacked/Contents/`. See XML Reference below for patterns.
 
 ### Step 3: Pack
 ```bash
-python scripts/pack.py unpacked/ output.hwpx
+python "$HWPX_SKILL_ROOT/scripts/pack.py" unpacked/ output.hwpx
 ```
 
 ### Common Pitfalls
@@ -280,11 +294,7 @@ For detailed XML structures (headers/footers, lists/numbering, paragraph formatt
 
 ## Dependencies
 
-```bash
-npm install @ssabrojs/hwpxjs
-```
-
-- **hwpxjs**: `npm install @ssabrojs/hwpxjs` - reading, writing, HTML conversion, HWP→HWPX conversion
-- **pyhwp2md**: Converting HWP/HWPX to Markdown (alternative)
-- **LibreOffice**: PDF conversion (auto-configured via `scripts/office/soffice.py`)
-- **Poppler**: `pdftoppm` for PDF to images
+- **hwpxjs**: existing project-local exact version for reading, writing, HTML conversion, and
+  HWP→HWPX conversion. Never invoke it through plain `npx` or install it implicitly.
+- **Python standard library**: package/unpackage and structural validation helpers
+- **lxml**: optional explicit runtime for structural image insertion examples

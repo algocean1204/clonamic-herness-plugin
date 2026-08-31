@@ -1,21 +1,15 @@
 # Playwright CLI Reference
 
-Use the wrapper script unless the CLI is already installed globally:
+Use the wrapper script unless the CLI is already installed globally. Resolve the skill directory from
+the host's loaded-skill path; never search vendor-specific home directories.
 
 ```bash
-PWCLI=""
-for f in \
-  "$HOME"/.claude/skills/clonamic-playwright/scripts/playwright_cli.sh \
-  "$HOME"/.codex/skills/clonamic-playwright/scripts/playwright_cli.sh \
-  "$HOME"/.codex/skills-disabled/clonamic-playwright/scripts/playwright_cli.sh
-do
-  [ -x "$f" ] && PWCLI="$f" && break
-done
+PLAYWRIGHT_SKILL_ROOT="<host-resolved directory containing this skill's SKILL.md>"
+PWCLI="$PLAYWRIGHT_SKILL_ROOT/scripts/playwright_cli.sh"
+test -x "$PWCLI"
 export PWCLI
 "$PWCLI" --help
 ```
-
-Resolves Claude active, Codex active, then Codex `skills-disabled`.
 
 Optional convenience alias:
 

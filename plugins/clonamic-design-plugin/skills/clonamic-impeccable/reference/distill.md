@@ -21,7 +21,7 @@ Analyze what makes the design feel complex or cluttered:
    - What can be removed, hidden, or combined?
    - What's the 20% that delivers 80% of value?
 
-If any of these are unclear from the codebase, STOP and call the AskUserQuestion tool to clarify.
+If a material choice remains unclear after codebase inspection, use the host's existing intent gate once; otherwise choose the smallest conservative default.
 
 **CRITICAL**: Simplicity is not about removing features. It's about removing obstacles between users and their goals. Every element should justify its existence.
 

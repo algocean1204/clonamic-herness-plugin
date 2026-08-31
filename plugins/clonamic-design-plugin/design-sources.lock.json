@@ -16,10 +16,10 @@
       "repository": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
       "commit": "3da52ff1cab1be91848072ec1be5f493d730fd5f",
       "sha256": "d9983d2a21d330b6b696480940fd78029f7b34027814f2ac1cf17c5d0b042407",
-      "vendored_sha256": "5474da3226aa53161862066a83d87c20402e9bc3d412d516c1382959e6f06c9b",
       "vendored_files": {
-        "scripts/search.py": "5474da3226aa53161862066a83d87c20402e9bc3d412d516c1382959e6f06c9b",
-        "scripts/design_system.py": "bc832c9f3ce6050da4796f271354e0bf3515313c1358b9ba34cec97162ab3012"
+        "scripts/search.py": "51040df139685a0c70fcdc46f98a8470b7cc9c15c9298f202be560afc114e74a",
+        "scripts/core.py": "ab9f398b493e34404448cefc766239ee86119c7a21d8581ba965cabdc698b0a8",
+        "scripts/design_system.py": "64821c42c96099f4a34bb543f5da3f7651fc2634fd30bb52e06b392e3a6c3ccd"
       },
       "license": "MIT",
       "offline": "vendored data and stdlib scripts",

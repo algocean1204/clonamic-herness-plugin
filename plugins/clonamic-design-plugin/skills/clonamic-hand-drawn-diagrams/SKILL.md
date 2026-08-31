@@ -13,7 +13,7 @@ Create local, editable `.excalidraw` JSON first. SVG or PNG is a derived preview
 1. Choose the smallest diagram type that communicates the idea and define the reading order.
 2. Use a restrained hand-drawn vocabulary: boxes, arrows, labels, and at most one emphasis color unless the brief asks for a page-like mockup.
 3. Route arrows around nodes; do not cross labels or hide connection meaning. Keep labels horizontal and short.
-4. Save valid Excalidraw JSON locally. Run `python3 scripts/validate_excalidraw.py <file>` when compatible with the output schema.
+4. Resolve `HAND_DRAWN_SKILL_ROOT` to the host-provided directory containing this `SKILL.md`. Save valid Excalidraw JSON locally and run `python3 "$HAND_DRAWN_SKILL_ROOT/scripts/validate_excalidraw.py" <file>` when compatible with the output schema. Never scan vendor homes or execute a project-relative helper.
 5. Produce SVG/PNG only with tools already installed. If rendering is unavailable offline, return the editable `.excalidraw` file and explain the missing preview; do not install Playwright, Chrome tooling, or a server silently.
 6. Inspect legibility, arrow ownership, bounds, clipping, and accidental overlap before completion.
 

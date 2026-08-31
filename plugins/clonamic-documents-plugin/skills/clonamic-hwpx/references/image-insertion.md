@@ -424,7 +424,7 @@ def nsmap(prefix, local):
 
 def main():
     # 1. Unpack hwpx
-    # python scripts/unpack.py document.hwpx unpacked/
+    # python "$HWPX_SKILL_ROOT/scripts/unpack.py" document.hwpx unpacked/
 
     unpacked_dir = 'unpacked'
 
@@ -466,7 +466,7 @@ def main():
         return
 
     # 8. Pack
-    # python scripts/pack.py unpacked/ output.hwpx
+    # python "$HWPX_SKILL_ROOT/scripts/pack.py" unpacked/ output.hwpx
 
 if __name__ == '__main__':
     main()

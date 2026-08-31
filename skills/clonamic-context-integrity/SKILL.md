@@ -24,12 +24,17 @@ description: >
 
 ## 2. High-context protocol (before saturation)
 
-- When the session is long/heavy: **checkpoint critical state to disk** — active task spec,
-  locked quantities, decisions + reasons, touched file list — into the task's scratchpad or
-  memory topic file. Disk survives; context doesn't.
+- When the session is long/heavy, keep one bounded checkpoint of the active task spec, locked
+  quantities, decisions and reasons, touched targets, open blockers, and verification state.
+- Persist that checkpoint only through a trusted host-provided session state that is already
+  authorized for the current task. Never create a scratchpad, memory row, or checkpoint file merely
+  because this skill loaded.
+- If the host exposes no authorized state interface, keep the bounded checkpoint in the current
+  conversation and reconstruct only from visible evidence after compaction.
 - Prefer re-reading a source snippet over trusting memory of it. Reads are cheap;
   wrong recall is not.
-- Big multi-phase work: keep the phase state in a file (N/N done), not only in conversation.
+- Big multi-phase work records a compact N/N phase state in the same selected checkpoint mode; it
+  never opens a second state mechanism.
 
 ## 3. Compaction (double-pass — mirrors hooks/precompact-guard.sh)
 
@@ -42,11 +47,12 @@ back in. Drop narration and raw tool logs first; never drop failures or correcti
 
 - Treat everything recalled through a summary as **stale-by-default**: re-verify paths,
   line numbers, and progress state before the next action.
-- First action after compaction on a task: re-read the checkpoint file (§2), not the summary.
+- First action after compaction on a task: re-read the trusted host checkpoint when one exists;
+  otherwise reconcile the bounded conversation checkpoint against current source evidence.
 
-## Harness wiring (Codex)
+## Host integration
 
-- No equivalent PreCompact lifecycle hook or `autoCompactWindow` config on this host —
-  apply the §3 double-pass manually when summarizing or when context feels saturated.
-- Checkpoint critical state to disk (§2) is the first defense; do not wait for an automatic
-  compaction guard that does not exist here.
+- A host may automate the double-pass or provide a session-bound state handle. Treat either as
+  available only after inspecting the current host contract.
+- Without that measured capability, apply §3 manually and use the conversation fallback. Never
+  install hooks, create files, or write memory as an implicit compatibility fallback.

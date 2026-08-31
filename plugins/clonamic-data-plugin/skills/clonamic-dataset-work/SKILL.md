@@ -1,27 +1,45 @@
 ---
 name: clonamic-dataset-work
-description: "Dataset / Hugging Face pipeline procedure — pre-flight disk guard, hf CLI conventions, streaming/chunked processing, JSONL validation, upload checklist. Use for any dataset build, clean, convert, finetuning-data, or HF Hub task (데이터셋, 파인튜닝 데이터, HF 업로드)."
+description: "Build, clean, convert, validate, or publish datasets and finetuning data with proportional storage checks, streaming, JSONL validation, and bounded Hugging Face operations."
 ---
 
 # Dataset Work
 
-Procedure for dataset pipelines and Hugging Face Hub work. History: a full disk once triggered macOS jetsam kills mid-pipeline — the pre-flight is not optional.
+Procedure for dataset pipelines and Hugging Face Hub work. Storage and memory pre-flight is mandatory
+for large jobs, but the check must use the current host's native interface.
 
-## 1. Pre-flight (always)
+## 1. Proportional pre-flight
 
-- Disk: `df -g /` — require **≥ 30G free + estimated output size**. If low, stop and clean first (APFS snapshots are the usual culprit: `tmutil listlocalsnapshots /`).
-- Workspace: use the project dir or `~/Documents/DataSet/` — never `/tmp` for large intermediates.
-- Estimate output size before generating (rows × avg record size); state the estimate.
+Tiny inputs that fit comfortably in measured memory and have bounded output skip storage forecasting
+and checkpoint setup; validate them directly. Apply the following pre-flight only when input size,
+expansion, temporary artifacts, or runtime duration creates a material capacity or restart risk.
+
+- Estimate output size before generating (rows × average record size), including temporary and
+  checkpoint files.
+- Measure free space with a portable runtime such as Python's `shutil.disk_usage(workspace)` or the
+  host's equivalent. Require the estimate plus a proportional safety margin; do not impose one fixed
+  capacity threshold on every job or operating system.
+- Use the current project workspace or a directory explicitly supplied by the user. Use temporary
+  storage only for small disposable files, never for a large implicit dataset workspace.
+- When capacity is insufficient, stop new writes and report the measured shortfall. Never delete
+  snapshots, caches, or unrelated files automatically.
 
 ## 2. Hugging Face connection
 
-- Already authenticated: `hf` CLI (HF_TOKEN in env) + claude.ai HF MCP. **Never re-login or ask for tokens.**
-- Reads: `hf download <repo> --repo-type dataset [--include ...]` or MCP search tools. Writes: `hf upload <repo> <local> --repo-type dataset`. New repo: `hf repo create <name> --repo-type dataset --private`.
+- Reuse an explicitly configured authenticated interface already available on the host, such as the
+  `hf` CLI or a connected Hugging Face tool. Confirm identity through that interface without printing
+  or reading secret values.
+- Reads: `hf download <repo> --repo-type dataset [--include ...]` or an equivalent connected read
+  tool. Writes: `hf upload <repo> <local> --repo-type dataset`. New repo: `hf repo create <name>
+  --repo-type dataset --private`.
+- If publishing requires authentication and none is available, treat the host credential action as a
+  blocker. Never request a token value in chat, arguments, logs, or files.
 
 ## 3. Processing discipline
 
-- Stream line-by-line or in chunks; never load a whole large dataset into RAM.
-- Checkpoint every N chunks to a resumable intermediate file — a killed run must resume, not restart.
+- Stream line-by-line or in chunks when the dataset is large relative to measured memory.
+- For long or expensive jobs, checkpoint at a measured interval to a resumable intermediate file.
+  Tiny bounded transforms need no checkpoint artifact.
 - Delete intermediates as soon as the next stage is verified.
 - Ladder applies: stdlib `json`/`csv` first; pandas/pyarrow only when the operation needs it.
 
@@ -39,4 +57,7 @@ Procedure for dataset pipelines and Hugging Face Hub work. History: a full disk 
 
 ## Failure playbook
 
-Disk full mid-run → stop writes immediately, clean snapshots/intermediates, resume from last checkpoint. OOM → halve chunk size. Upload interrupted → `hf upload` is resumable; re-run same command.
+Disk full mid-run → stop writes immediately, remove only job-owned verified intermediates, then resume
+from the last checkpoint. OOM → reduce chunk size based on measured memory pressure. Upload
+interrupted → use the authenticated interface's documented resume behavior or verify remote state
+before retrying.

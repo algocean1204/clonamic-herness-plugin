@@ -11,7 +11,7 @@ Voice-DNA is the one skill you can't just download — you build it from your ow
 1. **Gather your last ~20 posts.** Best input = **spoken transcripts of your own short-form videos** (how you actually talk), not just captions. Even 10 is enough to start; more = sharper.
 2. **Paste them into Claude** with the prompt below.
 3. **Claude returns a `voice-dna.md`** — a profile of how you sound: your sentence shapes, signature phrases, your hooks, your tics, and your anti-voice (what you'd never say).
-4. **Save it as a skill** at `~/.claude/skills/voice-dna/SKILL.md` (wrap it with the template below). Now every piece Claude writes for you can read it and match your voice.
+4. **Save it as a private skill** through the host's documented personal-skill interface (wrap it with the template below). Do not place the generated profile in this public plugin.
 
 ---
 
@@ -59,7 +59,7 @@ Here are my posts:
 
 ## Save it as a skill
 
-Take the markdown Claude returns and save it at `~/.claude/skills/voice-dna/SKILL.md` with this frontmatter on top, so it installs and fires like the other four:
+Take the generated markdown and save it through the host's documented private-skill interface with this frontmatter on top. Keep it outside public repositories:
 
 ```
 ---
