@@ -40,7 +40,10 @@ class ContextBudgetTest(unittest.TestCase):
         paths = [path for path in skill_paths() if path.parent.name in CORE_SKILLS]
         self.assertEqual(CORE_SKILLS, {path.parent.name for path in paths})
         paths.append(ROOT_GUIDANCE)
-        self.assertLessEqual(sum(len(path.read_bytes()) for path in paths), 4_500)
+        logical_bytes = sum(
+            len(path.read_text(encoding="utf-8").encode("utf-8")) for path in paths
+        )
+        self.assertLessEqual(logical_bytes, 4_500)
 
     def test_every_canonical_package_and_citation_use_version_1_0_0(self):
         catalog = json.loads((ROOT / "catalog" / "plugins.json").read_text(encoding="utf-8"))
